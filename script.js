@@ -1,4 +1,4 @@
-// ========== AOS Animation Init ==========
+// ========== AOS ==========
 AOS.init({ duration: 800, easing: 'ease-out-cubic', once: true });
 
 // ========== LOADER ==========
@@ -42,31 +42,63 @@ if (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth(
 ageEl.textContent = age;
 document.getElementById('currentYear').textContent = today.getFullYear();
 
-// ========== CLOCK ==========
-function updateClock() {
-  const now = new Date();
-  document.getElementById('liveClock').textContent = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
-}
-setInterval(updateClock, 1000);
-updateClock();
+// ========== VISITOR FLAG & TIME (IP‑based) ==========
+let visitorTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone; // fallback
+let clockInterval = null;
 
-// ========== VISITOR FLAG (with fallback) ==========
-async function getFlag() {
+async function fetchGeoData() {
+  // Try ipapi.co first
   try {
     const res = await fetch('https://ipapi.co/json/');
-    if (!res.ok) throw new Error('API failed');
-    const data = await res.json();
-    const code = data.country_code?.toLowerCase();
-    if (code) {
-      const flag = code.replace(/./g, c => String.fromCodePoint(c.charCodeAt(0) + 127397));
-      document.getElementById('visitorFlag').textContent = flag;
-      return;
+    if (res.ok) {
+      const data = await res.json();
+      if (data.timezone) visitorTimezone = data.timezone;
+      if (data.country_code) {
+        const code = data.country_code.toLowerCase();
+        const flag = code.replace(/./g, c => String.fromCodePoint(c.charCodeAt(0) + 127397));
+        document.getElementById('visitorFlag').textContent = flag;
+        startClock();
+        return;
+      }
     }
   } catch (e) {}
-  // fallback to globe
+
+  // Fallback to ip-api.com
+  try {
+    const res = await fetch('https://ip-api.com/json/?fields=status,message,countryCode,timezone');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.status === 'success') {
+        if (data.timezone) visitorTimezone = data.timezone;
+        if (data.countryCode) {
+          const code = data.countryCode.toLowerCase();
+          const flag = code.replace(/./g, c => String.fromCodePoint(c.charCodeAt(0) + 127397));
+          document.getElementById('visitorFlag').textContent = flag;
+          startClock();
+          return;
+        }
+      }
+    }
+  } catch (e) {}
+
+  // Total failure: show globe and use device timezone
   document.getElementById('visitorFlag').textContent = '🌐';
+  startClock();
 }
-getFlag();
+
+function startClock() {
+  if (clockInterval) clearInterval(clockInterval);
+  updateClock();
+  clockInterval = setInterval(updateClock, 1000);
+}
+
+function updateClock() {
+  const now = new Date();
+  const options = { hour: '2-digit', minute: '2-digit', timeZone: visitorTimezone };
+  document.getElementById('liveClock').textContent = now.toLocaleTimeString('en-US', options);
+}
+
+fetchGeoData();
 
 // ========== EXPERIENCE ==========
 const expData = [
@@ -179,7 +211,7 @@ document.getElementById('contactForm').addEventListener('submit', async function
 
 // ========== LIGHT BEAM ==========
 const beam = document.getElementById('lightBeam');
-let isMobile = window.matchMedia('(pointer: coarse)').matches;
+const isMobile = window.matchMedia('(pointer: coarse)').matches;
 
 function moveBeam(xPercent, yPercent) {
   beam.style.transform = `translate(${xPercent - 50}%, ${yPercent - 50}%)`;
@@ -200,11 +232,11 @@ if (isMobile) {
   });
 }
 
-// ========== EASTER EGG: 999 Meme Found (responsive shake / fast mouse) ==========
+// ========== EASTER EGG: 999 Meme Found ==========
 const memeOverlay = document.getElementById('memeOverlay');
 const memeCountdownEl = document.getElementById('memeCountdown');
 let shakeActive = false;
-const SHAKE_DURATION = 2000; // 2 seconds instead of 8
+const SHAKE_DURATION = 2000;
 
 function triggerMeme() {
   if (memeOverlay.classList.contains('active')) return;
@@ -221,13 +253,12 @@ function triggerMeme() {
   }, 1000);
 }
 
-// Mobile: shake detection via devicemotion
 if (isMobile) {
   window.addEventListener('devicemotion', (e) => {
     const acc = e.accelerationIncludingGravity;
     if (!acc) return;
     const magnitude = Math.sqrt(acc.x*acc.x + acc.y*acc.y + acc.z*acc.z);
-    if (magnitude > 15) {   // active shaking
+    if (magnitude > 15) {
       if (!shakeActive) {
         shakeActive = true;
         setTimeout(() => {
@@ -239,10 +270,9 @@ if (isMobile) {
     }
   });
 } else {
-  // Desktop: detect fast mouse movement for 2 seconds
   let fastMouseTimer = null;
   let fastMouseStart = 0;
-  const SPEED_THRESHOLD = 300; // pixels per second (lowered)
+  const SPEED_THRESHOLD = 300;
   let lastMouse = { x:0, y:0, time: Date.now() };
 
   document.addEventListener('mousemove', (e) => {
@@ -263,7 +293,6 @@ if (isMobile) {
         }, SHAKE_DURATION);
       }
     } else {
-      // reset if speed drops
       fastMouseStart = 0;
       if (fastMouseTimer) {
         clearTimeout(fastMouseTimer);
@@ -273,7 +302,7 @@ if (isMobile) {
   });
 }
 
-// Parallax shapes (mouse/tilt)
+// Parallax shapes (desktop only)
 document.addEventListener('mousemove', (e) => {
   if (isMobile) return;
   const x = (e.clientX / window.innerWidth - 0.5) * 14;
