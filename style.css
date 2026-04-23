@@ -60,12 +60,70 @@ body {
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
 }
+
+/* Light Beam */
+.light-beam {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 120vw;
+  height: 120vh;
+  background: radial-gradient(circle 600px at 50% 50%, var(--accent-glow) 0%, transparent 70%);
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity 0.5s;
+  will-change: transform;
+}
+
+/* Meme overlay */
+.meme-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000000;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.8s, visibility 0.8s;
+}
+.meme-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+.meme-content {
+  text-align: center;
+  color: #ff2d55;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.meme-text {
+  font-size: clamp(4rem, 15vw, 8rem);
+  animation: glitch 0.3s infinite;
+}
+.meme-timer {
+  font-size: 1.5rem;
+  color: #86868b;
+  margin-top: 2rem;
+}
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-3px, 3px); }
+  40% { transform: translate(3px, -2px); }
+  60% { transform: translate(-2px, -3px); }
+  80% { transform: translate(2px, 2px); }
+  100% { transform: translate(0); }
+}
+
 /* Loader */
 .loader-wrapper {
   position: fixed;
   inset: 0;
   background: var(--bg);
-  z-index: 9999;
+  z-index: 9998;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -454,6 +512,7 @@ body.dark .glass-nav {
   box-shadow: 0 8px 20px rgba(37,211,102,0.3);
   z-index: 50;
 }
+.whatsapp-float:hover { transform: scale(1.05); }
 
 /* Modal */
 .modal {
@@ -471,4 +530,5 @@ body.dark .glass-nav {
 @media (max-width: 768px) {
   .hero { flex-direction: column; min-height: auto; }
   .nav-links { display: none; }
+  .light-beam { opacity: 0.15; }
 }
