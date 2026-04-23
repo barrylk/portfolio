@@ -2,151 +2,173 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nadeeja Nirmala · IT & Creative Portfolio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Nadeeja Nirmala · IT & Creative</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
-<body>
-  <!-- Geometric Background Elements -->
-  <div class="geo-shapes">
-    <div class="geo-shape"></div>
-    <div class="geo-shape"></div>
-    <div class="geo-shape"></div>
-    <div class="geo-shape"></div>
-    <div class="geo-shape"></div>
+<body class="loading">
+  <!-- Page Loader -->
+  <div class="loader-wrapper">
+    <div class="apple-loader"></div>
   </div>
-  <div class="hex-pattern"></div>
 
-  <div class="container">
-    <!-- Theme Controls + Clock & Flag -->
-    <div class="theme-controls">
-      <div class="visitor-info">
-        <span id="visitorFlag">🌐</span>
-        <span id="liveClock">00:00:00</span>
+  <!-- Sticky Navigation -->
+  <nav class="nav-bar glass-nav" id="navbar">
+    <div class="nav-container container">
+      <a href="#" class="nav-logo">Nadeeja<span>.</span></a>
+      <div class="nav-links">
+        <a href="#experience">Experience</a>
+        <a href="#projects">Projects</a>
+        <a href="#skills">Skills</a>
+        <a href="#contact">Contact</a>
       </div>
-      <div class="mode-indicator" id="modeIndicator">
-        <i class="fas" id="modeIcon"></i> <span id="modeText">Auto</span>
-      </div>
-      <button class="theme-btn" id="themeToggleBtn">
-        <i class="fas" id="toggleIcon"></i> 
-        <span id="toggleText">Switch to Dark</span>
-      </button>
-    </div>
-
-    <!-- Hero Section -->
-    <div class="hero">
-      <div class="profile-wrapper">
-        <img src="images/nadeeja-profile.jpg" alt="Nadeeja Nirmala" class="profile-img" id="profilePic">
-      </div>
-      <div class="name-title">
-        <h1>Nadeeja Nirmala<br>Hendavitharana</h1>
-        <div class="badge-row">
-          <span class="badge"><i class="fas fa-map-pin"></i> Polonnaruwa, Sri Lanka</span>
-          <span class="badge"><i class="fas fa-cake-candles"></i> <span id="ageDisplay">26</span> years</span>
-          <span class="badge"><i class="fas fa-briefcase"></i> <span id="currentJobTitle">IT Manager</span></span>
+      <div class="nav-actions">
+        <div class="visitor-info">
+          <span id="visitorFlag">🌐</span>
+          <span id="liveClock">00:00</span>
         </div>
-        <div class="contact-info">
-          <a href="tel:+94717111009" class="contact-icon-wrapper" data-tooltip="071 711 1009">
-            <i class="fas fa-phone"></i>
-          </a>
-          <a href="mailto:nirmala.itdev@gmail.com" class="contact-icon-wrapper" data-tooltip="nirmala.itdev@gmail.com">
-            <i class="fas fa-envelope"></i>
-          </a>
-          <a href="mailto:nirmala.itdev@proton.me" class="contact-icon-wrapper" data-tooltip="nirmala.itdev@proton.me">
-            <i class="fas fa-shield-halved"></i>
-          </a>
+        <button class="theme-btn-small" id="themeToggleBtnSmall">
+          <i class="fas" id="toggleIconSmall"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Geometric Background (light/dark adaptive) -->
+  <div class="bg-glow"></div>
+  <div class="bg-grid"></div>
+  <div class="bg-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+    <div class="shape shape-4"></div>
+    <div class="shape shape-5"></div>
+  </div>
+
+  <main class="container main-content">
+    <!-- Hero -->
+    <section class="hero" id="hero">
+      <div class="hero-image" data-aos="fade-down" data-aos-duration="1000">
+        <img src="images/nadeeja-profile.jpg" alt="Nadeeja Nirmala" class="profile-img">
+      </div>
+      <div class="hero-text" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
+        <h1 class="hero-title">
+          <span class="gradient-text">Nadeeja Nirmala<br>Hendavitharana</span>
+        </h1>
+        <p class="hero-subtitle">IT Manager & Digital Creative</p>
+        <div class="hero-location">
+          <i class="fas fa-map-pin"></i> Polonnaruwa, Sri Lanka · <span id="ageDisplay">26</span> y/o
+        </div>
+        <div class="hero-contact-icons">
+          <a href="tel:+94717111009" class="icon-btn" data-tooltip="071 711 1009"><i class="fas fa-phone"></i></a>
+          <a href="mailto:nirmala.itdev@gmail.com" class="icon-btn" data-tooltip="nirmala.itdev@gmail.com"><i class="fas fa-envelope"></i></a>
+          <a href="mailto:nirmala.itdev@proton.me" class="icon-btn" data-tooltip="ProtonMail"><i class="fas fa-shield-halved"></i></a>
+        </div>
+        <div class="hero-cta">
+          <a href="https://linkedin.com/in/nadeejanirmala/" target="_blank" class="cta-btn"><i class="fab fa-linkedin"></i> Hire Me</a>
+          <a href="#contact" class="cta-btn secondary">Get in Touch</a>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Bio Card -->
-    <div class="highlight-card glass" data-aos="fade-up">
-      <p><i class="fas fa-quote-left"></i> Hybrid digital architect — I keep industrial networks alive while crafting visual identity. From CAD precision to cinematic edits, I bridge operations & creativity.</p>
-      <div id="linkedinStatus" class="linkedin-badge">
-        <i class="fab fa-linkedin"></i> <span id="linkedinHeadline">Loading LinkedIn data...</span>
+    <!-- Bio highlight -->
+    <section class="bio-card glass-card" data-aos="fade-up" data-aos-duration="800">
+      <p class="bio-quote">
+        <i class="fas fa-quote-left"></i>
+        Hybrid digital architect — I keep industrial networks alive while crafting visual identity. From CAD precision to cinematic edits, I bridge operations & creativity.
+      </p>
+      <div class="linkedin-badge" id="linkedinStatus">
+        <i class="fab fa-linkedin"></i> <span id="linkedinHeadline">Loading...</span>
       </div>
-    </div>
-
-    <!-- Hire Me Button -->
-    <a href="https://linkedin.com/in/nadeejanirmala/" target="_blank" class="hire-me-btn" data-aos="fade-up">
-      <i class="fab fa-linkedin"></i> Hire Me
-    </a>
+    </section>
 
     <!-- Experience Timeline -->
-    <div class="section-title" data-aos="fade-right">
-      <i class="fas fa-briefcase"></i> Career Journey
-    </div>
-    <div class="timeline" id="experienceTimeline">
-      <!-- Populated by JS -->
-    </div>
+    <section id="experience" data-aos="fade-up">
+      <div class="section-header">
+        <span class="section-eyebrow">Career</span>
+        <h2>Journey</h2>
+      </div>
+      <div class="timeline" id="experienceTimeline"></div>
+    </section>
 
-    <!-- Projects Section -->
-    <div class="section-title" data-aos="fade-right">
-      <i class="fas fa-code-branch"></i> Projects & Work
-    </div>
-    <div class="projects-grid" id="projectsGrid">
-      <!-- Populated by JS -->
-    </div>
+    <!-- Projects -->
+    <section id="projects" data-aos="fade-up">
+      <div class="section-header">
+        <span class="section-eyebrow">Work</span>
+        <h2>Projects & Code</h2>
+      </div>
+      <div class="projects-grid" id="projectsGrid"></div>
+    </section>
 
-    <!-- Skills Section -->
-    <div class="section-title" data-aos="fade-right">
-      <i class="fas fa-chart-bar"></i> Technical Arsenal
-    </div>
-    <div class="skills-container" id="skillsContainer">
-      <!-- Populated by JS -->
-    </div>
+    <!-- Skills -->
+    <section id="skills" data-aos="fade-up">
+      <div class="section-header">
+        <span class="section-eyebrow">Expertise</span>
+        <h2>Tech Arsenal</h2>
+      </div>
+      <div class="skills-container" id="skillsContainer"></div>
+    </section>
 
     <!-- Contact Form -->
-    <section class="contact-section" data-aos="fade-up">
-      <div class="section-title">
-        <i class="fas fa-paper-plane"></i> Get In Touch
+    <section id="contact" data-aos="fade-up">
+      <div class="section-header">
+        <span class="section-eyebrow">Connect</span>
+        <h2>Get in Touch</h2>
       </div>
-      <form class="contact-form glass" id="contactForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
-        <div class="form-group">
-          <input type="text" name="name" placeholder="Your Name" required>
+      <form class="contact-form glass-card" id="contactForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+        <div class="form-row">
+          <div class="form-group">
+            <input type="text" id="name" name="name" required placeholder=" ">
+            <label for="name">Your Name</label>
+          </div>
+          <div class="form-group">
+            <input type="email" id="email" name="email" required placeholder=" ">
+            <label for="email">Email Address</label>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <input type="tel" id="phone" name="phone" placeholder=" ">
+            <label for="phone">Phone Number (optional)</label>
+          </div>
         </div>
         <div class="form-group">
-          <input type="email" name="email" placeholder="Your Email" required>
+          <textarea id="message" name="message" rows="5" required placeholder=" "></textarea>
+          <label for="message">Your Message</label>
         </div>
-        <div class="form-group">
-          <input type="tel" name="phone" placeholder="Your Phone Number">
-        </div>
-        <div class="form-group">
-          <textarea name="message" rows="5" placeholder="Your Message" required></textarea>
-        </div>
-        <button type="submit" class="submit-btn">Send Message <i class="fas fa-arrow-right"></i></button>
-        <p id="form-status" style="margin-top: 1rem;"></p>
+        <button type="submit" class="cta-btn submit-btn">Send Message <i class="fas fa-arrow-right"></i></button>
+        <p id="form-status"></p>
       </form>
     </section>
 
     <!-- Footer -->
-    <div class="footer">
-      <div class="social-links">
+    <footer class="footer" data-aos="fade-up">
+      <div class="footer-social">
         <a href="https://linkedin.com/in/nadeejanirmala/" target="_blank"><i class="fab fa-linkedin-in"></i></a>
         <a href="https://github.com/barrylk" target="_blank"><i class="fab fa-github"></i></a>
         <a href="https://drive.google.com/drive/folders/1MyCzaJPsRv2DFtU6tRUc-oV7pnDDOETM" target="_blank"><i class="fab fa-google-drive"></i></a>
       </div>
-      <p>© <span id="currentYear"></span> Nadeeja Nirmala Hendavitharana · IT Manager & Digital Creative</p>
-    </div>
-  </div>
+      <p class="footer-text">© <span id="currentYear"></span> Nadeeja Nirmala. Blending tech & creativity.</p>
+    </footer>
+  </main>
+
+  <!-- WhatsApp Floating Button -->
+  <a href="https://wa.me/message/4YGA7K2KMFCNK1" target="_blank" class="whatsapp-float" data-aos="zoom-in">
+    <i class="fab fa-whatsapp"></i>
+  </a>
 
   <!-- Project Modal -->
   <div class="modal" id="projectModal">
-    <div class="modal-content">
+    <div class="modal-content glass-card">
       <span class="modal-close" onclick="closeModal()">&times;</span>
       <h2 id="modalTitle"></h2>
       <p id="modalDescription"></p>
       <div id="modalLinks"></div>
     </div>
   </div>
-
-  <!-- WhatsApp Floating Button -->
-  <a href="https://wa.me/message/4YGA7K2KMFCNK1" target="_blank" class="whatsapp-float">
-    <i class="fab fa-whatsapp"></i>
-  </a>
 
   <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
   <script src="script.js"></script>
