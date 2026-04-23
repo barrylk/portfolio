@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body>
-  <!-- ========== GEOMETRIC BACKGROUND ELEMENTS ========== -->
+  <!-- Geometric Background Elements -->
   <div class="geo-shapes">
     <div class="geo-shape"></div>
     <div class="geo-shape"></div>
@@ -19,11 +19,14 @@
     <div class="geo-shape"></div>
   </div>
   <div class="hex-pattern"></div>
-  <!-- ================================================= -->
 
   <div class="container">
-    <!-- Theme Controls -->
+    <!-- Theme Controls + Clock & Flag -->
     <div class="theme-controls">
+      <div class="visitor-info">
+        <span id="visitorFlag">🌐</span>
+        <span id="liveClock">00:00:00</span>
+      </div>
       <div class="mode-indicator" id="modeIndicator">
         <i class="fas" id="modeIcon"></i> <span id="modeText">Auto</span>
       </div>
@@ -46,9 +49,15 @@
           <span class="badge"><i class="fas fa-briefcase"></i> <span id="currentJobTitle">IT Manager</span></span>
         </div>
         <div class="contact-info">
-          <a href="tel:+94717111009"><i class="fas fa-phone"></i> 071 711 1009</a>
-          <a href="mailto:nirmala.itdev@gmail.com"><i class="fas fa-envelope"></i> nirmala.itdev@gmail.com</a>
-          <a href="mailto:nirmala.itdev@proton.me"><i class="fas fa-shield"></i> ProtonMail</a>
+          <a href="tel:+94717111009" class="contact-icon-wrapper" data-tooltip="071 711 1009">
+            <i class="fas fa-phone"></i>
+          </a>
+          <a href="mailto:nirmala.itdev@gmail.com" class="contact-icon-wrapper" data-tooltip="nirmala.itdev@gmail.com">
+            <i class="fas fa-envelope"></i>
+          </a>
+          <a href="mailto:nirmala.itdev@proton.me" class="contact-icon-wrapper" data-tooltip="nirmala.itdev@proton.me">
+            <i class="fas fa-shield-halved"></i>
+          </a>
         </div>
       </div>
     </div>
@@ -60,6 +69,11 @@
         <i class="fab fa-linkedin"></i> <span id="linkedinHeadline">Loading LinkedIn data...</span>
       </div>
     </div>
+
+    <!-- Hire Me Button -->
+    <a href="https://linkedin.com/in/nadeejanirmala/" target="_blank" class="hire-me-btn" data-aos="fade-up">
+      <i class="fab fa-linkedin"></i> Hire Me
+    </a>
 
     <!-- Experience Timeline -->
     <div class="section-title" data-aos="fade-right">
@@ -85,6 +99,29 @@
       <!-- Populated by JS -->
     </div>
 
+    <!-- Contact Form -->
+    <section class="contact-section" data-aos="fade-up">
+      <div class="section-title">
+        <i class="fas fa-paper-plane"></i> Get In Touch
+      </div>
+      <form class="contact-form glass" id="contactForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+        <div class="form-group">
+          <input type="text" name="name" placeholder="Your Name" required>
+        </div>
+        <div class="form-group">
+          <input type="email" name="email" placeholder="Your Email" required>
+        </div>
+        <div class="form-group">
+          <input type="tel" name="phone" placeholder="Your Phone Number">
+        </div>
+        <div class="form-group">
+          <textarea name="message" rows="5" placeholder="Your Message" required></textarea>
+        </div>
+        <button type="submit" class="submit-btn">Send Message <i class="fas fa-arrow-right"></i></button>
+        <p id="form-status" style="margin-top: 1rem;"></p>
+      </form>
+    </section>
+
     <!-- Footer -->
     <div class="footer">
       <div class="social-links">
@@ -105,6 +142,11 @@
       <div id="modalLinks"></div>
     </div>
   </div>
+
+  <!-- WhatsApp Floating Button -->
+  <a href="https://wa.me/message/4YGA7K2KMFCNK1" target="_blank" class="whatsapp-float">
+    <i class="fab fa-whatsapp"></i>
+  </a>
 
   <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
   <script src="script.js"></script>
