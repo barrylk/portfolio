@@ -1,0 +1,21 @@
+[
+  {
+    "name": "Network Resilience Dashboard",
+    "description": "Real-time monitoring for FIBC Lanka's manufacturing network.",
+    "tags": ["networking", "grafana", "python"],
+    "icon": "fa-network-wired",
+    "links": {
+      "github": "https://github.com/barrylk/network-dashboard",
+      "drive": "https://drive.google.com/file/d/XXXXX/view"
+    }
+  },
+  {
+    "name": "FIBC Product Catalogue 2025",
+    "description": "Designed full B2B catalogue in-house. Saved LKR 200k+ agency fees.",
+    "tags": ["design", "illustrator", "branding"],
+    "icon": "fa-book-open",
+    "links": {
+      "drive": "https://drive.google.com/drive/folders/1MyCzaJPsRv2DFtU6tRUc-oV7pnDDOETM"
+    }
+  }
+]
