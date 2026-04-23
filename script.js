@@ -308,5 +308,5 @@ if (isMobile) {
   });
 }
 
-// Start projects after load
+// Start projects
 window.addEventListener('load', () => loadProjects());
