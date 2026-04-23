@@ -252,7 +252,7 @@ body.dark .glass-nav {
 .shape-4 { width:250px; height:250px; background:var(--accent); border-radius:70% 30% 60% 40% / 40% 60% 40% 60%; top:20%; right:15%; }
 .shape-5 { width:180px; height:180px; background:var(--purple); border-radius:60% 40% 50% 50% / 50% 50% 40% 60%; bottom:5%; left:40%; }
 
-/* Floating Apple devices */
+/* Floating Apple devices – realistic */
 .floating-devices {
   position: fixed;
   top: 0;
@@ -264,68 +264,135 @@ body.dark .glass-nav {
 }
 .floating-device {
   position: absolute;
-  opacity: 0.12;
-  filter: blur(1px);
+  opacity: 0.15;
+  filter: drop-shadow(0 0 8px rgba(0,0,0,0.1));
   animation: floatDevice 18s ease-in-out infinite;
   will-change: transform;
 }
+/* MacBook */
 .floating-device.macbook {
-  width: 120px;
-  height: 70px;
+  width: 160px;
+  height: 100px;
   top: 15%;
-  left: 10%;
+  left: 8%;
   animation-delay: 0s;
 }
 .floating-device.macbook .screen {
   width: 100%;
-  height: 60%;
-  background: var(--text-secondary);
-  border-radius: 4px 4px 0 0;
-  margin: 0 auto;
-}
-.floating-device.macbook .base {
-  width: 100%;
-  height: 30%;
-  background: var(--text-secondary);
-  border-radius: 0 0 4px 4px;
+  height: 70%;
+  background: linear-gradient(145deg, #1d1d1f 0%, #333 100%);
+  border-radius: 6px 6px 0 0;
+  border: 2px solid #555;
+  border-bottom: none;
   margin: 0 auto;
   position: relative;
 }
+.floating-device.macbook .screen::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 2px;
+  background: #0a0a0a;
+  border-radius: 1px;
+}
+.floating-device.macbook .base {
+  width: 100%;
+  height: 25%;
+  background: linear-gradient(180deg, #a0a0a0 0%, #d0d0d0 50%, #a0a0a0 100%);
+  border-radius: 0 0 8px 8px;
+  margin: 0 auto;
+  position: relative;
+  border: 2px solid #888;
+  border-top: 1px solid #777;
+}
+.floating-device.macbook .base::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 35%;
+  height: 5px;
+  background: #333;
+  border-radius: 3px;
+}
+/* iMac */
 .floating-device.imac {
-  width: 100px;
-  height: 80px;
+  width: 130px;
+  height: 100px;
   top: 70%;
   left: 80%;
   animation-delay: -5s;
 }
 .floating-device.imac .screen {
   width: 100%;
-  height: 70%;
-  background: var(--text-secondary);
-  border-radius: 6px;
-  margin: 0 auto;
+  height: 75%;
+  background: linear-gradient(160deg, #1d1d1f 0%, #2a2a2a 100%);
+  border-radius: 10px;
+  border: 2px solid #666;
+  position: relative;
+}
+.floating-device.imac .screen::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background: #111;
+  border-radius: 50%;
 }
 .floating-device.imac .stand {
-  width: 20%;
-  height: 20%;
-  background: var(--text-secondary);
-  margin: 2px auto 0;
-  border-radius: 0 0 2px 2px;
+  width: 25%;
+  height: 18%;
+  background: linear-gradient(180deg, #b0b0b0, #999);
+  margin: 0 auto;
+  border-radius: 0 0 3px 3px;
+  position: relative;
+  border: 1.5px solid #777;
 }
+/* iPhone */
 .floating-device.iphone {
-  width: 40px;
-  height: 80px;
-  top: 40%;
-  left: 50%;
+  width: 42px;
+  height: 85px;
+  top: 45%;
+  left: 55%;
   animation-delay: -10s;
 }
 .floating-device.iphone .screen {
-  width: 84%;
-  height: 90%;
-  background: var(--text-secondary);
-  border-radius: 12px;
-  margin: 8% auto;
+  width: 90%;
+  height: 92%;
+  background: linear-gradient(145deg, #1d1d1f 0%, #111 100%);
+  border-radius: 18px;
+  border: 2px solid #555;
+  margin: 4% auto;
   position: relative;
+}
+.floating-device.iphone .screen::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 35%;
+  height: 10px;
+  background: #000;
+  border-radius: 20px;
+}
+.floating-device.iphone .screen::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  right: 25%;
+  width: 3px;
+  height: 3px;
+  background: #1a1a2e;
+  border-radius: 50%;
+  box-shadow: 0 0 2px #333;
 }
 @keyframes floatDevice {
   0% { transform: translateY(0px) rotate(0deg); }
@@ -346,12 +413,39 @@ body.dark .glass-nav {
   padding-top: 4rem;
 }
 .hero-image { flex: 0 0 auto; }
+.profile-wrapper {
+  position: relative;
+  display: inline-block;
+}
+.profile-wrapper::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: calc(100% + 20px);
+  height: calc(100% + 20px);
+  border-radius: 50%;
+  border: 3px solid transparent;
+  background: conic-gradient(from 0deg, var(--accent), var(--purple), var(--red), var(--accent)) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: rotateGlow 4s linear infinite;
+  z-index: 0;
+}
+@keyframes rotateGlow {
+  to { transform: rotate(360deg); }
+}
 .profile-img {
-  width: 200px; height: 200px;
+  width: 200px;
+  height: 200px;
   border-radius: 50%;
   object-fit: cover;
-  box-shadow: 0 0 0 4px var(--bg), 0 0 0 6px var(--accent);
+  box-shadow: 0 0 0 4px var(--bg), 0 0 30px var(--accent-glow);
   transition: transform 0.4s;
+  position: relative;
+  z-index: 1;
 }
 .profile-img:hover { transform: scale(1.03); }
 .hero-text { flex: 1; }
