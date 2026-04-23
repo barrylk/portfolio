@@ -10,6 +10,18 @@
   <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body class="loading">
+
+  <!-- Light beam that follows cursor / tilt -->
+  <div class="light-beam" id="lightBeam"></div>
+
+  <!-- Meme overlay (hidden by default) -->
+  <div class="meme-overlay" id="memeOverlay">
+    <div class="meme-content">
+      <span class="meme-text">999 Meme Found</span>
+      <div class="meme-timer">Refreshing in <span id="memeCountdown">12</span>s</div>
+    </div>
+  </div>
+
   <!-- Page Loader -->
   <div class="loader-wrapper">
     <div class="apple-loader"></div>
