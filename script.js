@@ -136,6 +136,294 @@ fetch('data/linkedin.json')
   });
 
 // ========== PROJECTS: GitHub Repos + JSON Projects ==========
+
+// Custom keyword → icon mapping (add more as you like)
+const KEYWORD_MAP = {
+    'network': 'fa-network-wired',
+    'dashboard': 'fa-chart-line',
+    'monitor': 'fa-eye',
+    'catalogue': 'fa-book-open',
+    'catalog': 'fa-book',
+    'design': 'fa-paint-brush',
+    'video': 'fa-video',
+    'film': 'fa-film',
+    'motion': 'fa-clapperboard',
+    'graphic': 'fa-pen-nib',
+    'illustrator': 'fa-paintbrush',
+    'cad': 'fa-cube',
+    '3d': 'fa-cubes',
+    'pattern': 'fa-ruler-combined',
+    'resilience': 'fa-shield-halved',
+    'uptime': 'fa-server',
+    'security': 'fa-shield',
+    'firewall': 'fa-shield-virus',
+    'api': 'fa-code',
+    'web': 'fa-globe',
+    'app': 'fa-mobile-screen',
+    'mobile': 'fa-mobile-screen-button',
+    'social': 'fa-hashtag',
+    'instagram': 'fa-instagram',
+    'youtube': 'fa-youtube',
+    'linkedin': 'fa-linkedin',
+    'github': 'fa-github',
+    'drive': 'fa-google-drive',
+    'database': 'fa-database',
+    'sql': 'fa-database',
+    'python': 'fa-python',
+    'javascript': 'fa-js',
+    'react': 'fa-react',
+    'node': 'fa-node',
+    'docker': 'fa-docker',
+    'cloud': 'fa-cloud',
+    'aws': 'fa-aws',
+    'azure': 'fa-microsoft',
+    'linux': 'fa-linux',
+    'windows': 'fa-windows',
+    'apple': 'fa-apple',
+    'android': 'fa-android',
+    'frontend': 'fa-laptop-code',
+    'backend': 'fa-terminal',
+    'fullstack': 'fa-layer-group',
+    'devops': 'fa-infinity',
+    'testing': 'fa-flask',
+    'ci': 'fa-arrows-spin',
+    'cd': 'fa-rocket',
+    'automation': 'fa-robot',
+    'bot': 'fa-robot',
+    'ai': 'fa-brain',
+    'machine': 'fa-microchip',
+    'learning': 'fa-graduation-cap',
+    'data': 'fa-chart-bar',
+    'analytics': 'fa-chart-pie',
+    'visualization': 'fa-chart-scatter',
+    'report': 'fa-file-lines',
+    'document': 'fa-file',
+    'pdf': 'fa-file-pdf',
+    'image': 'fa-image',
+    'photo': 'fa-camera',
+    'portrait': 'fa-user',
+    'landscape': 'fa-mountain',
+    'travel': 'fa-plane',
+    'food': 'fa-utensils',
+    'recipe': 'fa-book',
+    'fitness': 'fa-heart-pulse',
+    'health': 'fa-notes-medical',
+    'medical': 'fa-hospital',
+    'finance': 'fa-coins',
+    'bank': 'fa-building-columns',
+    'payment': 'fa-credit-card',
+    'shopping': 'fa-cart-shopping',
+    'ecommerce': 'fa-store',
+    'store': 'fa-store',
+    'shop': 'fa-shop',
+    'cart': 'fa-cart-shopping',
+    'product': 'fa-box',
+    'inventory': 'fa-boxes-stacked',
+    'warehouse': 'fa-warehouse',
+    'logistics': 'fa-truck',
+    'shipping': 'fa-ship',
+    'delivery': 'fa-truck-fast',
+    'tracking': 'fa-map-location-dot',
+    'map': 'fa-map',
+    'location': 'fa-location-dot',
+    'address': 'fa-address-card',
+    'contact': 'fa-envelope',
+    'email': 'fa-envelope',
+    'phone': 'fa-phone',
+    'chat': 'fa-comment',
+    'message': 'fa-message',
+    'messaging': 'fa-comments',
+    'forum': 'fa-users',
+    'community': 'fa-people-group',
+    'social media': 'fa-share-nodes',
+    'share': 'fa-share',
+    'like': 'fa-thumbs-up',
+    'follow': 'fa-user-plus',
+    'subscribe': 'fa-bell',
+    'notification': 'fa-bell',
+    'alert': 'fa-exclamation-triangle',
+    'warning': 'fa-triangle-exclamation',
+    'error': 'fa-circle-exclamation',
+    'success': 'fa-circle-check',
+    'check': 'fa-check',
+    'close': 'fa-xmark',
+    'delete': 'fa-trash',
+    'edit': 'fa-pen',
+    'add': 'fa-plus',
+    'remove': 'fa-minus',
+    'upload': 'fa-upload',
+    'download': 'fa-download',
+    'export': 'fa-file-export',
+    'import': 'fa-file-import',
+    'sync': 'fa-rotate',
+    'refresh': 'fa-arrows-rotate',
+    'reload': 'fa-rotate-right',
+    'update': 'fa-pen-to-square',
+    'upgrade': 'fa-arrow-up',
+    'settings': 'fa-gear',
+    'config': 'fa-sliders',
+    'options': 'fa-ellipsis-vertical',
+    'menu': 'fa-bars',
+    'home': 'fa-house',
+    'dashboard': 'fa-gauge-high',
+    'profile': 'fa-id-card',
+    'account': 'fa-circle-user',
+    'user': 'fa-user',
+    'users': 'fa-users',
+    'team': 'fa-people-group',
+    'group': 'fa-user-group',
+    'role': 'fa-tag',
+    'permission': 'fa-lock',
+    'privacy': 'fa-user-secret',
+    'terms': 'fa-file-signature',
+    'policy': 'fa-file-contract',
+    'legal': 'fa-gavel',
+    'law': 'fa-scale-balanced',
+    'help': 'fa-circle-question',
+    'support': 'fa-headset',
+    'info': 'fa-circle-info',
+    'about': 'fa-address-card',
+    'faq': 'fa-question',
+    'guide': 'fa-book',
+    'tutorial': 'fa-chalkboard-user',
+    'course': 'fa-graduation-cap',
+    'education': 'fa-school',
+    'school': 'fa-school',
+    'university': 'fa-building-columns',
+    'college': 'fa-graduation-cap',
+    'student': 'fa-user-graduate',
+    'teacher': 'fa-chalkboard-user',
+    'research': 'fa-flask',
+    'science': 'fa-atom',
+    'math': 'fa-calculator',
+    'physics': 'fa-magnet',
+    'chemistry': 'fa-flask',
+    'biology': 'fa-dna',
+    'engineering': 'fa-gears',
+    'architecture': 'fa-draw-polygon',
+    'construction': 'fa-helmet-safety',
+    'manufacturing': 'fa-industry',
+    'factory': 'fa-industry',
+    'industrial': 'fa-industry',
+    'fibc': 'fa-box',
+    'bulk bag': 'fa-box',
+    'packaging': 'fa-cube',
+    'weaving': 'fa-vector-square',
+    'loom': 'fa-vector-square',
+    'extrusion': 'fa-arrow-right-long',
+    'printing': 'fa-print',
+    'sewing': 'fa-scissors',
+    'textile': 'fa-shirt',
+    'apparel': 'fa-shirt',
+    'garment': 'fa-vest',
+    'brandix': 'fa-industry',
+    'dialog': 'fa-tower-cell',
+    'isp': 'fa-tower-cell',
+    'telecom': 'fa-tower-broadcast',
+    'fiber': 'fa-fiber',
+    'optic': 'fa-eye',
+    'cable': 'fa-plug',
+    'router': 'fa-wifi',
+    'switch': 'fa-code-branch',
+    'cisco': 'fa-network-wired',
+    'juniper': 'fa-network-wired',
+    'arista': 'fa-network-wired',
+    'huawei': 'fa-network-wired',
+    'mikrotik': 'fa-wifi',
+    'ubiquiti': 'fa-wifi'
+};
+
+// Fallback icon when nothing matches
+const DEFAULT_ICON = 'fa-diagram-project';
+
+// Cache for AI suggestions (saved in localStorage)
+let iconCache = JSON.parse(localStorage.getItem('iconCache')) || {};
+
+/**
+ * Finds the best Font Awesome icon for a project
+ */
+function getIconForProject(project) {
+    const name = project.name || '';
+    const description = project.description || '';
+    const combined = (name + ' ' + description).toLowerCase();
+
+    // If project already has a custom icon, use it
+    if (project.icon) return project.icon;
+
+    // 1. Try exact keyword matches (prioritize longer matches)
+    const keywords = Object.keys(KEYWORD_MAP);
+    // Sort by length (longer = more specific)
+    keywords.sort((a, b) => b.length - a.length);
+    
+    for (const keyword of keywords) {
+        if (combined.includes(keyword.toLowerCase())) {
+            return KEYWORD_MAP[keyword];
+        }
+    }
+
+    // 2. Check localStorage cache
+    const cacheKey = name.toLowerCase().trim();
+    if (iconCache[cacheKey]) {
+        return iconCache[cacheKey];
+    }
+
+    // 3. If nothing found, ask AI (async)
+    getAISuggestion(project).then(icon => {
+        iconCache[cacheKey] = icon;
+        localStorage.setItem('iconCache', JSON.stringify(iconCache));
+        // Re-render just this project? We'll handle in loadProjects()
+    });
+
+    return DEFAULT_ICON;
+}
+
+/**
+ * Ask free AI service for icon suggestion
+ * Uses Google's Gemini API (free tier - just need a key)
+ * If no API key, returns DEFAULT_ICON
+ */
+async function getAISuggestion(project) {
+    const name = project.name || '';
+    const description = project.description || '';
+    
+    // You can get a free Gemini API key from: https://aistudio.google.com/
+    const GEMINI_API_KEY = 'AIzaSyDgNDTqE5Su0DL4WeQTeo1hVjLRHKuuZVo'; // 👈 Replace with your key
+    
+    if (!GEMINI_API_KEY || GEMINI_API_KEY === 'AIzaSyDgNDTqE5Su0DL4WeQTeo1hVjLRHKuuZVo') {
+        console.log('No Gemini API key set - using keyword matching only');
+        return DEFAULT_ICON;
+    }
+
+    try {
+        const prompt = `Given a project named "${name}" with description "${description}", suggest a single Font Awesome 6 icon name (without the 'fa-' prefix). Return ONLY the icon name, e.g., "diagram-project". If unsure, return "diagram-project".`;
+        
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: prompt }]
+                }],
+                generationConfig: {
+                    temperature: 0.1,
+                    maxOutputTokens: 20
+                }
+            })
+        });
+        
+        const data = await response.json();
+        let iconName = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || DEFAULT_ICON.replace('fa-', '');
+        
+        // Clean up the response
+        iconName = iconName.replace('fa-', '').replace(/[^a-z0-9-]/g, '');
+        
+        return 'fa-' + iconName;
+    } catch (error) {
+        console.warn('AI icon suggestion failed:', error);
+        return DEFAULT_ICON;
+    }
+}
+
 async function loadProjects() {
   const grid = document.getElementById('projectsGrid');
   grid.innerHTML = '<div class="loader">Loading projects...</div>';
@@ -158,11 +446,14 @@ async function loadProjects() {
       description: repo.description || 'GitHub Repository',
       tags: [repo.language].filter(Boolean),
       links: { github: repo.html_url },
-      icon: 'fab fa-github',
-      image: null
     }));
     projects = [...projects, ...ghProjects];
   } catch (e) { console.warn('GitHub fetch failed'); }
+  
+  // Assign icons to all projects
+  for (let proj of projects) {
+    proj.icon = getIconForProject(proj);
+  }
   
   // Render projects
   if (projects.length === 0) {
@@ -172,30 +463,10 @@ async function loadProjects() {
   
   grid.innerHTML = projects.map((proj, i) => `
     <div class="project-card glass" data-aos="zoom-in" data-aos-delay="${i*50}" onclick='openModal(${JSON.stringify(proj).replace(/'/g, "&apos;")})'>
-      <div class="project-icon"><i class="fas ${proj.icon || 'fa-diagram-project'}"></i></div>
+      <div class="project-icon"><i class="fas ${proj.icon || DEFAULT_ICON}"></i></div>
       <h3 class="project-title">${proj.name}</h3>
       <p class="project-desc">${proj.description || ''}</p>
       ${proj.tags ? `<div class="project-tags">${proj.tags.map(t => `<span class="project-tag">${t}</span>`).join('')}</div>` : ''}
     </div>
   `).join('');
 }
-
-function openModal(project) {
-  document.getElementById('modalTitle').textContent = project.name;
-  document.getElementById('modalDescription').textContent = project.description || '';
-  const linksDiv = document.getElementById('modalLinks');
-  let linksHtml = '';
-  if (project.links) {
-    if (project.links.github) linksHtml += `<a href="${project.links.github}" target="_blank" class="badge"><i class="fab fa-github"></i> GitHub</a>`;
-    if (project.links.drive) linksHtml += `<a href="${project.links.drive}" target="_blank" class="badge"><i class="fab fa-google-drive"></i> Drive</a>`;
-    if (project.links.live) linksHtml += `<a href="${project.links.live}" target="_blank" class="badge"><i class="fas fa-external-link"></i> Live Demo</a>`;
-  }
-  linksDiv.innerHTML = linksHtml;
-  document.getElementById('projectModal').style.display = 'flex';
-}
-
-function closeModal() { document.getElementById('projectModal').style.display = 'none'; }
-window.onclick = (e) => { if (e.target == document.getElementById('projectModal')) closeModal(); };
-
-// Initialize projects after page load
-window.addEventListener('load', loadProjects);
