@@ -1,4 +1,4 @@
-// ========== AOS ==========
+// ========== AOS Animation Init ==========
 AOS.init({ duration: 800, easing: 'ease-out-cubic', once: true });
 
 // ========== LOADER ==========
@@ -50,14 +50,21 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-// ========== FLAG ==========
+// ========== VISITOR FLAG (with fallback) ==========
 async function getFlag() {
   try {
     const res = await fetch('https://ipapi.co/json/');
+    if (!res.ok) throw new Error('API failed');
     const data = await res.json();
     const code = data.country_code?.toLowerCase();
-    document.getElementById('visitorFlag').textContent = code ? code.replace(/./g, c => String.fromCodePoint(c.charCodeAt(0)+127397)) : '🌐';
-  } catch { document.getElementById('visitorFlag').textContent = '🌐'; }
+    if (code) {
+      const flag = code.replace(/./g, c => String.fromCodePoint(c.charCodeAt(0) + 127397));
+      document.getElementById('visitorFlag').textContent = flag;
+      return;
+    }
+  } catch (e) {}
+  // fallback to globe
+  document.getElementById('visitorFlag').textContent = '🌐';
 }
 getFlag();
 
@@ -102,7 +109,7 @@ fetch('data/linkedin.json')
     document.getElementById('linkedinHeadline').textContent = d.headline || 'IT Manager at FIBC Lanka';
   }).catch(() => document.getElementById('linkedinHeadline').textContent = 'IT Manager at FIBC Lanka');
 
-// ========== PROJECTS (AI-free) ==========
+// ========== PROJECTS ==========
 const langIcons = {JavaScript:'devicon-javascript-plain',Python:'devicon-python-plain',HTML:'devicon-html5-plain',CSS:'devicon-css3-plain'};
 const kwIcons = {network:'fa-network-wired',dashboard:'fa-chart-line',design:'fa-paint-brush',bot:'fa-robot',chat:'fa-comment',web:'fa-globe',api:'fa-code',secret:'fa-lock',container:'fa-box'};
 const defaultIcon = 'fa-code';
@@ -170,20 +177,18 @@ document.getElementById('contactForm').addEventListener('submit', async function
   } catch { status.textContent = '❌ Network error.'; }
 });
 
-// ========== LIGHT BEAM (mouse / deviceorientation) ==========
+// ========== LIGHT BEAM ==========
 const beam = document.getElementById('lightBeam');
 let isMobile = window.matchMedia('(pointer: coarse)').matches;
 
 function moveBeam(xPercent, yPercent) {
-  // Move the radial gradient position via transform (translate) or background-position
   beam.style.transform = `translate(${xPercent - 50}%, ${yPercent - 50}%)`;
 }
 
 if (isMobile) {
   window.addEventListener('deviceorientation', (e) => {
     if (e.gamma === null || e.beta === null) return;
-    // gamma: left-to-right (-90 to 90), beta: front-to-back (-180 to 180)
-    const x = (e.gamma + 90) / 180 * 100;   // map to 0-100%
+    const x = (e.gamma + 90) / 180 * 100;
     const y = (e.beta + 180) / 360 * 100;
     moveBeam(x, y);
   });
@@ -195,14 +200,11 @@ if (isMobile) {
   });
 }
 
-// ========== EASTER EGG: 999 Meme Found ==========
+// ========== EASTER EGG: 999 Meme Found (responsive shake / fast mouse) ==========
 const memeOverlay = document.getElementById('memeOverlay');
 const memeCountdownEl = document.getElementById('memeCountdown');
-let shakeTimer = null;
-const SHAKE_THRESHOLD = 8; // seconds
-let shakeStart = null;
-let mouseSpeedBuffer = [];
-let lastMousePos = { x:0, y:0, time: Date.now() };
+let shakeActive = false;
+const SHAKE_DURATION = 2000; // 2 seconds instead of 8
 
 function triggerMeme() {
   if (memeOverlay.classList.contains('active')) return;
@@ -219,43 +221,54 @@ function triggerMeme() {
   }, 1000);
 }
 
-// Mobile shake detection (devicemotion)
+// Mobile: shake detection via devicemotion
 if (isMobile) {
   window.addEventListener('devicemotion', (e) => {
     const acc = e.accelerationIncludingGravity;
     if (!acc) return;
     const magnitude = Math.sqrt(acc.x*acc.x + acc.y*acc.y + acc.z*acc.z);
-    if (magnitude > 15) {   // shaking
-      if (!shakeStart) shakeStart = Date.now();
-      const elapsed = (Date.now() - shakeStart) / 1000;
-      if (elapsed >= SHAKE_THRESHOLD) {
-        triggerMeme();
-        shakeStart = null;
+    if (magnitude > 15) {   // active shaking
+      if (!shakeActive) {
+        shakeActive = true;
+        setTimeout(() => {
+          if (shakeActive) triggerMeme();
+        }, SHAKE_DURATION);
       }
     } else {
-      shakeStart = null;
+      shakeActive = false;
     }
   });
 } else {
-  // Desktop: track mouse velocity
+  // Desktop: detect fast mouse movement for 2 seconds
+  let fastMouseTimer = null;
+  let fastMouseStart = 0;
+  const SPEED_THRESHOLD = 300; // pixels per second (lowered)
+  let lastMouse = { x:0, y:0, time: Date.now() };
+
   document.addEventListener('mousemove', (e) => {
     const now = Date.now();
-    const dt = (now - lastMousePos.time) / 1000;
+    const dt = (now - lastMouse.time) / 1000;
     if (dt === 0) return;
-    const dx = e.clientX - lastMousePos.x;
-    const dy = e.clientY - lastMousePos.y;
-    const speed = Math.sqrt(dx*dx + dy*dy) / dt; // pixels per second
-    lastMousePos = { x: e.clientX, y: e.clientY, time: now };
+    const dx = e.clientX - lastMouse.x;
+    const dy = e.clientY - lastMouse.y;
+    const speed = Math.sqrt(dx*dx + dy*dy) / dt;
+    lastMouse = { x: e.clientX, y: e.clientY, time: now };
 
-    mouseSpeedBuffer.push({ time: now, speed });
-    // Remove old entries (> 10 seconds)
-    mouseSpeedBuffer = mouseSpeedBuffer.filter(entry => now - entry.time < 10000);
-    // Check if all recent speeds are above threshold (e.g., 400px/s)
-    const highSpeed = mouseSpeedBuffer.every(entry => entry.speed > 400);
-    const duration = mouseSpeedBuffer.length > 0 ? (now - mouseSpeedBuffer[0].time) / 1000 : 0;
-    if (highSpeed && duration >= SHAKE_THRESHOLD && mouseSpeedBuffer.length > 10) {
-      triggerMeme();
-      mouseSpeedBuffer = [];
+    if (speed > SPEED_THRESHOLD) {
+      if (!fastMouseStart) {
+        fastMouseStart = now;
+        fastMouseTimer = setTimeout(() => {
+          triggerMeme();
+          fastMouseStart = 0;
+        }, SHAKE_DURATION);
+      }
+    } else {
+      // reset if speed drops
+      fastMouseStart = 0;
+      if (fastMouseTimer) {
+        clearTimeout(fastMouseTimer);
+        fastMouseTimer = null;
+      }
     }
   });
 }
