@@ -43,11 +43,9 @@ ageEl.textContent = age;
 document.getElementById('currentYear').textContent = today.getFullYear();
 
 // ========== VISITOR FLAG & TIME (IP‑based) ==========
-let visitorTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone; // fallback
+let visitorTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 let clockInterval = null;
-
 async function fetchGeoData() {
-  // Try ipapi.co first
   try {
     const res = await fetch('https://ipapi.co/json/');
     if (res.ok) {
@@ -62,10 +60,8 @@ async function fetchGeoData() {
       }
     }
   } catch (e) {}
-
-  // Fallback to ip-api.com
   try {
-    const res = await fetch('https://ip-api.com/json/?fields=status,message,countryCode,timezone');
+    const res = await fetch('https://ip-api.com/json/?fields=status,countryCode,timezone');
     if (res.ok) {
       const data = await res.json();
       if (data.status === 'success') {
@@ -80,24 +76,19 @@ async function fetchGeoData() {
       }
     }
   } catch (e) {}
-
-  // Total failure: show globe and use device timezone
   document.getElementById('visitorFlag').textContent = '🌐';
   startClock();
 }
-
 function startClock() {
   if (clockInterval) clearInterval(clockInterval);
   updateClock();
   clockInterval = setInterval(updateClock, 1000);
 }
-
 function updateClock() {
   const now = new Date();
   const options = { hour: '2-digit', minute: '2-digit', timeZone: visitorTimezone };
   document.getElementById('liveClock').textContent = now.toLocaleTimeString('en-US', options);
 }
-
 fetchGeoData();
 
 // ========== EXPERIENCE ==========
@@ -209,12 +200,22 @@ document.getElementById('contactForm').addEventListener('submit', async function
   } catch { status.textContent = '❌ Network error.'; }
 });
 
-// ========== LIGHT BEAM ==========
+// ========== LIGHT BEAM & PARALLAX ==========
 const beam = document.getElementById('lightBeam');
 const isMobile = window.matchMedia('(pointer: coarse)').matches;
 
 function moveBeam(xPercent, yPercent) {
   beam.style.transform = `translate(${xPercent - 50}%, ${yPercent - 50}%)`;
+}
+function moveShapesAndDevices(dx, dy) {
+  document.querySelectorAll('.shape').forEach((s, i) => {
+    const speed = (i+1)*0.4;
+    s.style.transform = `translate(${dx*speed}px, ${dy*speed}px)`;
+  });
+  document.querySelectorAll('.floating-device').forEach((d, i) => {
+    const speed = (i+2)*0.3;
+    d.style.transform = `translate(${dx*speed}px, ${dy*speed}px)`;
+  });
 }
 
 if (isMobile) {
@@ -223,16 +224,22 @@ if (isMobile) {
     const x = (e.gamma + 90) / 180 * 100;
     const y = (e.beta + 180) / 360 * 100;
     moveBeam(x, y);
+    const dx = (x - 50) * 0.3;
+    const dy = (y - 50) * 0.3;
+    moveShapesAndDevices(dx, dy);
   });
 } else {
   document.addEventListener('mousemove', (e) => {
     const x = (e.clientX / window.innerWidth) * 100;
     const y = (e.clientY / window.innerHeight) * 100;
     moveBeam(x, y);
+    const dx = (e.clientX / window.innerWidth - 0.5) * 14;
+    const dy = (e.clientY / window.innerHeight - 0.5) * 14;
+    moveShapesAndDevices(dx, dy);
   });
 }
 
-// ========== EASTER EGG: 999 Meme Found ==========
+// ========== EASTER EGG ==========
 const memeOverlay = document.getElementById('memeOverlay');
 const memeCountdownEl = document.getElementById('memeCountdown');
 let shakeActive = false;
@@ -271,7 +278,6 @@ if (isMobile) {
   });
 } else {
   let fastMouseTimer = null;
-  let fastMouseStart = 0;
   const SPEED_THRESHOLD = 300;
   let lastMouse = { x:0, y:0, time: Date.now() };
 
@@ -302,16 +308,5 @@ if (isMobile) {
   });
 }
 
-// Parallax shapes (desktop only)
-document.addEventListener('mousemove', (e) => {
-  if (isMobile) return;
-  const x = (e.clientX / window.innerWidth - 0.5) * 14;
-  const y = (e.clientY / window.innerHeight - 0.5) * 14;
-  document.querySelectorAll('.shape').forEach((s, i) => {
-    const speed = (i+1)*0.4;
-    s.style.transform = `translate(${x*speed}px, ${y*speed}px)`;
-  });
-});
-
-// Start projects
+// Start projects after load
 window.addEventListener('load', () => loadProjects());
