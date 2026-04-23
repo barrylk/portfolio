@@ -1,269 +1,185 @@
-// ========== AOS Animation Init ==========
-AOS.init({ duration: 800, once: true });
+// AOS settings
+AOS.init({ duration: 800, easing: 'ease-out-cubic', once: true });
 
-// ========== THEME TOGGLE ==========
+// Loader removal
+window.addEventListener('load', () => document.body.classList.add('loaded'));
+
+// Theme management
 const body = document.body;
-const modeIcon = document.getElementById('modeIcon');
-const modeText = document.getElementById('modeText');
-const toggleBtn = document.getElementById('themeToggleBtn');
-const toggleIcon = document.getElementById('toggleIcon');
-const toggleText = document.getElementById('toggleText');
-let userOverride = localStorage.getItem('themeOverride');
-let manualMode = userOverride !== null;
+const toggleBtn = document.getElementById('themeToggleBtnSmall');
+const toggleIcon = document.getElementById('toggleIconSmall');
+let manualMode = false, userOverride = localStorage.getItem('themeOverride');
 
-function updateUI(isDark) {
-  if (isDark) {
+function updateThemeUI(dark) {
+  if (dark) {
     body.classList.add('dark');
-    modeIcon.className = 'fas fa-moon';
-    modeText.textContent = manualMode ? 'Manual · Dark' : 'Auto · Night';
     toggleIcon.className = 'fas fa-sun';
-    toggleText.textContent = 'Switch to Light';
   } else {
     body.classList.remove('dark');
-    modeIcon.className = 'fas fa-sun';
-    modeText.textContent = manualMode ? 'Manual · Light' : 'Auto · Day';
     toggleIcon.className = 'fas fa-moon';
-    toggleText.textContent = 'Switch to Dark';
   }
 }
-
-function isNightTime() {
-  const hour = new Date().getHours();
-  return hour < 6 || hour >= 18;
-}
-
+function isNight() { const h = new Date().getHours(); return h < 6 || h >= 18; }
 function applyTheme() {
-  const useDark = manualMode ? userOverride === 'dark' : isNightTime();
-  updateUI(useDark);
+  const dark = manualMode ? userOverride === 'dark' : isNight();
+  updateThemeUI(dark);
 }
-
 toggleBtn.addEventListener('click', () => {
-  const currentIsDark = body.classList.contains('dark');
-  userOverride = currentIsDark ? 'light' : 'dark';
   manualMode = true;
+  userOverride = body.classList.contains('dark') ? 'light' : 'dark';
   localStorage.setItem('themeOverride', userOverride);
   applyTheme();
 });
-
-document.querySelector('.mode-indicator').addEventListener('click', () => {
-  userOverride = null;
-  manualMode = false;
-  localStorage.removeItem('themeOverride');
-  applyTheme();
-});
-
 applyTheme();
 setInterval(() => { if (!manualMode) applyTheme(); }, 60000);
 
-// ========== AUTO AGE ==========
-function calculateAge(birthDate) {
-  const today = new Date();
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const m = today.getMonth() - birthDate.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
-  return age;
-}
-const birthDate = new Date('2000-06-29');
-document.getElementById('ageDisplay').textContent = calculateAge(birthDate);
-document.getElementById('currentYear').textContent = new Date().getFullYear();
+// Age
+const ageEl = document.getElementById('ageDisplay');
+const birth = new Date('2000-06-29');
+const today = new Date();
+let age = today.getFullYear() - birth.getFullYear();
+if (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) age--;
+ageEl.textContent = age;
+document.getElementById('currentYear').textContent = today.getFullYear();
 
-// ========== CLOCK ==========
+// Clock
 function updateClock() {
   const now = new Date();
-  document.getElementById('liveClock').textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  document.getElementById('liveClock').textContent = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
 }
 setInterval(updateClock, 1000);
 updateClock();
 
-// ========== VISITOR FLAG ==========
-async function getVisitorFlag() {
+// Visitor flag
+async function getFlag() {
   try {
     const res = await fetch('https://ipapi.co/json/');
     const data = await res.json();
-    const countryCode = data.country_code?.toLowerCase();
-    if (countryCode) {
-      const flag = countryCode.replace(/./g, c => String.fromCodePoint(c.charCodeAt(0) + 127397));
-      document.getElementById('visitorFlag').textContent = flag;
-    }
-  } catch {
-    document.getElementById('visitorFlag').textContent = '🌐';
-  }
+    const code = data.country_code?.toLowerCase();
+    document.getElementById('visitorFlag').textContent = code ? code.replace(/./g, c => String.fromCodePoint(c.charCodeAt(0)+127397)) : '🌐';
+  } catch { document.getElementById('visitorFlag').textContent = '🌐'; }
 }
-getVisitorFlag();
+getFlag();
 
-// ========== EXPERIENCE ==========
-const experienceData = [
-  { period: '2024 – Present', title: 'IT Manager', company: 'FIBC Lanka Pvt Ltd, Polonnaruwa', desc: 'Industrial network uptime · In‑house graphic design · Social media content · Reduced external agency costs.' },
-  { period: '2021 – 2024', title: 'CAD Designer', company: 'Brandix Apparel Solutions', desc: '3D simulation & pattern engineering · Gerber/Lectra precision.' },
-  { period: '2020 – 2021 (8 mos)', title: 'Network Engineer Intern', company: 'Dialog Axiata, Kandy', desc: 'ISP-grade networking · VLANs, fiber troubleshooting · SLA support.' }
+// Experience
+const expData = [
+  { period:'2024 – Present', title:'IT Manager', company:'FIBC Lanka Pvt Ltd', desc:'Network uptime, graphic design, social media.' },
+  { period:'2021 – 2024', title:'CAD Designer', company:'Brandix Apparel', desc:'3D patterns, Gerber/Lectra.' },
+  { period:'2020 – 2021', title:'Network Engineer Intern', company:'Dialog Axiata', desc:'ISP networking, fiber.' }
 ];
-function renderExperience() {
-  const container = document.getElementById('experienceTimeline');
-  container.innerHTML = experienceData.map((item, i) => `
-    <div class="timeline-item" data-aos="fade-up" data-aos-delay="${i*100}">
-      <div class="timeline-dot"></div>
-      <div class="timeline-content glass">
-        <span class="timeline-date"><i class="far fa-calendar"></i> ${item.period}</span>
-        <h3 class="timeline-title">${item.title}</h3>
-        <div class="timeline-company">${item.company}</div>
-        <p>${item.desc}</p>
-      </div>
+const timeline = document.getElementById('experienceTimeline');
+timeline.innerHTML = expData.map((e,i) => `
+  <div class="timeline-item" data-aos="fade-up" data-aos-delay="${i*100}">
+    <div class="timeline-dot"></div>
+    <div class="timeline-content">
+      <div class="timeline-date">${e.period}</div>
+      <div class="timeline-title">${e.title}</div>
+      <div class="timeline-company">${e.company}</div>
+      <p>${e.desc}</p>
     </div>
-  `).join('');
-}
-renderExperience();
+  </div>`).join('');
 
-// ========== SKILLS ==========
-const skillsData = [
-  { category: 'Network & SysAdmin', skills: [{ name:'TCP/IP & DNS',percent:90},{ name:'Windows Server',percent:85},{ name:'Fortinet Firewall',percent:80},{ name:'VLAN/Subnetting',percent:88}] },
-  { category: 'Design & Print', skills: [{ name:'Adobe Illustrator',percent:92},{ name:'Photoshop',percent:88},{ name:'InDesign',percent:85},{ name:'CorelDRAW',percent:90}] },
-  { category: 'Video & Motion', skills: [{ name:'Premiere Pro',percent:85},{ name:'After Effects',percent:75},{ name:'DaVinci Resolve',percent:80},{ name:'Social Media Content',percent:90}] }
+// Skills
+const skills = [
+  { cat:'Network & SysAdmin', items:[{n:'TCP/IP & DNS',p:90},{n:'Windows Server',p:85},{n:'Fortinet',p:80},{n:'VLAN',p:88}] },
+  { cat:'Design', items:[{n:'Illustrator',p:92},{n:'Photoshop',p:88},{n:'InDesign',p:85},{n:'CorelDRAW',p:90}] },
+  { cat:'Video', items:[{n:'Premiere Pro',p:85},{n:'After Effects',p:75},{n:'DaVinci',p:80},{n:'Social Media',p:90}] }
 ];
-function renderSkills() {
-  const container = document.getElementById('skillsContainer');
-  container.innerHTML = skillsData.map(cat => `
-    <div class="skill-category glass" data-aos="flip-left">
-      <h4><i class="fas fa-code"></i> ${cat.category}</h4>
-      ${cat.skills.map(skill => `
-        <div class="skill-bar-item">
-          <div class="skill-info"><span>${skill.name}</span><span>${skill.percent}%</span></div>
-          <div class="skill-progress"><div class="skill-progress-fill" style="width:${skill.percent}%"></div></div>
-        </div>
-      `).join('')}
-    </div>
-  `).join('');
-}
-renderSkills();
+const skillsContainer = document.getElementById('skillsContainer');
+skillsContainer.innerHTML = skills.map(c => `
+  <div class="skill-category" data-aos="fade-up">
+    <h4>${c.cat}</h4>
+    ${c.items.map(s => `
+      <div class="skill-bar-item">
+        <div class="skill-info"><span>${s.n}</span><span>${s.p}%</span></div>
+        <div class="skill-progress"><div class="skill-progress-fill" style="width:${s.p}%"></div></div>
+      </div>`).join('')}
+  </div>`).join('');
 
-// ========== LINKEDIN DATA ==========
+// LinkedIn data
 fetch('data/linkedin.json')
-  .then(res => res.json())
-  .then(data => {
-    if (data.headline) {
-      document.getElementById('linkedinHeadline').textContent = data.headline;
-      document.getElementById('currentJobTitle').textContent = data.headline.split(' at ')[0] || 'IT Manager';
-    }
-  })
-  .catch(() => {
-    document.getElementById('linkedinHeadline').textContent = 'IT Manager at FIBC Lanka Pvt Ltd';
-  });
+  .then(r => r.json()).then(d => {
+    document.getElementById('linkedinHeadline').textContent = d.headline || 'IT Manager at FIBC Lanka';
+  }).catch(() => document.getElementById('linkedinHeadline').textContent = 'IT Manager at FIBC Lanka');
 
-// ========== PROJECTS WITH SMART ICONS (NO AI) ==========
-const LANGUAGE_ICON_MAP = {
-  'JavaScript':'devicon-javascript-plain','Python':'devicon-python-plain','HTML':'devicon-html5-plain','CSS':'devicon-css3-plain',
-  'Java':'devicon-java-plain','C++':'devicon-cplusplus-plain','C#':'devicon-csharp-plain','PHP':'devicon-php-plain',
-  'Ruby':'devicon-ruby-plain','Go':'devicon-go-plain','Rust':'devicon-rust-plain','Swift':'devicon-swift-plain',
-  'Kotlin':'devicon-kotlin-plain','TypeScript':'devicon-typescript-plain','Dart':'devicon-dart-plain','Shell':'devicon-bash-plain'
-};
-const KEYWORD_MAP = {
-  'network':'fa-network-wired','dashboard':'fa-chart-line','catalogue':'fa-book-open','design':'fa-paint-brush',
-  'video':'fa-video','graphic':'fa-pen-nib','cad':'fa-cube','3d':'fa-cubes','resilience':'fa-shield-halved',
-  'security':'fa-shield','firewall':'fa-shield-virus','api':'fa-code','web':'fa-globe','app':'fa-mobile-screen',
-  'bot':'fa-robot','chat':'fa-comment','whatsapp':'fa-whatsapp','portfolio':'fa-briefcase','secret':'fa-lock',
-  'container':'fa-box','ephemeral':'fa-clock'
-};
-const DEFAULT_ICON = 'fa-code';
-
-async function getIconForProject(project) {
-  if (project.icon) return project.icon;
-  const language = project.language || (project.tags && project.tags[0]);
-  if (language && LANGUAGE_ICON_MAP[language]) return LANGUAGE_ICON_MAP[language];
-  const combined = (project.name + ' ' + (project.description || '')).toLowerCase();
-  for (const [keyword, icon] of Object.entries(KEYWORD_MAP)) {
-    if (combined.includes(keyword)) return icon;
-  }
-  return DEFAULT_ICON;
+// Projects (with Devicon/keyword without AI key)
+const langIcons = {JavaScript:'devicon-javascript-plain',Python:'devicon-python-plain',HTML:'devicon-html5-plain',CSS:'devicon-css3-plain'};
+const kwIcons = {network:'fa-network-wired',dashboard:'fa-chart-line',design:'fa-paint-brush',bot:'fa-robot',chat:'fa-comment',web:'fa-globe',api:'fa-code',secret:'fa-lock',container:'fa-box'};
+const defaultIcon = 'fa-code';
+function getIcon(p) {
+  if (p.icon) return p.icon;
+  const lang = p.language || (p.tags && p.tags[0]);
+  if (lang && langIcons[lang]) return langIcons[lang];
+  const text = (p.name+' '+ (p.description||'')).toLowerCase();
+  for (let k in kwIcons) if (text.includes(k)) return kwIcons[k];
+  return defaultIcon;
 }
-
 async function loadProjects() {
   const grid = document.getElementById('projectsGrid');
-  grid.innerHTML = '<div class="loader">Loading projects...</div>';
   let projects = [];
   try {
-    const res = await fetch('data/projects.json');
-    if (res.ok) projects = [...await res.json()];
-  } catch(e) { console.warn('projects.json missing'); }
+    const r = await fetch('data/projects.json');
+    if (r.ok) projects = await r.json();
+  } catch(e){}
   try {
-    const ghRes = await fetch('https://api.github.com/users/barrylk/repos?sort=updated&per_page=6');
-    if (ghRes.ok) {
-      const repos = await ghRes.json();
-      const ghProjects = repos.map(repo => ({
-        name: repo.name,
-        description: repo.description || 'GitHub Repository',
-        tags: repo.language ? [repo.language] : [],
-        language: repo.language,
-        links: { github: repo.html_url }
+    const gh = await fetch('https://api.github.com/users/barrylk/repos?sort=updated&per_page=6');
+    if (gh.ok) {
+      const repos = await gh.json();
+      const mapped = repos.map(r => ({
+        name:r.name, description:r.description||'GitHub Repository', language:r.language, tags:r.language?[r.language]:[], links:{github:r.html_url}
       }));
-      projects = [...projects, ...ghProjects];
+      projects = [...projects, ...mapped];
     }
-  } catch(e) { console.warn('GitHub fetch failed'); }
-  if (projects.length === 0) {
-    projects = [
-      { name:'Network Resilience Dashboard', description:'Real-time monitoring for FIBC Lanka manufacturing network.', tags:['Python'], language:'Python', links:{github:'#'} },
-      { name:'FIBC Product Catalogue 2025', description:'Designed full B2B catalogue, saved LKR 200k+', tags:['Design'], links:{drive:'#'} }
-    ];
-  }
+  } catch(e){}
+  if (!projects.length) projects = [{name:'Sample Project', description:'Add projects in data/projects.json', icon:'fa-code'}];
+  // Load Devicon CSS if needed
   if (!document.querySelector('link[href*="devicon"]')) {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://cdn.jsdelivr.net/gh/devicons/devicon@v2.15.1/devicon.min.css';
-    document.head.appendChild(link);
+    const l = document.createElement('link'); l.rel='stylesheet'; l.href='https://cdn.jsdelivr.net/gh/devicons/devicon@v2.15.1/devicon.min.css'; document.head.appendChild(l);
   }
-  for (let proj of projects) {
-    proj.icon = await getIconForProject(proj);
-  }
-  grid.innerHTML = projects.map((proj,i) => {
-    const iconClass = proj.icon;
-    const iconHtml = iconClass.startsWith('devicon-') ? `<i class="${iconClass}"></i>` : `<i class="fas ${iconClass}"></i>`;
-    return `
-      <div class="project-card glass" data-aos="zoom-in" data-aos-delay="${i*50}" onclick='openModal(${JSON.stringify(proj).replace(/'/g,"&apos;")})'>
-        <div class="project-icon">${iconHtml}</div>
-        <h3 class="project-title">${proj.name}</h3>
-        <p class="project-desc">${proj.description || ''}</p>
-        ${proj.tags?.length ? `<div class="project-tags">${proj.tags.map(t=>`<span class="project-tag">${t}</span>`).join('')}</div>` : ''}
-      </div>
-    `;
+  projects.forEach(p => p.icon = getIcon(p));
+  grid.innerHTML = projects.map((p,i) => {
+    const ic = p.icon.startsWith('devicon-') ? `<i class="${p.icon}"></i>` : `<i class="fas ${p.icon}"></i>`;
+    return `<div class="project-card" data-aos="fade-up" data-aos-delay="${i*50}" onclick='openModal(${JSON.stringify(p).replace(/'/g,"&apos;")})'>
+      <div class="project-icon">${ic}</div>
+      <div class="project-title">${p.name}</div>
+      <div class="project-desc">${p.description||''}</div>
+      ${p.tags?`<div class="project-tags">${p.tags.map(t=>`<span class="project-tag">${t}</span>`).join('')}</div>`:''}
+    </div>`;
   }).join('');
 }
-
-// ========== MODAL ==========
-function openModal(project) {
-  document.getElementById('modalTitle').textContent = project.name;
-  document.getElementById('modalDescription').textContent = project.description || '';
-  const linksDiv = document.getElementById('modalLinks');
+function openModal(p) {
+  document.getElementById('modalTitle').textContent = p.name;
+  document.getElementById('modalDescription').textContent = p.description||'';
   let links = '';
-  if (project.links) {
-    if (project.links.github) links += `<a href="${project.links.github}" target="_blank" class="badge"><i class="fab fa-github"></i> GitHub</a>`;
-    if (project.links.drive) links += `<a href="${project.links.drive}" target="_blank" class="badge"><i class="fab fa-google-drive"></i> Drive</a>`;
-    if (project.links.live) links += `<a href="${project.links.live}" target="_blank" class="badge"><i class="fas fa-external-link"></i> Live Demo</a>`;
-  }
-  linksDiv.innerHTML = links || '<p>No external links provided.</p>';
+  if (p.links?.github) links += `<a href="${p.links.github}" target="_blank" class="cta-btn">GitHub</a>`;
+  if (p.links?.drive) links += `<a href="${p.links.drive}" target="_blank" class="cta-btn">Drive</a>`;
+  document.getElementById('modalLinks').innerHTML = links;
   document.getElementById('projectModal').style.display = 'flex';
 }
-function closeModal() { document.getElementById('projectModal').style.display = 'none'; }
-window.onclick = function(e) { if (e.target === document.getElementById('projectModal')) closeModal(); };
+window.closeModal = () => document.getElementById('projectModal').style.display = 'none';
+window.onclick = e => { if (e.target === document.getElementById('projectModal')) closeModal(); };
 
-// ========== CONTACT FORM SUBMISSION ==========
-document.getElementById('contactForm').addEventListener('submit', async (e) => {
+// Contact form submission
+document.getElementById('contactForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   const form = e.target;
   const status = document.getElementById('form-status');
-  const data = new FormData(form);
   try {
-    const res = await fetch(form.action, { method: 'POST', body: data, headers: { 'Accept': 'application/json' } });
-    if (res.ok) {
-      status.textContent = '✅ Message sent! Thank you.';
-      form.reset();
-    } else {
-      status.textContent = '❌ Oops! Something went wrong.';
-    }
-  } catch {
-    status.textContent = '❌ Network error. Please try again.';
-  }
+    const res = await fetch(form.action, { method:'POST', body: new FormData(form), headers:{'Accept':'application/json'} });
+    status.textContent = res.ok ? '✅ Message sent!' : '❌ Error, try again.';
+    if (res.ok) form.reset();
+  } catch { status.textContent = '❌ Network error.'; }
 });
 
-// ========== START ==========
-window.addEventListener('load', () => {
-  loadProjects();
-  console.log('Portfolio ready!');
+// Start projects
+window.addEventListener('load', () => loadProjects());
+
+// Parallax-like movement for background shapes (subtle)
+document.addEventListener('mousemove', (e) => {
+  const x = (e.clientX / window.innerWidth - 0.5) * 14;
+  const y = (e.clientY / window.innerHeight - 0.5) * 14;
+  document.querySelectorAll('.shape').forEach((s, i) => {
+    const speed = (i+1)*0.4;
+    s.style.transform = `translate(${x*speed}px, ${y*speed}px)`;
+  });
 });
