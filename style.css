@@ -69,21 +69,7 @@ body {
   transition: var(--transition);
 }
 
-/* ========== MULTI-COLOR BACKGROUND GLOWS ========== */
-.bg-glow {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.8;
-  background:
-    radial-gradient(circle at 20% 40%, var(--accent-glow) 0%, transparent 55%),
-    radial-gradient(circle at 80% 30%, var(--purple-glow) 0%, transparent 55%),
-    radial-gradient(circle at 50% 80%, var(--red-glow) 0%, transparent 55%);
-  transition: opacity 0.8s;
-}
-
-/* ========== LIGHT BEAM (multicolor aura) ========== */
+/* Light Beam */
 .light-beam {
   position: fixed;
   top: 0;
@@ -101,7 +87,7 @@ body {
   transition: opacity 0.5s;
 }
 
-/* Meme overlay (unchanged) */
+/* Meme overlay */
 .meme-overlay {
   position: fixed;
   inset: 0;
@@ -229,7 +215,19 @@ body.dark .glass-nav {
   transition: color 0.3s;
 }
 
-/* Grid background (subtle) */
+/* Background glows */
+.bg-glow {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.8;
+  background:
+    radial-gradient(circle at 20% 40%, var(--accent-glow) 0%, transparent 55%),
+    radial-gradient(circle at 80% 30%, var(--purple-glow) 0%, transparent 55%),
+    radial-gradient(circle at 50% 80%, var(--red-glow) 0%, transparent 55%);
+  transition: opacity 0.8s;
+}
 .bg-grid {
   position: fixed;
   inset: 0;
@@ -240,8 +238,6 @@ body.dark .glass-nav {
   z-index: -1;
   opacity: 0.4;
 }
-
-/* Floating colorful shapes */
 .bg-shapes .shape {
   position: fixed;
   opacity: 0.2;
@@ -256,7 +252,90 @@ body.dark .glass-nav {
 .shape-4 { width:250px; height:250px; background:var(--accent); border-radius:70% 30% 60% 40% / 40% 60% 40% 60%; top:20%; right:15%; }
 .shape-5 { width:180px; height:180px; background:var(--purple); border-radius:60% 40% 50% 50% / 50% 50% 40% 60%; bottom:5%; left:40%; }
 
-/* Hero (unchanged) */
+/* Floating Apple devices */
+.floating-devices {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+}
+.floating-device {
+  position: absolute;
+  opacity: 0.12;
+  filter: blur(1px);
+  animation: floatDevice 18s ease-in-out infinite;
+  will-change: transform;
+}
+.floating-device.macbook {
+  width: 120px;
+  height: 70px;
+  top: 15%;
+  left: 10%;
+  animation-delay: 0s;
+}
+.floating-device.macbook .screen {
+  width: 100%;
+  height: 60%;
+  background: var(--text-secondary);
+  border-radius: 4px 4px 0 0;
+  margin: 0 auto;
+}
+.floating-device.macbook .base {
+  width: 100%;
+  height: 30%;
+  background: var(--text-secondary);
+  border-radius: 0 0 4px 4px;
+  margin: 0 auto;
+  position: relative;
+}
+.floating-device.imac {
+  width: 100px;
+  height: 80px;
+  top: 70%;
+  left: 80%;
+  animation-delay: -5s;
+}
+.floating-device.imac .screen {
+  width: 100%;
+  height: 70%;
+  background: var(--text-secondary);
+  border-radius: 6px;
+  margin: 0 auto;
+}
+.floating-device.imac .stand {
+  width: 20%;
+  height: 20%;
+  background: var(--text-secondary);
+  margin: 2px auto 0;
+  border-radius: 0 0 2px 2px;
+}
+.floating-device.iphone {
+  width: 40px;
+  height: 80px;
+  top: 40%;
+  left: 50%;
+  animation-delay: -10s;
+}
+.floating-device.iphone .screen {
+  width: 84%;
+  height: 90%;
+  background: var(--text-secondary);
+  border-radius: 12px;
+  margin: 8% auto;
+  position: relative;
+}
+@keyframes floatDevice {
+  0% { transform: translateY(0px) rotate(0deg); }
+  25% { transform: translateY(-15px) rotate(1deg); }
+  50% { transform: translateY(10px) rotate(-1deg); }
+  75% { transform: translateY(-8px) rotate(0.5deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+/* Hero */
 .hero {
   display: flex;
   flex-wrap: wrap;
@@ -266,12 +345,9 @@ body.dark .glass-nav {
   min-height: 85vh;
   padding-top: 4rem;
 }
-.hero-image {
-  flex: 0 0 auto;
-}
+.hero-image { flex: 0 0 auto; }
 .profile-img {
-  width: 200px;
-  height: 200px;
+  width: 200px; height: 200px;
   border-radius: 50%;
   object-fit: cover;
   box-shadow: 0 0 0 4px var(--bg), 0 0 0 6px var(--accent);
@@ -364,7 +440,7 @@ body.dark .glass-nav {
   margin-top: 0.2rem;
 }
 
-/* Timeline (unchanged) */
+/* Timeline */
 .timeline {
   position: relative;
   padding-left: 32px;
@@ -408,7 +484,7 @@ body.dark .glass-nav {
 .timeline-title { font-size: 1.4rem; font-weight: 600; }
 .timeline-company { color: var(--text-secondary); margin-bottom: 0.8rem; }
 
-/* Projects (unchanged) */
+/* Projects */
 .projects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -439,7 +515,7 @@ body.dark .glass-nav {
   font-size: 0.75rem;
 }
 
-/* Skills (unchanged) */
+/* Skills */
 .skills-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -469,7 +545,7 @@ body.dark .glass-nav {
   transition: width 1s ease;
 }
 
-/* Contact Form (unchanged) */
+/* Contact Form */
 .contact-form { padding: 2rem; margin-top: 1rem; }
 .form-row { display: flex; gap: 20px; flex-wrap: wrap; }
 .form-group { flex: 1; position: relative; margin-bottom: 1.5rem; }
@@ -505,13 +581,13 @@ body.dark .glass-nav {
 .form-group input:focus,
 .form-group textarea:focus { border-color: var(--accent); }
 
-/* Footer (unchanged) */
+/* Footer */
 .footer { text-align: center; padding: 3rem 0; border-top: 1px solid var(--border); margin-top: 4rem; }
 .footer-social { display: flex; justify-content: center; gap: 20px; margin-bottom: 1rem; }
 .footer-social a { color: var(--text-secondary); font-size: 1.3rem; }
 .footer-text { color: var(--text-secondary); }
 
-/* WhatsApp (unchanged) */
+/* WhatsApp */
 .whatsapp-float {
   position: fixed;
   bottom: 30px;
@@ -530,7 +606,7 @@ body.dark .glass-nav {
 }
 .whatsapp-float:hover { transform: scale(1.05); }
 
-/* Modal (unchanged) */
+/* Modal */
 .modal {
   display: none;
   position: fixed; inset: 0;
