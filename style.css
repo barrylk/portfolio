@@ -413,17 +413,20 @@ body.dark .glass-nav {
   padding-top: 4rem;
 }
 .hero-image { flex: 0 0 auto; }
+/* Profile glow ring – perfectly round, exactly on the image edge */
 .profile-wrapper {
   position: relative;
   display: inline-block;
+  width: 200px;
+  height: 200px;
 }
 .profile-wrapper::after {
   content: '';
   position: absolute;
-  top: -10px;
-  left: -10px;
-  width: calc(100% + 20px);
-  height: calc(100% + 20px);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   border: 3px solid transparent;
   background: conic-gradient(from 0deg, var(--accent), var(--purple), var(--red), var(--accent)) border-box;
@@ -438,11 +441,11 @@ body.dark .glass-nav {
   to { transform: rotate(360deg); }
 }
 .profile-img {
-  width: 200px;
-  height: 200px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  box-shadow: 0 0 0 4px var(--bg), 0 0 30px var(--accent-glow);
+  box-shadow: 0 0 30px var(--accent-glow);
   transition: transform 0.4s;
   position: relative;
   z-index: 1;
