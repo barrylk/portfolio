@@ -1,3 +1,6 @@
+// ========== CONFIGURATION ==========
+const GEMINI_API_KEY = 'AIzaSyDgNDTqE5Su0DL4WeQTeo1hVjLRHKuuZVo'; // ✅ Your key
+
 // ========== AOS Animation Init ==========
 AOS.init({ duration: 800, once: true });
 
@@ -135,9 +138,30 @@ fetch('data/linkedin.json')
     document.getElementById('linkedinHeadline').textContent = 'IT Manager at FIBC Lanka Pvt Ltd';
   });
 
-// ========== PROJECTS WITH SMART ICONS ==========
+// ========== AUTOMATIC ICON DETECTION (with Gemini AI) ==========
 
-// Extended keyword → icon mapping
+// Language → Devicon mapping
+const LANGUAGE_ICON_MAP = {
+  'JavaScript': 'devicon-javascript-plain',
+  'Python': 'devicon-python-plain',
+  'HTML': 'devicon-html5-plain',
+  'CSS': 'devicon-css3-plain',
+  'Java': 'devicon-java-plain',
+  'C++': 'devicon-cplusplus-plain',
+  'C#': 'devicon-csharp-plain',
+  'PHP': 'devicon-php-plain',
+  'Ruby': 'devicon-ruby-plain',
+  'Go': 'devicon-go-plain',
+  'Rust': 'devicon-rust-plain',
+  'Swift': 'devicon-swift-plain',
+  'Kotlin': 'devicon-kotlin-plain',
+  'TypeScript': 'devicon-typescript-plain',
+  'Dart': 'devicon-dart-plain',
+  'Shell': 'devicon-bash-plain',
+  'PowerShell': 'devicon-powershell-plain'
+};
+
+// Keyword → Font Awesome (fallback before AI)
 const KEYWORD_MAP = {
     'network': 'fa-network-wired', 'dashboard': 'fa-chart-line', 'monitor': 'fa-eye',
     'catalogue': 'fa-book-open', 'catalog': 'fa-book', 'design': 'fa-paint-brush',
@@ -149,132 +173,191 @@ const KEYWORD_MAP = {
     'mobile': 'fa-mobile-screen-button', 'social': 'fa-hashtag', 'instagram': 'fa-instagram',
     'youtube': 'fa-youtube', 'linkedin': 'fa-linkedin', 'github': 'fa-github',
     'drive': 'fa-google-drive', 'database': 'fa-database', 'sql': 'fa-database',
-    'python': 'fa-python', 'javascript': 'fa-js', 'react': 'fa-react',
-    'node': 'fa-node', 'docker': 'fa-docker', 'cloud': 'fa-cloud',
-    'aws': 'fa-aws', 'azure': 'fa-microsoft', 'linux': 'fa-linux',
-    'windows': 'fa-windows', 'apple': 'fa-apple', 'android': 'fa-android',
-    'frontend': 'fa-laptop-code', 'backend': 'fa-terminal', 'fullstack': 'fa-layer-group',
-    'devops': 'fa-infinity', 'testing': 'fa-flask', 'automation': 'fa-robot',
-    'ai': 'fa-brain', 'machine': 'fa-microchip', 'learning': 'fa-graduation-cap',
-    'ecommerce': 'fa-store', 'store': 'fa-store', 'shop': 'fa-shop',
-    'cart': 'fa-cart-shopping', 'product': 'fa-box', 'inventory': 'fa-boxes-stacked',
-    'warehouse': 'fa-warehouse', 'logistics': 'fa-truck', 'shipping': 'fa-ship',
-    'delivery': 'fa-truck-fast', 'map': 'fa-map', 'location': 'fa-location-dot',
-    'contact': 'fa-envelope', 'email': 'fa-envelope', 'phone': 'fa-phone',
-    'chat': 'fa-comment', 'message': 'fa-message', 'forum': 'fa-users',
-    'community': 'fa-people-group', 'share': 'fa-share', 'fibc': 'fa-box',
-    'bulk bag': 'fa-box', 'packaging': 'fa-cube', 'weaving': 'fa-vector-square',
-    'loom': 'fa-vector-square', 'extrusion': 'fa-arrow-right-long', 'printing': 'fa-print',
-    'sewing': 'fa-scissors', 'textile': 'fa-shirt', 'apparel': 'fa-shirt',
-    'brandix': 'fa-industry', 'dialog': 'fa-tower-cell', 'isp': 'fa-tower-cell',
-    'telecom': 'fa-tower-broadcast', 'fiber': 'fa-fiber', 'router': 'fa-wifi',
-    'switch': 'fa-code-branch'
+    'bot': 'fa-robot', 'chat': 'fa-comment', 'whatsapp': 'fa-whatsapp',
+    'portfolio': 'fa-briefcase', 'drivethtu': 'fa-car', 'website': 'fa-globe',
+    'secret': 'fa-lock', 'container': 'fa-box', 'ephemeral': 'fa-clock'
 };
 
-const DEFAULT_ICON = 'fa-diagram-project';
+const DEFAULT_ICON = 'fa-code';
 
-function getIconForProject(project) {
-    if (project.icon) return project.icon;
-    const combined = (project.name + ' ' + (project.description || '')).toLowerCase();
-    const keywords = Object.keys(KEYWORD_MAP).sort((a, b) => b.length - a.length);
-    for (const keyword of keywords) {
-        if (combined.includes(keyword)) return KEYWORD_MAP[keyword];
-    }
-    return DEFAULT_ICON;
-}
-
-// Cache for AI suggestions (if you later add AI)
+// Cache for AI suggestions (saved in localStorage)
 let iconCache = JSON.parse(localStorage.getItem('iconCache')) || {};
 
+async function getAIIconSuggestion(project) {
+  const name = project.name || '';
+  const description = project.description || '';
+  const cacheKey = name.toLowerCase().trim();
+  
+  // Return cached if exists
+  if (iconCache[cacheKey]) {
+    return iconCache[cacheKey];
+  }
+
+  try {
+    const prompt = `Suggest a single Font Awesome 6 icon name (without 'fa-' prefix) for a project named "${name}" with description "${description}". Return only the icon name, e.g., "diagram-project". If unsure, return "code".`;
+    
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 20 }
+      })
+    });
+    
+    if (!response.ok) throw new Error('Gemini API error');
+    
+    const data = await response.json();
+    let iconName = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'code';
+    iconName = iconName.replace('fa-', '').replace(/[^a-z0-9-]/g, '');
+    
+    const finalIcon = 'fa-' + iconName;
+    iconCache[cacheKey] = finalIcon;
+    localStorage.setItem('iconCache', JSON.stringify(iconCache));
+    return finalIcon;
+  } catch (error) {
+    console.warn('AI icon suggestion failed:', error);
+    return DEFAULT_ICON;
+  }
+}
+
+async function getIconForProject(project) {
+  // 1. Manual override
+  if (project.icon) return project.icon;
+
+  // 2. Use language from GitHub API
+  const language = project.language || (project.tags && project.tags[0]);
+  if (language && LANGUAGE_ICON_MAP[language]) {
+    return LANGUAGE_ICON_MAP[language];
+  }
+
+  // 3. Keyword matching
+  const combined = (project.name + ' ' + (project.description || '')).toLowerCase();
+  for (const [keyword, icon] of Object.entries(KEYWORD_MAP)) {
+    if (combined.includes(keyword)) return icon;
+  }
+
+  // 4. Ask Gemini AI
+  return await getAIIconSuggestion(project);
+}
+
 async function loadProjects() {
-    const grid = document.getElementById('projectsGrid');
-    grid.innerHTML = '<div class="loader">Loading projects...</div>';
-    
-    let projects = [];
-    
-    // 1. Load manual projects from JSON
-    try {
-        const res = await fetch('data/projects.json');
-        if (res.ok) {
-            const jsonProjects = await res.json();
-            projects = [...jsonProjects];
-        }
-    } catch (e) {
-        console.warn('Could not load projects.json:', e);
+  const grid = document.getElementById('projectsGrid');
+  grid.innerHTML = '<div class="loader">Analyzing projects & generating icons...</div>';
+  
+  let projects = [];
+  
+  // 1. Load manual projects from JSON
+  try {
+    const res = await fetch('data/projects.json');
+    if (res.ok) {
+      const jsonProjects = await res.json();
+      projects = [...jsonProjects];
     }
-    
-    // 2. Fetch GitHub repos
-    try {
-        const ghRes = await fetch('https://api.github.com/users/barrylk/repos?sort=updated&per_page=6');
-        if (ghRes.ok) {
-            const repos = await ghRes.json();
-            const ghProjects = repos.map(repo => ({
-                name: repo.name,
-                description: repo.description || 'GitHub Repository',
-                tags: repo.language ? [repo.language] : [],
-                links: { github: repo.html_url }
-            }));
-            projects = [...projects, ...ghProjects];
-        }
-    } catch (e) {
-        console.warn('GitHub fetch failed:', e);
+  } catch (e) {
+    console.warn('Could not load projects.json:', e);
+  }
+  
+  // 2. Fetch GitHub repos with language data
+  try {
+    const ghRes = await fetch('https://api.github.com/users/barrylk/repos?sort=updated&per_page=6');
+    if (ghRes.ok) {
+      const repos = await ghRes.json();
+      const repoPromises = repos.map(async repo => {
+        let language = repo.language;
+        return {
+          name: repo.name,
+          description: repo.description || 'GitHub Repository',
+          tags: language ? [language] : [],
+          language: language,
+          links: { github: repo.html_url }
+        };
+      });
+      const ghProjects = await Promise.all(repoPromises);
+      projects = [...projects, ...ghProjects];
     }
+  } catch (e) {
+    console.warn('GitHub fetch failed:', e);
+  }
+  
+  // Fallback if still no projects
+  if (projects.length === 0) {
+    projects = [{
+      name: 'Network Resilience Dashboard',
+      description: 'Real-time monitoring for FIBC Lanka manufacturing network.',
+      tags: ['Python'],
+      language: 'Python',
+      links: { github: '#' }
+    }, {
+      name: 'FIBC Product Catalogue 2025',
+      description: 'Designed full B2B catalogue, saved LKR 200k+',
+      tags: ['Design'],
+      links: { drive: '#' }
+    }];
+  }
+  
+  // Load Devicon CSS dynamically
+  if (!document.querySelector('link[href*="devicon"]')) {
+    const deviconLink = document.createElement('link');
+    deviconLink.rel = 'stylesheet';
+    deviconLink.href = 'https://cdn.jsdelivr.net/gh/devicons/devicon@v2.15.1/devicon.min.css';
+    document.head.appendChild(deviconLink);
+  }
+  
+  // Get icons (some may be async AI calls)
+  const iconPromises = projects.map(async proj => {
+    proj.icon = await getIconForProject(proj);
+    return proj;
+  });
+  
+  const projectsWithIcons = await Promise.all(iconPromises);
+  
+  // Render
+  grid.innerHTML = projectsWithIcons.map((proj, i) => {
+    const iconClass = proj.icon;
+    const isDevicon = iconClass.startsWith('devicon-');
+    const iconHtml = isDevicon 
+      ? `<i class="${iconClass}"></i>` 
+      : `<i class="fas ${iconClass}"></i>`;
     
-    // If still no projects, show fallback
-    if (projects.length === 0) {
-        projects = [{
-            name: 'Network Resilience Dashboard',
-            description: 'Real-time monitoring for FIBC Lanka manufacturing network.',
-            tags: ['networking', 'grafana'],
-            links: { github: '#' }
-        }, {
-            name: 'FIBC Product Catalogue 2025',
-            description: 'Designed full B2B catalogue, saved LKR 200k+',
-            tags: ['design', 'illustrator'],
-            links: { drive: '#' }
-        }];
-    }
-    
-    // Assign icons
-    projects.forEach(p => { p.icon = getIconForProject(p); });
-    
-    // Render
-    grid.innerHTML = projects.map((proj, i) => `
-        <div class="project-card glass" data-aos="zoom-in" data-aos-delay="${i*50}" onclick='openModal(${JSON.stringify(proj).replace(/'/g, "&apos;")})'>
-            <div class="project-icon"><i class="fas ${proj.icon}"></i></div>
-            <h3 class="project-title">${proj.name}</h3>
-            <p class="project-desc">${proj.description || ''}</p>
-            ${proj.tags && proj.tags.length ? `<div class="project-tags">${proj.tags.map(t => `<span class="project-tag">${t}</span>`).join('')}</div>` : ''}
-        </div>
-    `).join('');
+    return `
+      <div class="project-card glass" data-aos="zoom-in" data-aos-delay="${i*50}" onclick='openModal(${JSON.stringify(proj).replace(/'/g, "&apos;")})'>
+        <div class="project-icon">${iconHtml}</div>
+        <h3 class="project-title">${proj.name}</h3>
+        <p class="project-desc">${proj.description || ''}</p>
+        ${proj.tags && proj.tags.length ? `<div class="project-tags">${proj.tags.map(t => `<span class="project-tag">${t}</span>`).join('')}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+  
+  console.log('✅ Projects loaded with AI-powered icons!');
 }
 
 // ========== MODAL FUNCTIONS ==========
 function openModal(project) {
-    document.getElementById('modalTitle').textContent = project.name;
-    document.getElementById('modalDescription').textContent = project.description || '';
-    const linksDiv = document.getElementById('modalLinks');
-    let linksHtml = '';
-    if (project.links) {
-        if (project.links.github) linksHtml += `<a href="${project.links.github}" target="_blank" class="badge"><i class="fab fa-github"></i> GitHub</a>`;
-        if (project.links.drive) linksHtml += `<a href="${project.links.drive}" target="_blank" class="badge"><i class="fab fa-google-drive"></i> Drive</a>`;
-        if (project.links.live) linksHtml += `<a href="${project.links.live}" target="_blank" class="badge"><i class="fas fa-external-link"></i> Live Demo</a>`;
-    }
-    linksDiv.innerHTML = linksHtml || '<p>No external links provided.</p>';
-    document.getElementById('projectModal').style.display = 'flex';
+  document.getElementById('modalTitle').textContent = project.name;
+  document.getElementById('modalDescription').textContent = project.description || '';
+  const linksDiv = document.getElementById('modalLinks');
+  let linksHtml = '';
+  if (project.links) {
+    if (project.links.github) linksHtml += `<a href="${project.links.github}" target="_blank" class="badge"><i class="fab fa-github"></i> GitHub</a>`;
+    if (project.links.drive) linksHtml += `<a href="${project.links.drive}" target="_blank" class="badge"><i class="fab fa-google-drive"></i> Drive</a>`;
+    if (project.links.live) linksHtml += `<a href="${project.links.live}" target="_blank" class="badge"><i class="fas fa-external-link"></i> Live Demo</a>`;
+  }
+  linksDiv.innerHTML = linksHtml || '<p>No external links provided.</p>';
+  document.getElementById('projectModal').style.display = 'flex';
 }
 
 function closeModal() {
-    document.getElementById('projectModal').style.display = 'none';
+  document.getElementById('projectModal').style.display = 'none';
 }
 
 window.onclick = function(event) {
-    const modal = document.getElementById('projectModal');
-    if (event.target === modal) closeModal();
+  const modal = document.getElementById('projectModal');
+  if (event.target === modal) closeModal();
 };
 
-// ========== START EVERYTHING ==========
+// ========== START ==========
 window.addEventListener('load', () => {
-    loadProjects();
-    console.log('Portfolio loaded successfully!');
+  loadProjects();
 });
