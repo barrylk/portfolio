@@ -1,10 +1,10 @@
-// AOS settings
+// ========== AOS ==========
 AOS.init({ duration: 800, easing: 'ease-out-cubic', once: true });
 
-// Loader removal
+// ========== LOADER ==========
 window.addEventListener('load', () => document.body.classList.add('loaded'));
 
-// Theme management
+// ========== THEME ==========
 const body = document.body;
 const toggleBtn = document.getElementById('themeToggleBtnSmall');
 const toggleIcon = document.getElementById('toggleIconSmall');
@@ -33,7 +33,7 @@ toggleBtn.addEventListener('click', () => {
 applyTheme();
 setInterval(() => { if (!manualMode) applyTheme(); }, 60000);
 
-// Age
+// ========== AGE ==========
 const ageEl = document.getElementById('ageDisplay');
 const birth = new Date('2000-06-29');
 const today = new Date();
@@ -42,7 +42,7 @@ if (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth(
 ageEl.textContent = age;
 document.getElementById('currentYear').textContent = today.getFullYear();
 
-// Clock
+// ========== CLOCK ==========
 function updateClock() {
   const now = new Date();
   document.getElementById('liveClock').textContent = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
@@ -50,7 +50,7 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-// Visitor flag
+// ========== FLAG ==========
 async function getFlag() {
   try {
     const res = await fetch('https://ipapi.co/json/');
@@ -61,7 +61,7 @@ async function getFlag() {
 }
 getFlag();
 
-// Experience
+// ========== EXPERIENCE ==========
 const expData = [
   { period:'2024 – Present', title:'IT Manager', company:'FIBC Lanka Pvt Ltd', desc:'Network uptime, graphic design, social media.' },
   { period:'2021 – 2024', title:'CAD Designer', company:'Brandix Apparel', desc:'3D patterns, Gerber/Lectra.' },
@@ -79,7 +79,7 @@ timeline.innerHTML = expData.map((e,i) => `
     </div>
   </div>`).join('');
 
-// Skills
+// ========== SKILLS ==========
 const skills = [
   { cat:'Network & SysAdmin', items:[{n:'TCP/IP & DNS',p:90},{n:'Windows Server',p:85},{n:'Fortinet',p:80},{n:'VLAN',p:88}] },
   { cat:'Design', items:[{n:'Illustrator',p:92},{n:'Photoshop',p:88},{n:'InDesign',p:85},{n:'CorelDRAW',p:90}] },
@@ -96,13 +96,13 @@ skillsContainer.innerHTML = skills.map(c => `
       </div>`).join('')}
   </div>`).join('');
 
-// LinkedIn data
+// ========== LINKEDIN ==========
 fetch('data/linkedin.json')
   .then(r => r.json()).then(d => {
     document.getElementById('linkedinHeadline').textContent = d.headline || 'IT Manager at FIBC Lanka';
   }).catch(() => document.getElementById('linkedinHeadline').textContent = 'IT Manager at FIBC Lanka');
 
-// Projects (with Devicon/keyword without AI key)
+// ========== PROJECTS (AI-free) ==========
 const langIcons = {JavaScript:'devicon-javascript-plain',Python:'devicon-python-plain',HTML:'devicon-html5-plain',CSS:'devicon-css3-plain'};
 const kwIcons = {network:'fa-network-wired',dashboard:'fa-chart-line',design:'fa-paint-brush',bot:'fa-robot',chat:'fa-comment',web:'fa-globe',api:'fa-code',secret:'fa-lock',container:'fa-box'};
 const defaultIcon = 'fa-code';
@@ -132,7 +132,6 @@ async function loadProjects() {
     }
   } catch(e){}
   if (!projects.length) projects = [{name:'Sample Project', description:'Add projects in data/projects.json', icon:'fa-code'}];
-  // Load Devicon CSS if needed
   if (!document.querySelector('link[href*="devicon"]')) {
     const l = document.createElement('link'); l.rel='stylesheet'; l.href='https://cdn.jsdelivr.net/gh/devicons/devicon@v2.15.1/devicon.min.css'; document.head.appendChild(l);
   }
@@ -159,7 +158,7 @@ function openModal(p) {
 window.closeModal = () => document.getElementById('projectModal').style.display = 'none';
 window.onclick = e => { if (e.target === document.getElementById('projectModal')) closeModal(); };
 
-// Contact form submission
+// ========== CONTACT FORM ==========
 document.getElementById('contactForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   const form = e.target;
@@ -171,11 +170,99 @@ document.getElementById('contactForm').addEventListener('submit', async function
   } catch { status.textContent = '❌ Network error.'; }
 });
 
-// Start projects
-window.addEventListener('load', () => loadProjects());
+// ========== LIGHT BEAM (mouse / deviceorientation) ==========
+const beam = document.getElementById('lightBeam');
+let isMobile = window.matchMedia('(pointer: coarse)').matches;
 
-// Parallax-like movement for background shapes (subtle)
+function moveBeam(xPercent, yPercent) {
+  // Move the radial gradient position via transform (translate) or background-position
+  beam.style.transform = `translate(${xPercent - 50}%, ${yPercent - 50}%)`;
+}
+
+if (isMobile) {
+  window.addEventListener('deviceorientation', (e) => {
+    if (e.gamma === null || e.beta === null) return;
+    // gamma: left-to-right (-90 to 90), beta: front-to-back (-180 to 180)
+    const x = (e.gamma + 90) / 180 * 100;   // map to 0-100%
+    const y = (e.beta + 180) / 360 * 100;
+    moveBeam(x, y);
+  });
+} else {
+  document.addEventListener('mousemove', (e) => {
+    const x = (e.clientX / window.innerWidth) * 100;
+    const y = (e.clientY / window.innerHeight) * 100;
+    moveBeam(x, y);
+  });
+}
+
+// ========== EASTER EGG: 999 Meme Found ==========
+const memeOverlay = document.getElementById('memeOverlay');
+const memeCountdownEl = document.getElementById('memeCountdown');
+let shakeTimer = null;
+const SHAKE_THRESHOLD = 8; // seconds
+let shakeStart = null;
+let mouseSpeedBuffer = [];
+let lastMousePos = { x:0, y:0, time: Date.now() };
+
+function triggerMeme() {
+  if (memeOverlay.classList.contains('active')) return;
+  memeOverlay.classList.add('active');
+  let count = 12;
+  memeCountdownEl.textContent = count;
+  const interval = setInterval(() => {
+    count--;
+    memeCountdownEl.textContent = count;
+    if (count <= 0) {
+      clearInterval(interval);
+      location.reload();
+    }
+  }, 1000);
+}
+
+// Mobile shake detection (devicemotion)
+if (isMobile) {
+  window.addEventListener('devicemotion', (e) => {
+    const acc = e.accelerationIncludingGravity;
+    if (!acc) return;
+    const magnitude = Math.sqrt(acc.x*acc.x + acc.y*acc.y + acc.z*acc.z);
+    if (magnitude > 15) {   // shaking
+      if (!shakeStart) shakeStart = Date.now();
+      const elapsed = (Date.now() - shakeStart) / 1000;
+      if (elapsed >= SHAKE_THRESHOLD) {
+        triggerMeme();
+        shakeStart = null;
+      }
+    } else {
+      shakeStart = null;
+    }
+  });
+} else {
+  // Desktop: track mouse velocity
+  document.addEventListener('mousemove', (e) => {
+    const now = Date.now();
+    const dt = (now - lastMousePos.time) / 1000;
+    if (dt === 0) return;
+    const dx = e.clientX - lastMousePos.x;
+    const dy = e.clientY - lastMousePos.y;
+    const speed = Math.sqrt(dx*dx + dy*dy) / dt; // pixels per second
+    lastMousePos = { x: e.clientX, y: e.clientY, time: now };
+
+    mouseSpeedBuffer.push({ time: now, speed });
+    // Remove old entries (> 10 seconds)
+    mouseSpeedBuffer = mouseSpeedBuffer.filter(entry => now - entry.time < 10000);
+    // Check if all recent speeds are above threshold (e.g., 400px/s)
+    const highSpeed = mouseSpeedBuffer.every(entry => entry.speed > 400);
+    const duration = mouseSpeedBuffer.length > 0 ? (now - mouseSpeedBuffer[0].time) / 1000 : 0;
+    if (highSpeed && duration >= SHAKE_THRESHOLD && mouseSpeedBuffer.length > 10) {
+      triggerMeme();
+      mouseSpeedBuffer = [];
+    }
+  });
+}
+
+// Parallax shapes (mouse/tilt)
 document.addEventListener('mousemove', (e) => {
+  if (isMobile) return;
   const x = (e.clientX / window.innerWidth - 0.5) * 14;
   const y = (e.clientY / window.innerHeight - 0.5) * 14;
   document.querySelectorAll('.shape').forEach((s, i) => {
@@ -183,3 +270,6 @@ document.addEventListener('mousemove', (e) => {
     s.style.transform = `translate(${x*speed}px, ${y*speed}px)`;
   });
 });
+
+// Start projects
+window.addEventListener('load', () => loadProjects());
