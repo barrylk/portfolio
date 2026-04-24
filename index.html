@@ -184,12 +184,32 @@
     </footer>
   </main>
 
-  <!-- WhatsApp -->
+  <!-- WhatsApp Floating Button -->
   <a href="https://wa.me/message/4YGA7K2KMFCNK1" target="_blank" class="whatsapp-float" data-aos="zoom-in">
     <i class="fab fa-whatsapp"></i>
   </a>
 
-  <!-- Project Modal -->
+  <!-- 🐍 Snake Game Floating Button (next to WhatsApp) -->
+  <button class="snake-float" id="snakeBtn" title="Play Snake">
+    <i class="fas fa-gamepad"></i>
+  </button>
+
+  <!-- Snake Game Modal -->
+  <div class="game-modal" id="snakeGameModal">
+    <div class="game-window" id="snakeGameWindow">
+      <div class="game-header" id="snakeDragHandle">
+        <span>Snake Game</span>
+        <button class="game-close" id="snakeGameCloseBtn">✕</button>
+      </div>
+      <div class="game-body">
+        <canvas id="snakeCanvas" width="300" height="300"></canvas>
+        <div class="game-score" id="snakeScore">Score: 0</div>
+        <div class="game-instruction">Arrow keys / swipe to move</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Project Modal (unchanged) -->
   <div class="modal" id="projectModal">
     <div class="modal-content glass-card">
       <span class="modal-close" onclick="closeModal()">&times;</span>
@@ -198,25 +218,6 @@
       <div id="modalLinks"></div>
     </div>
   </div>
-
-  <!-- ========== CRICKET GAME FLOAT BUTTON ========== -->
-  <button class="cricket-float" id="cricketBtn" title="Play Cricket">🏏</button>
-
-<!-- ========== CRICKET GAME MODAL ========== -->
-<div class="game-modal" id="gameModal">
-  <div class="game-window" id="gameWindow">
-    <div class="game-header" id="gameDragHandle">
-      <span>2048 Cricket</span>
-      <button class="game-close" id="gameCloseBtn">✕</button>
-    </div>
-    <div class="game-body">
-      <iframe id="cricketFrame" src="games/2048-cricket/index.html"
-              style="width:100%; height:100%; border:none; border-radius:12px;"
-              allow="accelerometer; autoplay; gyroscope"
-              title="2048 Cricket Game"></iframe>
-    </div>
-  </div>
-</div>
 
   <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
   <script src="script.js"></script>
