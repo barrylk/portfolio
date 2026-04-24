@@ -42,7 +42,7 @@ if (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth(
 ageEl.textContent = age;
 document.getElementById('currentYear').textContent = today.getFullYear();
 
-// ========== VISITOR FLAG & TIME (IP-based) ==========
+// ========== VISITOR FLAG & TIME ==========
 let visitorTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 let clockInterval = null;
 async function fetchGeoData() {
@@ -91,7 +91,7 @@ function updateClock() {
 }
 fetchGeoData();
 
-// ========== EXPERIENCE (from CV) ==========
+// ========== EXPERIENCE ==========
 const expData = [
   { period:'Dec 2024 – Present', title:'IT Manager', company:'FIBC Lanka (Pvt) Ltd, Polonnaruwa', desc:'Managing IT operations, networks, servers, cloud, security, ERP (Tally Prime), HRM (SignHR), CCTV, and hardware/software support. Also creating bag artwork and social media content.' },
   { period:'Jul 2021 – Oct 2023', title:'Computer Aided Design Designer', company:'Brandix, Polonnaruwa', desc:'Designed apparel patterns using Lectra Modaris and AutoCAD, ensuring precision and efficiency in mass production.' }
@@ -108,19 +108,13 @@ timeline.innerHTML = expData.map((e,i) => `
     </div>
   </div>`).join('');
 
-// ========== SKILLS (from CV) ==========
+// ========== SKILLS ==========
 const skills = [
   { cat:'IT & ERP', items:[
-    {n:'Tally ERP / SignHR',p:85},
-    {n:'Network & Security',p:90},
-    {n:'Cloud & Server Admin',p:80},
-    {n:'CCTV & Hardware Support',p:88}
+    {n:'Tally ERP / SignHR',p:85},{n:'Network & Security',p:90},{n:'Cloud & Server Admin',p:80},{n:'CCTV & Hardware Support',p:88}
   ]},
   { cat:'Graphic & CAD Design', items:[
-    {n:'Adobe Photoshop',p:92},
-    {n:'Modaris',p:85},
-    {n:'AutoCAD',p:80},
-    {n:'CorelDRAW',p:88}
+    {n:'Adobe Photoshop',p:92},{n:'Modaris',p:85},{n:'AutoCAD',p:80},{n:'CorelDRAW',p:88}
   ]}
 ];
 const skillsContainer = document.getElementById('skillsContainer');
@@ -134,7 +128,7 @@ skillsContainer.innerHTML = skills.map(c => `
       </div>`).join('')}
   </div>`).join('');
 
-// ========== EDUCATION (from CV) ==========
+// ========== EDUCATION ==========
 const eduData = [
   { period:'Jun 2017 – Jun 2026', title:'BSc (Hons) Computer Networks & Security', company:'American College of Higher Education', desc:'CCNA Certified. Cisco Networking Academy, IEEE Student Branch, hackathons.' },
   { period:'Feb 2016 – Aug 2016', title:'Diploma in Computer Software Engineering', company:'ICT Institute Polonnaruwa', desc:'C++, C#, and software development fundamentals.' }
@@ -242,7 +236,6 @@ function moveShapesAndDevices(dx, dy) {
     d.style.transform = `translate(${dx*speed}px, ${dy*speed}px)`;
   });
 }
-
 if (isMobile) {
   window.addEventListener('deviceorientation', (e) => {
     if (e.gamma === null || e.beta === null) return;
@@ -264,42 +257,168 @@ if (isMobile) {
   });
 }
 
-// ========== CRICKET GAME MODAL (2048-Cricket via iframe) ==========
-const cricketBtn = document.getElementById('cricketBtn');
-const gameModal = document.getElementById('gameModal');
-const gameCloseBtn = document.getElementById('gameCloseBtn');
-const gameWindow = document.getElementById('gameWindow');
-const gameDragHandle = document.getElementById('gameDragHandle');
+// ========== SNAKE GAME ==========
+const snakeBtn = document.getElementById('snakeBtn');
+const snakeModal = document.getElementById('snakeGameModal');
+const snakeClose = document.getElementById('snakeGameCloseBtn');
+const snakeWindow = document.getElementById('snakeGameWindow');
+const snakeHandle = document.getElementById('snakeDragHandle');
+const canvas = document.getElementById('snakeCanvas');
+const ctx = canvas.getContext('2d');
+const scoreSpan = document.getElementById('snakeScore');
 
-cricketBtn.addEventListener('click', () => {
-  gameModal.classList.add('active');
-});
-function closeCricket() {
-  gameModal.classList.remove('active');
+let snake, food, direction, nextDirection, score, gameInterval, gameRunning;
+const gridSize = 20;
+const tileCount = canvas.width / gridSize;
+
+function initSnake() {
+  snake = [{x: 10, y: 10}];
+  direction = {x: 1, y: 0};
+  nextDirection = {x: 1, y: 0};
+  score = 0;
+  gameRunning = true;
+  placeFood();
+  updateScore();
 }
-gameCloseBtn.addEventListener('click', closeCricket);
-gameModal.addEventListener('click', (e) => {
-  if (e.target === gameModal) closeCricket();
+function placeFood() {
+  food = {
+    x: Math.floor(Math.random() * tileCount),
+    y: Math.floor(Math.random() * tileCount)
+  };
+  while (snake.some(p => p.x === food.x && p.y === food.y)) {
+    food.x = Math.floor(Math.random() * tileCount);
+    food.y = Math.floor(Math.random() * tileCount);
+  }
+}
+function updateScore() {
+  scoreSpan.textContent = `Score: ${score}`;
+}
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // draw food
+  ctx.fillStyle = '#e74c3c';
+  ctx.beginPath();
+  ctx.arc(food.x * gridSize + gridSize/2, food.y * gridSize + gridSize/2, gridSize/2 - 2, 0, 2*Math.PI);
+  ctx.fill();
+  // draw snake
+  snake.forEach((p, i) => {
+    ctx.fillStyle = i === 0 ? '#2ecc71' : '#27ae60';
+    ctx.fillRect(p.x * gridSize, p.y * gridSize, gridSize - 2, gridSize - 2);
+  });
+}
+function moveSnake() {
+  direction = nextDirection;
+  const head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
+  // wrap
+  if (head.x < 0) head.x = tileCount - 1;
+  if (head.x >= tileCount) head.x = 0;
+  if (head.y < 0) head.y = tileCount - 1;
+  if (head.y >= tileCount) head.y = 0;
+  // self collision
+  if (snake.some(p => p.x === head.x && p.y === head.y)) {
+    endGame();
+    return;
+  }
+  snake.unshift(head);
+  if (head.x === food.x && head.y === food.y) {
+    score += 10;
+    updateScore();
+    placeFood();
+  } else {
+    snake.pop();
+  }
+}
+function endGame() {
+  gameRunning = false;
+  clearInterval(gameInterval);
+  ctx.fillStyle = 'rgba(0,0,0,0.7)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'white';
+  ctx.font = '20px Inter, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Game Over', canvas.width/2, canvas.height/2);
+  ctx.textAlign = 'start';
+}
+function gameLoop() {
+  if (!gameRunning) return;
+  moveSnake();
+  draw();
+}
+
+function startSnakeGame() {
+  if (gameRunning) return;
+  initSnake();
+  gameInterval = setInterval(gameLoop, 100);
+  scoreSpan.textContent = `Score: 0`;
+}
+function stopSnakeGame() {
+  gameRunning = false;
+  clearInterval(gameInterval);
+}
+
+// Keyboard controls
+document.addEventListener('keydown', (e) => {
+  if (!gameRunning) return;
+  const key = e.key.toLowerCase();
+  if (['arrowup','w'].includes(key) && direction.y === 0) nextDirection = {x:0, y:-1};
+  if (['arrowdown','s'].includes(key) && direction.y === 0) nextDirection = {x:0, y:1};
+  if (['arrowleft','a'].includes(key) && direction.x === 0) nextDirection = {x:-1, y:0};
+  if (['arrowright','d'].includes(key) && direction.x === 0) nextDirection = {x:1, y:0};
 });
 
-// Draggable on desktop only
+// Touch swipe (mobile)
+let touchStartX, touchStartY;
+canvas.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+});
+canvas.addEventListener('touchend', (e) => {
+  if (!touchStartX || !touchStartY) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dx) > Math.abs(dy)) {
+    if (dx > 0 && direction.x === 0) nextDirection = {x:1, y:0};
+    else if (dx < 0 && direction.x === 0) nextDirection = {x:-1, y:0};
+  } else {
+    if (dy > 0 && direction.y === 0) nextDirection = {x:0, y:1};
+    else if (dy < 0 && direction.y === 0) nextDirection = {x:0, y:-1};
+  }
+  touchStartX = null;
+  touchStartY = null;
+});
+
+// Modal controls
+snakeBtn.addEventListener('click', () => {
+  snakeModal.classList.add('active');
+  startSnakeGame();
+});
+function closeSnake() {
+  snakeModal.classList.remove('active');
+  stopSnakeGame();
+}
+snakeClose.addEventListener('click', closeSnake);
+snakeModal.addEventListener('click', (e) => {
+  if (e.target === snakeModal) closeSnake();
+});
+
+// Draggable (desktop only)
 if (!isMobile) {
-  let offsetX, offsetY, isDragging = false;
-  gameDragHandle.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    const rect = gameWindow.getBoundingClientRect();
-    offsetX = e.clientX - rect.left;
-    offsetY = e.clientY - rect.top;
-    gameWindow.style.transition = 'none';
+  let offX, offY, dragging = false;
+  snakeHandle.addEventListener('mousedown', (e) => {
+    dragging = true;
+    const rect = snakeWindow.getBoundingClientRect();
+    offX = e.clientX - rect.left;
+    offY = e.clientY - rect.top;
+    snakeWindow.style.transition = 'none';
   });
   document.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
-    gameWindow.style.left = e.clientX - offsetX + 'px';
-    gameWindow.style.top = e.clientY - offsetY + 'px';
+    if (!dragging) return;
+    snakeWindow.style.left = e.clientX - offX + 'px';
+    snakeWindow.style.top = e.clientY - offY + 'px';
   });
   document.addEventListener('mouseup', () => {
-    isDragging = false;
-    gameWindow.style.transition = '';
+    dragging = false;
+    snakeWindow.style.transition = '';
   });
 }
 

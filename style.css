@@ -371,7 +371,6 @@ body.dark .glass-nav {
   padding-top: 4rem;
 }
 .hero-image { flex: 0 0 auto; }
-/* Profile glow ring – perfectly round, exactly on the image edge */
 .profile-wrapper {
   position: relative;
   display: inline-block;
@@ -642,7 +641,7 @@ body.dark .glass-nav {
 .footer-social a { color: var(--text-secondary); font-size: 1.3rem; }
 .footer-text { color: var(--text-secondary); }
 
-/* WhatsApp */
+/* Floating Buttons */
 .whatsapp-float {
   position: fixed;
   bottom: 30px;
@@ -658,47 +657,37 @@ body.dark .glass-nav {
   font-size: 2rem;
   box-shadow: 0 8px 20px rgba(37,211,102,0.3);
   z-index: 50;
+  transition: transform 0.2s ease;
+  text-decoration: none;
 }
-.whatsapp-float:hover { transform: scale(1.05); }
-
-/* Modal */
-.modal {
-  display: none;
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(10px);
-  z-index: 200;
-  align-items: center;
-  justify-content: center;
+.whatsapp-float:hover {
+  transform: scale(1.05);
 }
-.modal-content { max-width: 500px; padding: 2rem; }
-.modal-close { float: right; font-size: 1.5rem; cursor: pointer; }
 
-/* ========== CRICKET GAME STYLES ========== */
-.cricket-float {
+.snake-float {
   position: fixed;
-  bottom: 100px; /* above WhatsApp */
-  left: 30px;
+  bottom: 30px;
+  right: 110px; /* next to WhatsApp (60px button + 30px gap + 20px extra) */
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  background: linear-gradient(135deg, #4CAF50, #2E7D32);
   border: none;
   border-radius: 50%;
-  font-size: 2rem;
-  line-height: 1;
+  font-size: 1.8rem;
   color: white;
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(238,90,36,0.3);
+  box-shadow: 0 8px 20px rgba(46,125,50,0.3);
   z-index: 50;
   transition: transform 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.cricket-float:hover {
+.snake-float:hover {
   transform: scale(1.08);
 }
 
+/* Game Modal */
 .game-modal {
   display: none;
   position: fixed;
@@ -719,10 +708,8 @@ body.dark .glass-nav {
   background: var(--bg);
   border-radius: 24px;
   box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-  width: 400px;
+  width: 340px;
   max-width: 95vw;
-  height: 500px;
-  max-height: 90vh;
   overflow: hidden;
   position: relative;
   display: flex;
@@ -736,7 +723,7 @@ body.dark .glass-nav {
   background: var(--card-bg);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
-  cursor: move; /* desktop only */
+  cursor: move;
   color: var(--text);
   font-weight: 600;
 }
@@ -757,19 +744,38 @@ body.dark .glass-nav {
   color: var(--red);
 }
 .game-body {
-  flex: 1;
-  padding: 0;
-  display: flex;
+  padding: 12px;
+  text-align: center;
+}
+.game-body canvas {
+  display: block;
+  margin: 0 auto;
+  background: #111;
+  border-radius: 8px;
+}
+.game-score {
+  margin-top: 8px;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+.game-instruction {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* Project Modal */
+.modal {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
+  z-index: 200;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
 }
-.game-body iframe {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border: none;
-}
+.modal-content { max-width: 500px; padding: 2rem; }
+.modal-close { float: right; font-size: 1.5rem; cursor: pointer; }
 
 @media (max-width: 768px) {
   .hero { flex-direction: column; min-height: auto; }
