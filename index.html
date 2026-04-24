@@ -9,10 +9,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
-<body class="loading">
+<body class="loading dark">
 
-  <!-- Light beam -->
-  <div class="light-beam" id="lightBeam"></div>
+  <!-- Three.js canvas background -->
+  <canvas id="bgCanvas"></canvas>
 
   <!-- Page Loader -->
   <div class="loader-wrapper">
@@ -42,8 +42,7 @@
     </div>
   </nav>
 
-  <!-- Background Effects -->
-  <div class="bg-glow"></div>
+  <!-- Background Effects (CSS) -->
   <div class="bg-grid"></div>
   <div class="bg-shapes">
     <div class="shape shape-1"></div>
@@ -52,7 +51,7 @@
     <div class="shape shape-4"></div>
     <div class="shape shape-5"></div>
   </div>
-  <!-- Floating Apple Devices -->
+  <!-- Floating Apple Devices (CSS) -->
   <div class="floating-devices">
     <div class="floating-device macbook">
       <div class="screen"></div>
@@ -184,23 +183,14 @@
     </footer>
   </main>
 
-  <!-- WhatsApp Floating Button -->
-  <a href="https://wa.me/message/4YGA7K2KMFCNK1" target="_blank" class="whatsapp-float" data-aos="zoom-in">
-    <i class="fab fa-whatsapp"></i>
-  </a>
-
-  <!-- 🐍 Snake Game Floating Button (next to WhatsApp) -->
-  <button class="snake-float" id="snakeBtn" title="Play Snake">
-    <i class="fas fa-gamepad"></i>
-  </button>
+  <!-- Floating Buttons -->
+  <a href="https://wa.me/message/4YGA7K2KMFCNK1" target="_blank" class="whatsapp-float"><i class="fab fa-whatsapp"></i></a>
+  <button class="snake-float" id="snakeBtn" title="Play Snake"><i class="fas fa-gamepad"></i></button>
 
   <!-- Snake Game Modal -->
   <div class="game-modal" id="snakeGameModal">
     <div class="game-window" id="snakeGameWindow">
-      <div class="game-header" id="snakeDragHandle">
-        <span>Snake Game</span>
-        <button class="game-close" id="snakeGameCloseBtn">✕</button>
-      </div>
+      <div class="game-header" id="snakeDragHandle"><span>Snake Game</span><button class="game-close" id="snakeGameCloseBtn">✕</button></div>
       <div class="game-body">
         <canvas id="snakeCanvas" width="300" height="300"></canvas>
         <div class="game-score" id="snakeScore">Score: 0</div>
@@ -209,7 +199,7 @@
     </div>
   </div>
 
-  <!-- Project Modal (unchanged) -->
+  <!-- Project Modal -->
   <div class="modal" id="projectModal">
     <div class="modal-content glass-card">
       <span class="modal-close" onclick="closeModal()">&times;</span>
@@ -220,6 +210,7 @@
   </div>
 
   <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

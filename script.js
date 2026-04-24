@@ -4,29 +4,32 @@ AOS.init({ duration: 800, easing: 'ease-out-cubic', once: true });
 // ========== LOADER ==========
 window.addEventListener('load', () => document.body.classList.add('loaded'));
 
-// ========== THEME ==========
-const body = document.body;
+// ========== THEME (now toggles between dark/light, default dark) ==========
+const bodyEl = document.body;
 const toggleBtn = document.getElementById('themeToggleBtnSmall');
 const toggleIcon = document.getElementById('toggleIconSmall');
 let manualMode = false, userOverride = localStorage.getItem('themeOverride');
 
-function updateThemeUI(dark) {
-  if (dark) {
-    body.classList.add('dark');
-    toggleIcon.className = 'fas fa-sun';
-  } else {
-    body.classList.remove('dark');
+function updateThemeUI(light) {
+  if (light) {
+    bodyEl.classList.add('light');
     toggleIcon.className = 'fas fa-moon';
+  } else {
+    bodyEl.classList.remove('light');
+    toggleIcon.className = 'fas fa-sun';
   }
 }
-function isNight() { const h = new Date().getHours(); return h < 6 || h >= 18; }
+function isDay() { const h = new Date().getHours(); return h >= 6 && h < 18; }
 function applyTheme() {
-  const dark = manualMode ? userOverride === 'dark' : isNight();
-  updateThemeUI(dark);
+  let light;
+  if (manualMode) light = userOverride === 'light';
+  else light = isDay();
+  updateThemeUI(light);
 }
 toggleBtn.addEventListener('click', () => {
   manualMode = true;
-  userOverride = body.classList.contains('dark') ? 'light' : 'dark';
+  const currentlyLight = bodyEl.classList.contains('light');
+  userOverride = currentlyLight ? 'dark' : 'light';
   localStorage.setItem('themeOverride', userOverride);
   applyTheme();
 });
@@ -219,57 +222,132 @@ document.getElementById('contactForm').addEventListener('submit', async function
   } catch { status.textContent = '❌ Network error.'; }
 });
 
-// ========== LIGHT BEAM & PARALLAX ==========
-const beam = document.getElementById('lightBeam');
-const isMobile = window.matchMedia('(pointer: coarse)').matches;
+// ========== THREE.JS NETWORK PARTICLES ==========
+const canvas = document.getElementById('bgCanvas');
+const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x000000, 0);
 
-function moveBeam(xPercent, yPercent) {
-  beam.style.transform = `translate(${xPercent - 50}%, ${yPercent - 50}%)`;
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.z = 30;
+
+// Particle system
+const particleCount = 600;
+const geometry = new THREE.BufferGeometry();
+const positions = new Float32Array(particleCount * 3);
+const colors = new Float32Array(particleCount * 3);
+
+const color1 = new THREE.Color(0x00f0ff); // cyan
+const color2 = new THREE.Color(0xb44bff); // purple
+const color3 = new THREE.Color(0xff4d7d); // pink
+
+for (let i = 0; i < particleCount; i++) {
+  positions[i * 3] = (Math.random() - 0.5) * 50;
+  positions[i * 3 + 1] = (Math.random() - 0.5) * 30;
+  positions[i * 3 + 2] = (Math.random() - 0.5) * 30;
+
+  let color;
+  if (Math.random() < 0.33) color = color1;
+  else if (Math.random() < 0.66) color = color2;
+  else color = color3;
+  colors[i * 3] = color.r;
+  colors[i * 3 + 1] = color.g;
+  colors[i * 3 + 2] = color.b;
 }
-function moveShapesAndDevices(dx, dy) {
-  document.querySelectorAll('.shape').forEach((s, i) => {
-    const speed = (i+1)*0.4;
-    s.style.transform = `translate(${dx*speed}px, ${dy*speed}px)`;
-  });
-  document.querySelectorAll('.floating-device').forEach((d, i) => {
-    const speed = (i+2)*0.3;
-    d.style.transform = `translate(${dx*speed}px, ${dy*speed}px)`;
-  });
+geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+const material = new THREE.PointsMaterial({
+  size: 0.15,
+  vertexColors: true,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+  transparent: true,
+  opacity: 0.8
+});
+
+const particles = new THREE.Points(geometry, material);
+scene.add(particles);
+
+// Lines between nearby particles (simple wireframe grid)
+const lineGeometry = new THREE.BufferGeometry();
+const linePositions = [];
+const lineColors = [];
+const maxDist = 8;
+for (let i = 0; i < particleCount; i++) {
+  for (let j = i + 1; j < particleCount; j++) {
+    const dx = positions[i * 3] - positions[j * 3];
+    const dy = positions[i * 3 + 1] - positions[j * 3 + 1];
+    const dz = positions[i * 3 + 2] - positions[j * 3 + 2];
+    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    if (dist < maxDist) {
+      linePositions.push(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
+      linePositions.push(positions[j * 3], positions[j * 3 + 1], positions[j * 3 + 2]);
+      const alpha = 1 - dist / maxDist;
+      lineColors.push(colors[i * 3] * alpha, colors[i * 3 + 1] * alpha, colors[i * 3 + 2] * alpha);
+      lineColors.push(colors[j * 3] * alpha, colors[j * 3 + 1] * alpha, colors[j * 3 + 2] * alpha);
+    }
+  }
 }
-if (isMobile) {
+lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+lineGeometry.setAttribute('color', new THREE.Float32BufferAttribute(lineColors, 3));
+const lineMaterial = new THREE.LineBasicMaterial({ vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.3 });
+const lines = new THREE.LineSegments(lineGeometry, lineMaterial);
+scene.add(lines);
+
+// Mouse interaction
+const mouse = { x: 0, y: 0 };
+document.addEventListener('mousemove', (e) => {
+  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+});
+// For mobile, use device orientation
+if (window.matchMedia('(pointer: coarse)').matches) {
   window.addEventListener('deviceorientation', (e) => {
     if (e.gamma === null || e.beta === null) return;
-    const x = (e.gamma + 90) / 180 * 100;
-    const y = (e.beta + 180) / 360 * 100;
-    moveBeam(x, y);
-    const dx = (x - 50) * 0.3;
-    const dy = (y - 50) * 0.3;
-    moveShapesAndDevices(dx, dy);
-  });
-} else {
-  document.addEventListener('mousemove', (e) => {
-    const x = (e.clientX / window.innerWidth) * 100;
-    const y = (e.clientY / window.innerHeight) * 100;
-    moveBeam(x, y);
-    const dx = (e.clientX / window.innerWidth - 0.5) * 14;
-    const dy = (e.clientY / window.innerHeight - 0.5) * 14;
-    moveShapesAndDevices(dx, dy);
+    mouse.x = (e.gamma / 45); // roughly -1..1
+    mouse.y = -(e.beta / 45);
   });
 }
 
+function animate() {
+  requestAnimationFrame(animate);
+
+  particles.rotation.x += 0.0002;
+  particles.rotation.y += 0.0001;
+
+  // Rotate towards mouse
+  particles.rotation.x += (mouse.y * 0.1 - particles.rotation.x) * 0.01;
+  particles.rotation.y += (mouse.x * 0.1 - particles.rotation.y) * 0.01;
+  lines.rotation.x = particles.rotation.x;
+  lines.rotation.y = particles.rotation.y;
+
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
 // ========== SNAKE GAME ==========
+// (same as before, no changes needed)
 const snakeBtn = document.getElementById('snakeBtn');
 const snakeModal = document.getElementById('snakeGameModal');
 const snakeClose = document.getElementById('snakeGameCloseBtn');
 const snakeWindow = document.getElementById('snakeGameWindow');
 const snakeHandle = document.getElementById('snakeDragHandle');
-const canvas = document.getElementById('snakeCanvas');
-const ctx = canvas.getContext('2d');
+const snakeCanvas = document.getElementById('snakeCanvas');
+const ctx = snakeCanvas.getContext('2d');
 const scoreSpan = document.getElementById('snakeScore');
 
 let snake, food, direction, nextDirection, score, gameInterval, gameRunning;
 const gridSize = 20;
-const tileCount = canvas.width / gridSize;
+const tileCount = snakeCanvas.width / gridSize;
 
 function initSnake() {
   snake = [{x: 10, y: 10}];
@@ -290,17 +368,13 @@ function placeFood() {
     food.y = Math.floor(Math.random() * tileCount);
   }
 }
-function updateScore() {
-  scoreSpan.textContent = `Score: ${score}`;
-}
+function updateScore() { scoreSpan.textContent = `Score: ${score}`; }
 function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  // draw food
+  ctx.clearRect(0, 0, snakeCanvas.width, snakeCanvas.height);
   ctx.fillStyle = '#e74c3c';
   ctx.beginPath();
   ctx.arc(food.x * gridSize + gridSize/2, food.y * gridSize + gridSize/2, gridSize/2 - 2, 0, 2*Math.PI);
   ctx.fill();
-  // draw snake
   snake.forEach((p, i) => {
     ctx.fillStyle = i === 0 ? '#2ecc71' : '#27ae60';
     ctx.fillRect(p.x * gridSize, p.y * gridSize, gridSize - 2, gridSize - 2);
@@ -309,54 +383,38 @@ function draw() {
 function moveSnake() {
   direction = nextDirection;
   const head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
-  // wrap
   if (head.x < 0) head.x = tileCount - 1;
   if (head.x >= tileCount) head.x = 0;
   if (head.y < 0) head.y = tileCount - 1;
   if (head.y >= tileCount) head.y = 0;
-  // self collision
-  if (snake.some(p => p.x === head.x && p.y === head.y)) {
-    endGame();
-    return;
-  }
+  if (snake.some(p => p.x === head.x && p.y === head.y)) { endGame(); return; }
   snake.unshift(head);
   if (head.x === food.x && head.y === food.y) {
     score += 10;
     updateScore();
     placeFood();
-  } else {
-    snake.pop();
-  }
+  } else { snake.pop(); }
 }
 function endGame() {
   gameRunning = false;
   clearInterval(gameInterval);
   ctx.fillStyle = 'rgba(0,0,0,0.7)';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, snakeCanvas.width, snakeCanvas.height);
   ctx.fillStyle = 'white';
   ctx.font = '20px Inter, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('Game Over', canvas.width/2, canvas.height/2);
+  ctx.fillText('Game Over', snakeCanvas.width/2, snakeCanvas.height/2);
   ctx.textAlign = 'start';
 }
-function gameLoop() {
-  if (!gameRunning) return;
-  moveSnake();
-  draw();
-}
-
+function gameLoop() { if (!gameRunning) return; moveSnake(); draw(); }
 function startSnakeGame() {
   if (gameRunning) return;
   initSnake();
   gameInterval = setInterval(gameLoop, 100);
   scoreSpan.textContent = `Score: 0`;
 }
-function stopSnakeGame() {
-  gameRunning = false;
-  clearInterval(gameInterval);
-}
+function stopSnakeGame() { gameRunning = false; clearInterval(gameInterval); }
 
-// Keyboard controls
 document.addEventListener('keydown', (e) => {
   if (!gameRunning) return;
   const key = e.key.toLowerCase();
@@ -366,13 +424,12 @@ document.addEventListener('keydown', (e) => {
   if (['arrowright','d'].includes(key) && direction.x === 0) nextDirection = {x:1, y:0};
 });
 
-// Touch swipe (mobile)
 let touchStartX, touchStartY;
-canvas.addEventListener('touchstart', (e) => {
+snakeCanvas.addEventListener('touchstart', (e) => {
   touchStartX = e.touches[0].clientX;
   touchStartY = e.touches[0].clientY;
 });
-canvas.addEventListener('touchend', (e) => {
+snakeCanvas.addEventListener('touchend', (e) => {
   if (!touchStartX || !touchStartY) return;
   const dx = e.changedTouches[0].clientX - touchStartX;
   const dy = e.changedTouches[0].clientY - touchStartY;
@@ -387,21 +444,13 @@ canvas.addEventListener('touchend', (e) => {
   touchStartY = null;
 });
 
-// Modal controls
-snakeBtn.addEventListener('click', () => {
-  snakeModal.classList.add('active');
-  startSnakeGame();
-});
-function closeSnake() {
-  snakeModal.classList.remove('active');
-  stopSnakeGame();
-}
+snakeBtn.addEventListener('click', () => { snakeModal.classList.add('active'); startSnakeGame(); });
+function closeSnake() { snakeModal.classList.remove('active'); stopSnakeGame(); }
 snakeClose.addEventListener('click', closeSnake);
-snakeModal.addEventListener('click', (e) => {
-  if (e.target === snakeModal) closeSnake();
-});
+snakeModal.addEventListener('click', (e) => { if (e.target === snakeModal) closeSnake(); });
 
 // Draggable (desktop only)
+const isMobile = window.matchMedia('(pointer: coarse)').matches;
 if (!isMobile) {
   let offX, offY, dragging = false;
   snakeHandle.addEventListener('mousedown', (e) => {
@@ -416,11 +465,8 @@ if (!isMobile) {
     snakeWindow.style.left = e.clientX - offX + 'px';
     snakeWindow.style.top = e.clientY - offY + 'px';
   });
-  document.addEventListener('mouseup', () => {
-    dragging = false;
-    snakeWindow.style.transition = '';
-  });
+  document.addEventListener('mouseup', () => { dragging = false; snakeWindow.style.transition = ''; });
 }
 
-// Start projects
+// Load projects
 window.addEventListener('load', () => loadProjects());
