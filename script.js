@@ -1,6 +1,13 @@
-// ========== AOS ==========
-AOS.init({ duration: 800, easing: 'ease-out-cubic', once: true });
-
+// ========== AOS (safe init – waits until AOS is loaded) ==========
+function initAOS() {
+  if (typeof AOS !== 'undefined') {
+    AOS.init({ duration: 800, easing: 'ease-out-cubic', once: true });
+  } else {
+    // If AOS still not loaded, try again after 200ms
+    setTimeout(initAOS, 200);
+  }
+}
+initAOS();
 // ========== THEME (iOS toggle + auto) ==========
 const bodyEl = document.body;
 const themeToggle = document.getElementById('themeToggleCheckbox');
