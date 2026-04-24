@@ -1,6 +1,3 @@
-// ========== LOADER – handled inline in HTML now ==========
-// This is a backup, but the inline script ensures it always works.
-
 // ========== AOS ==========
 AOS.init({ duration: 800, easing: 'ease-out-cubic', once: true });
 
@@ -235,137 +232,132 @@ document.getElementById('contactForm').addEventListener('submit', async function
   } catch { status.textContent = '❌ Network error.'; }
 });
 
-// ========== ENHANCED 3D BACKGROUND (Central Globe + Particles) ==========
-const canvas = document.getElementById('bgCanvas');
-const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0x000000, 0);
+// ========== 3D BACKGROUND ==========
+function init3D() {
+  if (typeof THREE === 'undefined') return;
+  const canvas = document.getElementById('bgCanvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x000000, 0);
 
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.z = 40;
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.z = 40;
 
-const globeGeom = new THREE.IcosahedronGeometry(8, 2);
-const globeMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, wireframe: true, transparent: true, opacity: 0.2 });
-const globe = new THREE.Mesh(globeGeom, globeMat);
-scene.add(globe);
+  const globeGeom = new THREE.IcosahedronGeometry(8, 2);
+  const globeMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, wireframe: true, transparent: true, opacity: 0.2 });
+  const globe = new THREE.Mesh(globeGeom, globeMat);
+  scene.add(globe);
 
-const particleCount = 1000;
-const particleGeom = new THREE.BufferGeometry();
-const positions = new Float32Array(particleCount * 3);
-const colors = new Float32Array(particleCount * 3);
-const color1 = new THREE.Color(0x00f0ff);
-const color2 = new THREE.Color(0xb44bff);
-const color3 = new THREE.Color(0xff4d7d);
+  const particleCount = 1000;
+  const particleGeom = new THREE.BufferGeometry();
+  const positions = new Float32Array(particleCount * 3);
+  const colors = new Float32Array(particleCount * 3);
+  const color1 = new THREE.Color(0x00f0ff);
+  const color2 = new THREE.Color(0xb44bff);
+  const color3 = new THREE.Color(0xff4d7d);
 
-for (let i = 0; i < particleCount; i++) {
-  const radius = 12 + Math.random() * 8;
-  const theta = Math.random() * Math.PI * 2;
-  const phi = Math.asin((Math.random() * 2) - 1);
-  positions[i * 3] = Math.cos(theta) * Math.cos(phi) * radius;
-  positions[i * 3 + 1] = Math.sin(phi) * radius;
-  positions[i * 3 + 2] = Math.sin(theta) * Math.cos(phi) * radius;
+  for (let i = 0; i < particleCount; i++) {
+    const radius = 12 + Math.random() * 8;
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.asin((Math.random() * 2) - 1);
+    positions[i * 3] = Math.cos(theta) * Math.cos(phi) * radius;
+    positions[i * 3 + 1] = Math.sin(phi) * radius;
+    positions[i * 3 + 2] = Math.sin(theta) * Math.cos(phi) * radius;
 
-  let color;
-  const r = Math.random();
-  if (r < 0.33) color = color1;
-  else if (r < 0.66) color = color2;
-  else color = color3;
-  colors[i * 3] = color.r;
-  colors[i * 3 + 1] = color.g;
-  colors[i * 3 + 2] = color.b;
-}
-particleGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-particleGeom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-const particleMat = new THREE.PointsMaterial({
-  size: 0.2,
-  vertexColors: true,
-  blending: THREE.AdditiveBlending,
-  depthWrite: false,
-  transparent: true,
-  opacity: 0.9
-});
-const particles = new THREE.Points(particleGeom, particleMat);
-scene.add(particles);
+    let color;
+    const r = Math.random();
+    if (r < 0.33) color = color1;
+    else if (r < 0.66) color = color2;
+    else color = color3;
+    colors[i * 3] = color.r;
+    colors[i * 3 + 1] = color.g;
+    colors[i * 3 + 2] = color.b;
+  }
+  particleGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  particleGeom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const particleMat = new THREE.PointsMaterial({
+    size: 0.2,
+    vertexColors: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    transparent: true,
+    opacity: 0.9
+  });
+  const particles = new THREE.Points(particleGeom, particleMat);
+  scene.add(particles);
 
-const lineGeom = new THREE.BufferGeometry();
-const linePositions = [];
-const lineColors = [];
-const maxDist = 2.5;
-for (let i = 0; i < particleCount; i++) {
-  for (let j = i + 1; j < particleCount; j++) {
-    const dx = positions[i * 3] - positions[j * 3];
-    const dy = positions[i * 3 + 1] - positions[j * 3 + 1];
-    const dz = positions[i * 3 + 2] - positions[j * 3 + 2];
-    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-    if (dist < maxDist) {
-      linePositions.push(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
-      linePositions.push(positions[j * 3], positions[j * 3 + 1], positions[j * 3 + 2]);
-      const alpha = 1 - dist / maxDist;
-      lineColors.push(colors[i * 3] * alpha, colors[i * 3 + 1] * alpha, colors[i * 3 + 2] * alpha);
-      lineColors.push(colors[j * 3] * alpha, colors[j * 3 + 1] * alpha, colors[j * 3 + 2] * alpha);
+  const lineGeom = new THREE.BufferGeometry();
+  const linePositions = [];
+  const lineColors = [];
+  const maxDist = 2.5;
+  for (let i = 0; i < particleCount; i++) {
+    for (let j = i + 1; j < particleCount; j++) {
+      const dx = positions[i * 3] - positions[j * 3];
+      const dy = positions[i * 3 + 1] - positions[j * 3 + 1];
+      const dz = positions[i * 3 + 2] - positions[j * 3 + 2];
+      const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      if (dist < maxDist) {
+        linePositions.push(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
+        linePositions.push(positions[j * 3], positions[j * 3 + 1], positions[j * 3 + 2]);
+        const alpha = 1 - dist / maxDist;
+        lineColors.push(colors[i * 3] * alpha, colors[i * 3 + 1] * alpha, colors[i * 3 + 2] * alpha);
+        lineColors.push(colors[j * 3] * alpha, colors[j * 3 + 1] * alpha, colors[j * 3 + 2] * alpha);
+      }
     }
   }
-}
-lineGeom.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
-lineGeom.setAttribute('color', new THREE.Float32BufferAttribute(lineColors, 3));
-const lineMat = new THREE.LineBasicMaterial({ vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.15 });
-const lines = new THREE.LineSegments(lineGeom, lineMat);
-scene.add(lines);
+  lineGeom.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+  lineGeom.setAttribute('color', new THREE.Float32BufferAttribute(lineColors, 3));
+  const lineMat = new THREE.LineBasicMaterial({ vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.15 });
+  const lines = new THREE.LineSegments(lineGeom, lineMat);
+  scene.add(lines);
 
-const mouse = { x: 0, y: 0 };
-document.addEventListener('mousemove', (e) => {
-  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-});
-if (window.matchMedia('(pointer: coarse)').matches) {
-  window.addEventListener('deviceorientation', (e) => {
-    if (e.gamma === null || e.beta === null) return;
-    mouse.x = (e.gamma / 45);
-    mouse.y = -(e.beta / 45);
+  const mouse = { x: 0, y: 0 };
+  document.addEventListener('mousemove', (e) => {
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  });
+  if (window.matchMedia('(pointer: coarse)').matches) {
+    window.addEventListener('deviceorientation', (e) => {
+      if (e.gamma === null || e.beta === null) return;
+      mouse.x = (e.gamma / 45);
+      mouse.y = -(e.beta / 45);
+    });
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    globe.rotation.y += 0.002;
+    globe.rotation.x += 0.001;
+    particles.rotation.y += 0.0005;
+    particles.rotation.x += 0.0002;
+    lines.rotation.y = particles.rotation.y;
+    lines.rotation.x = particles.rotation.x;
+
+    const targetRotX = mouse.y * 0.5;
+    const targetRotY = mouse.x * 0.5;
+    globe.rotation.x += (targetRotX - globe.rotation.x) * 0.01;
+    globe.rotation.y += (targetRotY - globe.rotation.y) * 0.01;
+    particles.rotation.x += (targetRotX * 0.1 - particles.rotation.x) * 0.01;
+    particles.rotation.y += (targetRotY * 0.1 - particles.rotation.y) * 0.01;
+
+    renderer.render(scene, camera);
+  }
+  animate();
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
   });
 }
 
-function animate() {
-  requestAnimationFrame(animate);
-  globe.rotation.y += 0.002;
-  globe.rotation.x += 0.001;
-  particles.rotation.y += 0.0005;
-  particles.rotation.x += 0.0002;
-  lines.rotation.y = particles.rotation.y;
-  lines.rotation.x = particles.rotation.x;
-
-  const targetRotX = mouse.y * 0.5;
-  const targetRotY = mouse.x * 0.5;
-  globe.rotation.x += (targetRotX - globe.rotation.x) * 0.01;
-  globe.rotation.y += (targetRotY - globe.rotation.y) * 0.01;
-  particles.rotation.x += (targetRotX * 0.1 - particles.rotation.x) * 0.01;
-  particles.rotation.y += (targetRotY * 0.1 - particles.rotation.y) * 0.01;
-
-  renderer.render(scene, camera);
-}
-animate();
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-// ========== NETWORK MONITOR SIMULATION ==========
-const dlEl = document.getElementById('dlSpeed');
-const ulEl = document.getElementById('ulSpeed');
-const latEl = document.getElementById('latency');
-function updateNetworkStats() {
-  const dl = (Math.random() * 50 + 10).toFixed(1);
-  const ul = (Math.random() * 20 + 5).toFixed(1);
-  const lat = (Math.random() * 80 + 5).toFixed(0);
-  dlEl.textContent = `${dl} Mbps`;
-  ulEl.textContent = `${ul} Mbps`;
-  latEl.textContent = `${lat} ms`;
-}
-setInterval(updateNetworkStats, 1500);
-updateNetworkStats();
+// ========== NETWORK MONITOR ==========
+setInterval(() => {
+  document.getElementById('dlSpeed').textContent = (Math.random() * 50 + 10).toFixed(1) + ' Mbps';
+  document.getElementById('ulSpeed').textContent = (Math.random() * 20 + 5).toFixed(1) + ' Mbps';
+  document.getElementById('latency').textContent = (Math.random() * 80 + 5).toFixed(0) + ' ms';
+}, 1500);
 
 // ========== SNAKE GAME ==========
 const snakeBtn = document.getElementById('snakeBtn');
@@ -391,10 +383,7 @@ function initSnake() {
   updateScore();
 }
 function placeFood() {
-  food = {
-    x: Math.floor(Math.random() * tileCount),
-    y: Math.floor(Math.random() * tileCount)
-  };
+  food = { x: Math.floor(Math.random() * tileCount), y: Math.floor(Math.random() * tileCount) };
   while (snake.some(p => p.x === food.x && p.y === food.y)) {
     food.x = Math.floor(Math.random() * tileCount);
     food.y = Math.floor(Math.random() * tileCount);
@@ -421,9 +410,8 @@ function moveSnake() {
   if (head.y >= tileCount) head.y = 0;
   if (snake.some(p => p.x === head.x && p.y === head.y)) { endGame(); return; }
   snake.unshift(head);
-  if (head.x === food.x && head.y === food.y) {
-    score += 10; updateScore(); placeFood();
-  } else { snake.pop(); }
+  if (head.x === food.x && head.y === food.y) { score += 10; updateScore(); placeFood(); }
+  else { snake.pop(); }
 }
 function endGame() {
   gameRunning = false;
@@ -434,14 +422,9 @@ function endGame() {
   ctx.font = '20px Inter, sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText('Game Over', snakeCanvas.width/2, snakeCanvas.height/2);
-  ctx.textAlign = 'start';
 }
 function gameLoop() { if (!gameRunning) return; moveSnake(); draw(); }
-function startSnakeGame() {
-  if (gameRunning) return;
-  initSnake();
-  gameInterval = setInterval(gameLoop, 100);
-}
+function startSnakeGame() { if (gameRunning) return; initSnake(); gameInterval = setInterval(gameLoop, 100); }
 function stopSnakeGame() { gameRunning = false; clearInterval(gameInterval); }
 
 document.addEventListener('keydown', (e) => {
@@ -453,10 +436,7 @@ document.addEventListener('keydown', (e) => {
   if (['arrowright','d'].includes(key) && direction.x === 0) nextDirection = {x:1, y:0};
 });
 let touchStartX, touchStartY;
-snakeCanvas.addEventListener('touchstart', (e) => {
-  touchStartX = e.touches[0].clientX;
-  touchStartY = e.touches[0].clientY;
-});
+snakeCanvas.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; });
 snakeCanvas.addEventListener('touchend', (e) => {
   if (!touchStartX || !touchStartY) return;
   const dx = e.changedTouches[0].clientX - touchStartX;
@@ -468,8 +448,7 @@ snakeCanvas.addEventListener('touchend', (e) => {
     if (dy > 0 && direction.y === 0) nextDirection = {x:0, y:1};
     else if (dy < 0 && direction.y === 0) nextDirection = {x:0, y:-1};
   }
-  touchStartX = null;
-  touchStartY = null;
+  touchStartX = null; touchStartY = null;
 });
 
 snakeBtn.addEventListener('click', () => { snakeModal.classList.add('active'); startSnakeGame(); });
@@ -495,7 +474,7 @@ if (!isMobile) {
   document.addEventListener('mouseup', () => { dragging = false; snakeWindow.style.transition = ''; });
 }
 
-// ========== MUSIC PLAYER ==========
+// ========== MUSIC PLAYER (YouTube) ==========
 const playlist = [
   { id: 'JGwWNGJdvx8', title: 'Shape of You', artist: 'Ed Sheeran' },
   { id: 'fKopy74weus', title: 'Blinding Lights', artist: 'The Weeknd' },
@@ -535,89 +514,42 @@ function loadTrack(index) {
 }
 function togglePlay() {
   if (!player) return;
-  if (isPlaying) {
-    player.pauseVideo();
-    playBtn.innerHTML = '<i class="fas fa-play"></i>';
-  } else {
-    player.playVideo();
-    playBtn.innerHTML = '<i class="fas fa-pause"></i>';
-  }
+  if (isPlaying) { player.pauseVideo(); playBtn.innerHTML = '<i class="fas fa-play"></i>'; }
+  else { player.playVideo(); playBtn.innerHTML = '<i class="fas fa-pause"></i>'; }
 }
-function onYouTubeIframeAPIReady() {
-  if (player) return;
+function initYouTubePlayer() {
+  if (player || typeof YT === 'undefined' || !YT.Player) return;
   player = new YT.Player('ytPlayer', {
     height: '0', width: '0',
     videoId: playlist[0].id,
-    playerVars: {
-      autoplay: 0, controls: 0, disablekb: 1,
-      fs: 0, iv_load_policy: 3, modestbranding: 1, rel: 0
-    },
+    playerVars: { autoplay: 0, controls: 0, disablekb: 1, fs: 0, iv_load_policy: 3, modestbranding: 1, rel: 0 },
     events: {
-      onReady: () => {
-        setVolume();
-        updateDuration();
-        progressInterval = setInterval(updateProgress, 500);
-      },
-      onStateChange: onPlayerStateChange
+      onReady: () => { setVolume(); updateDuration(); progressInterval = setInterval(updateProgress, 500); },
+      onStateChange: (e) => {
+        if (e.data === YT.PlayerState.PLAYING) { isPlaying = true; playBtn.innerHTML = '<i class="fas fa-pause"></i>'; }
+        else if (e.data === YT.PlayerState.PAUSED) { isPlaying = false; playBtn.innerHTML = '<i class="fas fa-play"></i>'; }
+        else if (e.data === YT.PlayerState.ENDED) nextTrack();
+      }
     }
   });
-}
-function onPlayerStateChange(event) {
-  if (event.data === YT.PlayerState.PLAYING) {
-    isPlaying = true;
-    playBtn.innerHTML = '<i class="fas fa-pause"></i>';
-  } else if (event.data === YT.PlayerState.PAUSED) {
-    isPlaying = false;
-    playBtn.innerHTML = '<i class="fas fa-play"></i>';
-  } else if (event.data === YT.PlayerState.ENDED) {
-    nextTrack();
-  }
 }
 function setVolume() { if (player) player.setVolume(volumeBar.value); }
 function updateProgress() {
   if (player && player.getCurrentTime && player.getDuration) {
-    const current = player.getCurrentTime();
-    const duration = player.getDuration();
-    if (duration) {
-      progressBar.value = (current / duration) * 100;
-      currentTimeEl.textContent = formatTime(current);
-      durationEl.textContent = formatTime(duration);
-    }
-  }
-}
-function updateDuration() {
-  if (player && player.getDuration) {
+    const cur = player.getCurrentTime();
     const dur = player.getDuration();
-    if (dur) durationEl.textContent = formatTime(dur);
+    if (dur) { progressBar.value = (cur / dur) * 100; currentTimeEl.textContent = fmt(cur); durationEl.textContent = fmt(dur); }
   }
 }
-function seekTo(value) {
-  if (player && player.getDuration) {
-    player.seekTo((value / 100) * player.getDuration(), true);
-  }
-}
-function formatTime(sec) {
-  const m = Math.floor(sec / 60);
-  const s = Math.floor(sec % 60);
-  return `${m}:${s < 10 ? '0' : ''}${s}`;
-}
-function prevTrack() {
-  let idx = currentTrackIndex - 1;
-  if (idx < 0) idx = playlist.length - 1;
-  loadTrack(idx);
-  if (isPlaying) setTimeout(() => player.playVideo(), 500);
-}
-function nextTrack() {
-  let idx = (currentTrackIndex + 1) % playlist.length;
-  loadTrack(idx);
-  if (isPlaying) setTimeout(() => player.playVideo(), 500);
-}
+function updateDuration() { if (player && player.getDuration) { const d = player.getDuration(); if (d) durationEl.textContent = fmt(d); } }
+function seekTo(v) { if (player && player.getDuration) player.seekTo((v / 100) * player.getDuration(), true); }
+function fmt(s) { const m = Math.floor(s / 60); const sec = Math.floor(s % 60); return m + ':' + (sec < 10 ? '0' : '') + sec; }
+function prevTrack() { let idx = currentTrackIndex - 1; if (idx < 0) idx = playlist.length - 1; loadTrack(idx); if (isPlaying) setTimeout(() => player.playVideo(), 500); }
+function nextTrack() { let idx = (currentTrackIndex + 1) % playlist.length; loadTrack(idx); if (isPlaying) setTimeout(() => player.playVideo(), 500); }
 
 musicBtn.addEventListener('click', () => {
   musicModal.classList.add('active');
-  if (!player && typeof YT !== 'undefined' && YT.Player) {
-    onYouTubeIframeAPIReady();
-  }
+  if (!player && typeof YT !== 'undefined' && YT.Player) initYouTubePlayer();
 });
 musicCloseBtn.addEventListener('click', () => { musicModal.classList.remove('active'); });
 playBtn.addEventListener('click', togglePlay);
@@ -625,12 +557,11 @@ prevBtn.addEventListener('click', prevTrack);
 nextBtn.addEventListener('click', nextTrack);
 progressBar.addEventListener('input', () => seekTo(progressBar.value));
 volumeBar.addEventListener('input', setVolume);
+if (typeof YT !== 'undefined' && YT.Player) initYouTubePlayer();
+else window.onYouTubeIframeAPIReady = initYouTubePlayer;
 
-if (typeof YT !== 'undefined' && YT.Player) {
-  onYouTubeIframeAPIReady();
-} else {
-  window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
-}
-
-// ========== LOAD PROJECTS ON START ==========
-window.addEventListener('load', () => loadProjects());
+// ========== INITIALIZE EVERYTHING ==========
+window.addEventListener('load', () => {
+  loadProjects();
+  init3D();
+});

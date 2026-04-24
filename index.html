@@ -8,13 +8,22 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+  <!-- FAIL‑SAFE LOADER HIDE – works even if all other scripts fail -->
+  <script>
+    (function() {
+      var hide = function() { document.body.classList.add('loaded'); };
+      setTimeout(hide, 3000);
+      if (document.readyState === 'interactive' || document.readyState === 'complete') hide();
+      else document.addEventListener('DOMContentLoaded', hide);
+    })();
+  </script>
 </head>
 <body class="loading dark">
 
   <!-- 3D Canvas -->
   <canvas id="bgCanvas"></canvas>
 
-  <!-- Splash Loader -->
+  <!-- Splash Loader (will be hidden automatically) -->
   <div class="splash-loader" id="splashLoader">
     <div class="apple-logo"></div>
     <div class="loading-bar"></div>
@@ -59,7 +68,6 @@
           <span id="visitorFlag">🌐</span>
           <span id="liveClock">00:00</span>
         </div>
-        <!-- iOS‑style toggle switch -->
         <label class="ios-toggle" for="themeToggleCheckbox">
           <input type="checkbox" id="themeToggleCheckbox" />
           <span class="ios-toggle-slider"></span>
@@ -68,7 +76,7 @@
     </div>
   </nav>
 
-  <!-- Mobile Bottom Tab Bar (iOS style) -->
+  <!-- Mobile Bottom Tab Bar -->
   <div class="mobile-tab-bar glass-nav" id="mobileTabBar">
     <a href="#hero" class="tab-item active"><i class="fas fa-home"></i><span>Home</span></a>
     <a href="#experience" class="tab-item"><i class="fas fa-briefcase"></i><span>Work</span></a>
@@ -83,20 +91,11 @@
     <div class="shape shape-2"></div>
     <div class="shape shape-3"></div>
   </div>
-
   <!-- Floating Apple Devices -->
   <div class="floating-devices">
-    <div class="floating-device macbook">
-      <div class="screen"></div>
-      <div class="base"></div>
-    </div>
-    <div class="floating-device imac">
-      <div class="screen"></div>
-      <div class="stand"></div>
-    </div>
-    <div class="floating-device iphone">
-      <div class="screen"></div>
-    </div>
+    <div class="floating-device macbook"><div class="screen"></div><div class="base"></div></div>
+    <div class="floating-device imac"><div class="screen"></div><div class="stand"></div></div>
+    <div class="floating-device iphone"><div class="screen"></div></div>
   </div>
 
   <main class="container main-content">
@@ -220,7 +219,7 @@
     </footer>
   </main>
 
-  <!-- Floating action buttons (WhatsApp, Snake, Music) -->
+  <!-- Floating action buttons -->
   <div class="fab-container">
     <a href="https://wa.me/message/4YGA7K2KMFCNK1" target="_blank" class="fab whatsapp-fab"><i class="fab fa-whatsapp"></i></a>
     <button class="fab snake-fab" id="snakeBtn" title="Play Snake"><i class="fas fa-gamepad"></i></button>
@@ -271,7 +270,6 @@
           <input type="range" id="volumeBar" value="80" min="0" max="100">
         </div>
       </div>
-      <!-- Hidden YouTube iframe (audio only) -->
       <div id="ytPlayer" style="position:absolute; width:0; height:0; overflow:hidden;"></div>
     </div>
   </div>
@@ -286,9 +284,10 @@
     </div>
   </div>
 
-  <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://www.youtube.com/iframe_api"></script>
+  <!-- Load scripts asynchronously so they never block the page -->
+  <script async src="https://unpkg.com/aos@next/dist/aos.js"></script>
+  <script async src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script async src="https://www.youtube.com/iframe_api"></script>
   <script src="script.js"></script>
 </body>
 </html>
