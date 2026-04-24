@@ -1,4 +1,4 @@
-// ========== AOS (safe init – waits until AOS is loaded) ==========
+// ========== AOS (safe init) ==========
 function initAOS() {
   if (typeof AOS !== 'undefined') {
     AOS.init({ duration: 800, easing: 'ease-out-cubic', once: true });
@@ -556,6 +556,7 @@ function nextTrack() { let idx = (currentTrackIndex + 1) % playlist.length; load
 
 musicBtn.addEventListener('click', () => {
   musicModal.classList.add('active');
+  loadTrack(0);   // always show first song info
   if (!player && typeof YT !== 'undefined' && YT.Player) initYouTubePlayer();
 });
 musicCloseBtn.addEventListener('click', () => { musicModal.classList.remove('active'); });

@@ -177,6 +177,8 @@ body.light .glass-nav {
   border-radius: 20px;
   white-space: nowrap;
 }
+
+/* iOS toggle switch */
 .ios-toggle { position: relative; display: inline-block; width: 51px; height: 31px; }
 .ios-toggle input { opacity: 0; width: 0; height: 0; }
 .ios-toggle-slider {
@@ -205,7 +207,7 @@ input:checked + .ios-toggle-slider:before {
   transform: translateX(20px);
 }
 
-/* Mobile Tab Bar */
+/* Mobile Tab Bar (bottom) */
 .mobile-tab-bar {
   position: fixed;
   bottom: 0;
@@ -342,6 +344,7 @@ body.light .mobile-tab-bar { background: rgba(255,255,255,0.5); }
 }
 .profile-img:hover { transform: scale(1.03); }
 .hero-text { flex: 1; }
+/* Dynamic Island */
 .dynamic-island {
   display: inline-flex;
   align-items: center;
@@ -470,7 +473,7 @@ body.light .mobile-tab-bar { background: rgba(255,255,255,0.5); }
 /* FAB Buttons */
 .fab-container {
   position: fixed;
-  bottom: 80px;
+  bottom: 90px;      /* above mobile tab bar */
   right: 24px;
   z-index: 50;
   display: flex;
@@ -598,11 +601,11 @@ body.light .mobile-tab-bar { background: rgba(255,255,255,0.5); }
 /* Network Monitor */
 .network-monitor {
   position: fixed;
-  top: 20px;
-  left: 20px;
-  z-index: 120;
-  padding: 16px;
-  width: 220px;
+  top: 10px;
+  left: 10px;
+  z-index: 99;        /* below nav (100) */
+  padding: 12px;
+  width: 200px;
   backdrop-filter: blur(16px);
   background: var(--card-bg);
   border: 1px solid var(--border);
@@ -610,12 +613,12 @@ body.light .mobile-tab-bar { background: rgba(255,255,255,0.5); }
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
-.monitor-header { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.9rem; color: var(--accent); }
-.monitor-stats { display: flex; flex-direction: column; gap: 6px; }
-.stat-row { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary); }
-.monitor-wave { height: 4px; background: linear-gradient(90deg, var(--accent), var(--purple), var(--pink)); border-radius: 4px; position: relative; overflow: hidden; }
+.monitor-header { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.8rem; color: var(--accent); }
+.monitor-stats { display: flex; flex-direction: column; gap: 4px; }
+.stat-row { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); }
+.monitor-wave { height: 3px; background: linear-gradient(90deg, var(--accent), var(--purple), var(--pink)); border-radius: 3px; position: relative; overflow: hidden; }
 .monitor-wave::after {
   content: '';
   position: absolute;
@@ -623,7 +626,7 @@ body.light .mobile-tab-bar { background: rgba(255,255,255,0.5); }
   height: 100%;
   background: white;
   opacity: 0.6;
-  border-radius: 4px;
+  border-radius: 3px;
   animation: wave 1.5s ease-in-out infinite;
 }
 @keyframes wave {

@@ -20,7 +20,7 @@
     <div class="loading-bar"></div>
   </div>
 
-  <!-- Real‑time Network Monitor (top‑left) -->
+  <!-- Real‑time Network Monitor (seamless, below nav) -->
   <div class="network-monitor glass-card" id="networkMonitor">
     <div class="monitor-header">
       <i class="fas fa-network-wired"></i>
@@ -67,7 +67,7 @@
     </div>
   </nav>
 
-  <!-- Mobile Bottom Tab Bar -->
+  <!-- Mobile Bottom Tab Bar (iOS style) -->
   <div class="mobile-tab-bar glass-nav" id="mobileTabBar">
     <a href="#hero" class="tab-item active"><i class="fas fa-home"></i><span>Home</span></a>
     <a href="#experience" class="tab-item"><i class="fas fa-briefcase"></i><span>Work</span></a>
@@ -76,7 +76,7 @@
     <a href="#contact" class="tab-item"><i class="fas fa-paper-plane"></i><span>Contact</span></a>
   </div>
 
-  <!-- Background Effects -->
+  <!-- Background geometric shapes -->
   <div class="bg-shapes">
     <div class="shape shape-1"></div>
     <div class="shape shape-2"></div>
@@ -241,8 +241,8 @@
       </div>
       <div class="music-body">
         <div class="song-info">
-          <span id="songTitle">Select a song</span>
-          <span id="songArtist"></span>
+          <span id="songTitle">Shape of You</span>
+          <span id="songArtist">Ed Sheeran</span>
         </div>
         <div class="progress-container">
           <input type="range" id="progressBar" value="0" min="0" max="100">
@@ -275,13 +275,13 @@
     </div>
   </div>
 
-  <!-- Load scripts -->
+  <!-- Scripts -->
   <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
   <script async src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script async src="https://www.youtube.com/iframe_api"></script>
   <script src="script.js"></script>
 
-  <!-- Failsafe: hide loader no matter what -->
+  <!-- Failsafe loader hide (must be at the very end) -->
   <script>
     (function() {
       var hideLoader = function() { document.body.classList.add('loaded'); };
