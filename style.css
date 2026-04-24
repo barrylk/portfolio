@@ -719,11 +719,14 @@ body.dark .glass-nav {
   background: var(--bg);
   border-radius: 24px;
   box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-  width: 360px;
+  width: 400px;
   max-width: 95vw;
+  height: 500px;
+  max-height: 90vh;
   overflow: hidden;
-  position: relative; /* for drag: we set left/top on desktop */
-  transition: none; /* disable transition while dragging */
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 .game-header {
   display: flex;
@@ -733,7 +736,7 @@ body.dark .glass-nav {
   background: var(--card-bg);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
-  cursor: move; /* only visible on desktop if pointer: fine */
+  cursor: move; /* desktop only */
   color: var(--text);
   font-weight: 600;
 }
@@ -754,25 +757,18 @@ body.dark .glass-nav {
   color: var(--red);
 }
 .game-body {
-  padding: 12px;
-  text-align: center;
+  flex: 1;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
-.game-body canvas {
+.game-body iframe {
   display: block;
-  margin: 0 auto;
-  background: #2ecc71;
-  border-radius: 12px;
-  touch-action: none;
-}
-.game-score {
-  margin-top: 8px;
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-.game-instruction {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  margin-top: 4px;
+  width: 100%;
+  height: 100%;
+  border: none;
 }
 
 @media (max-width: 768px) {

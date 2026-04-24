@@ -264,7 +264,7 @@ if (isMobile) {
   });
 }
 
-// ========== CRICKET GAME (integrated) ==========
+// ========== CRICKET GAME MODAL (2048-Cricket via iframe) ==========
 const cricketBtn = document.getElementById('cricketBtn');
 const gameModal = document.getElementById('gameModal');
 const gameCloseBtn = document.getElementById('gameCloseBtn');
@@ -273,18 +273,16 @@ const gameDragHandle = document.getElementById('gameDragHandle');
 
 cricketBtn.addEventListener('click', () => {
   gameModal.classList.add('active');
-  startCricketGame();
 });
 function closeCricket() {
   gameModal.classList.remove('active');
-  stopCricketGame();
 }
 gameCloseBtn.addEventListener('click', closeCricket);
 gameModal.addEventListener('click', (e) => {
   if (e.target === gameModal) closeCricket();
 });
 
-// Draggable functionality (desktop only)
+// Draggable on desktop only
 if (!isMobile) {
   let offsetX, offsetY, isDragging = false;
   gameDragHandle.addEventListener('mousedown', (e) => {
@@ -303,139 +301,7 @@ if (!isMobile) {
     isDragging = false;
     gameWindow.style.transition = '';
   });
-} else {
-  // Mobile: no drag, just centered
-  gameWindow.style.left = '';
-  gameWindow.style.top = '';
 }
 
-// Cricket game logic
-const canvas = document.getElementById('cricketCanvas');
-const ctx = canvas.getContext('2d');
-const scoreDisplay = document.getElementById('gameScore');
-let gameRunning = false;
-let animationId;
-let score = 0;
-let ball = { x: 50, y: 200, speed: 3, radius: 12 };
-let bat = { x: 290, y: 200, width: 10, height: 60, swing: false, swingTimer: 0 };
-
-function resetBall() {
-  ball.x = 50;
-  ball.y = 180 + Math.random() * 40;
-  ball.speed = 3 + Math.random() * 2;
-}
-function drawPitch() {
-  ctx.fillStyle = '#2ecc71';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 2;
-  ctx.setLineDash([10, 10]);
-  ctx.beginPath();
-  ctx.moveTo(0, 200);
-  ctx.lineTo(canvas.width, 200);
-  ctx.stroke();
-  ctx.setLineDash([]);
-}
-function drawBat() {
-  ctx.fillStyle = '#8B4513';
-  ctx.fillRect(bat.x, bat.y - bat.height/2, bat.width, bat.height);
-  if (bat.swing) {
-    ctx.save();
-    ctx.translate(bat.x, bat.y);
-    ctx.rotate((Math.PI/6) * Math.sin(bat.swingTimer * 0.5));
-    ctx.fillStyle = '#D2B48C';
-    ctx.fillRect(0, -bat.height/2, bat.width, bat.height);
-    ctx.restore();
-  }
-}
-function drawBall() {
-  ctx.fillStyle = '#c0392b';
-  ctx.beginPath();
-  ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2);
-  ctx.fill();
-  ctx.fillStyle = 'white';
-  ctx.beginPath();
-  ctx.arc(ball.x-2, ball.y-2, 4, 0, Math.PI*2);
-  ctx.fill();
-}
-function drawScore() {
-  scoreDisplay.textContent = `Score: ${score}`;
-}
-
-function update() {
-  if (!gameRunning) return;
-  ball.x += ball.speed;
-
-  if (ball.x + ball.radius > bat.x - bat.width/2 &&
-      ball.x - ball.radius < bat.x + bat.width &&
-      ball.y + ball.radius > bat.y - bat.height/2 &&
-      ball.y - ball.radius < bat.y + bat.height/2) {
-    const hitPos = Math.abs(ball.y - bat.y);
-    let runs;
-    if (hitPos < 10) runs = 6;
-    else if (hitPos < 20) runs = 4;
-    else if (hitPos < 30) runs = 1;
-    else runs = 2;
-    score += runs;
-    resetBall();
-    bat.swing = true;
-    bat.swingTimer = 10;
-  }
-
-  if (ball.x > canvas.width) {
-    score = Math.max(0, score - 1);
-    resetBall();
-  }
-
-  if (bat.swing) {
-    bat.swingTimer--;
-    if (bat.swingTimer <= 0) bat.swing = false;
-  }
-
-  drawPitch();
-  drawBat();
-  drawBall();
-  drawScore();
-  animationId = requestAnimationFrame(update);
-}
-
-function handleBat(e) {
-  e.preventDefault();
-  if (!gameRunning) return;
-  bat.swing = true;
-  bat.swingTimer = 10;
-  const rect = canvas.getBoundingClientRect();
-  const y = (e.clientY || e.touches[0].clientY) - rect.top;
-  bat.y = Math.min(canvas.height - bat.height/2, Math.max(bat.height/2, y));
-}
-canvas.addEventListener('mousedown', handleBat);
-canvas.addEventListener('touchstart', handleBat, {passive: false});
-canvas.addEventListener('mousemove', (e) => {
-  if (!gameRunning) return;
-  const rect = canvas.getBoundingClientRect();
-  bat.y = e.clientY - rect.top;
-});
-canvas.addEventListener('touchmove', (e) => {
-  e.preventDefault();
-  if (!gameRunning) return;
-  const rect = canvas.getBoundingClientRect();
-  bat.y = e.touches[0].clientY - rect.top;
-});
-
-function startCricketGame() {
-  if (gameRunning) return;
-  gameRunning = true;
-  score = 0;
-  resetBall();
-  bat.y = 200;
-  update();
-}
-function stopCricketGame() {
-  gameRunning = false;
-  if (animationId) cancelAnimationFrame(animationId);
-}
-
-window.addEventListener('beforeunload', stopCricketGame);
-
-// Start projects on load
+// Start projects
 window.addEventListener('load', () => loadProjects());
