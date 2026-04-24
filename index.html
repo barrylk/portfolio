@@ -27,6 +27,7 @@
         <a href="#experience">Experience</a>
         <a href="#projects">Projects</a>
         <a href="#skills">Skills</a>
+        <a href="#education">Education</a>
         <a href="#contact">Contact</a>
       </div>
       <div class="nav-actions">
@@ -97,15 +98,9 @@
     <!-- Bio -->
     <section class="bio-card glass-card" data-aos="fade-up" data-aos-duration="800">
       <p class="bio-quote">
-<<<<<<< HEAD
         <i class="fas fa-quote-left"></i>
         I manage IT at FIBC Lanka, keeping everything from networks, servers, cloud, ERP, and CCTV running smoothly. Alongside that, I handle digital design work & artwork for bags, social media posts, and other creative needs. My background is in computer networks and software engineering, with hands‑on experience in both tech and design.
       </p>
-=======
-  <i class="fas fa-quote-left"></i>
-  I manage IT at FIBC Lanka, keeping everything from networks, servers, cloud, ERP, and CCTV running smoothly. Alongside that, I handle digital design work & artwork for bags, social media posts, and other creative needs. My background is in computer networks and software engineering, with hands‑on experience in both tech and design.
-</p>
->>>>>>> 19a06c4dcf9922ee71c62b3eb9df27d07698e7c7
       <div class="linkedin-badge" id="linkedinStatus">
         <i class="fab fa-linkedin"></i> <span id="linkedinHeadline">Loading...</span>
       </div>
@@ -136,6 +131,15 @@
         <h2>Tech Arsenal</h2>
       </div>
       <div class="skills-container" id="skillsContainer"></div>
+    </section>
+
+    <!-- Education -->
+    <section id="education" data-aos="fade-up">
+      <div class="section-header">
+        <span class="section-eyebrow">Learning</span>
+        <h2>Education</h2>
+      </div>
+      <div class="timeline" id="educationTimeline"></div>
     </section>
 
     <!-- Contact -->
@@ -195,13 +199,23 @@
     </div>
   </div>
 
-  <!-- 🏏 Cricket Game Button -->
-  <div class="cricket-btn" id="cricketBtn" title="Play Cricket">
-    🏏
-  </div>
+  <!-- ========== CRICKET GAME FLOAT BUTTON ========== -->
+  <button class="cricket-float" id="cricketBtn" title="Play Cricket">🏏</button>
 
-  <!-- Cricket Game Canvas (hidden by default) -->
-  <canvas id="cricketCanvas" style="display:none;"></canvas>
+  <!-- ========== CRICKET GAME MODAL ========== -->
+  <div class="game-modal" id="gameModal">
+    <div class="game-window" id="gameWindow">
+      <div class="game-header" id="gameDragHandle">
+        <span>Cricket Game</span>
+        <button class="game-close" id="gameCloseBtn">✕</button>
+      </div>
+      <div class="game-body">
+        <canvas id="cricketCanvas" width="340" height="400"></canvas>
+        <div class="game-score" id="gameScore">Score: 0</div>
+        <div class="game-instruction">Tap or click to bat</div>
+      </div>
+    </div>
+  </div>
 
   <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
   <script src="script.js"></script>

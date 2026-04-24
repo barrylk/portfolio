@@ -42,7 +42,7 @@ if (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth(
 ageEl.textContent = age;
 document.getElementById('currentYear').textContent = today.getFullYear();
 
-// ========== VISITOR FLAG & TIME (IP‑based) ==========
+// ========== VISITOR FLAG & TIME (IP-based) ==========
 let visitorTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 let clockInterval = null;
 async function fetchGeoData() {
@@ -91,11 +91,10 @@ function updateClock() {
 }
 fetchGeoData();
 
-// ========== EXPERIENCE ==========
+// ========== EXPERIENCE (from CV) ==========
 const expData = [
-  { period:'2024 – Present', title:'IT Manager', company:'FIBC Lanka Pvt Ltd', desc:'Network uptime, graphic design, social media.' },
-  { period:'2021 – 2024', title:'CAD Designer', company:'Brandix Apparel', desc:'3D patterns, Gerber/Lectra.' },
-  { period:'2020 – 2021', title:'Network Engineer Intern', company:'Dialog Axiata', desc:'ISP networking, fiber.' }
+  { period:'Dec 2024 – Present', title:'IT Manager', company:'FIBC Lanka (Pvt) Ltd, Polonnaruwa', desc:'Managing IT operations, networks, servers, cloud, security, ERP (Tally Prime), HRM (SignHR), CCTV, and hardware/software support. Also creating bag artwork and social media content.' },
+  { period:'Jul 2021 – Oct 2023', title:'Computer Aided Design Designer', company:'Brandix, Polonnaruwa', desc:'Designed apparel patterns using Lectra Modaris and AutoCAD, ensuring precision and efficiency in mass production.' }
 ];
 const timeline = document.getElementById('experienceTimeline');
 timeline.innerHTML = expData.map((e,i) => `
@@ -109,11 +108,20 @@ timeline.innerHTML = expData.map((e,i) => `
     </div>
   </div>`).join('');
 
-// ========== SKILLS ==========
+// ========== SKILLS (from CV) ==========
 const skills = [
-  { cat:'Network & SysAdmin', items:[{n:'TCP/IP & DNS',p:90},{n:'Windows Server',p:85},{n:'Fortinet',p:80},{n:'VLAN',p:88}] },
-  { cat:'Design', items:[{n:'Illustrator',p:92},{n:'Photoshop',p:88},{n:'InDesign',p:85},{n:'CorelDRAW',p:90}] },
-  { cat:'Video', items:[{n:'Premiere Pro',p:85},{n:'After Effects',p:75},{n:'DaVinci',p:80},{n:'Social Media',p:90}] }
+  { cat:'IT & ERP', items:[
+    {n:'Tally ERP / SignHR',p:85},
+    {n:'Network & Security',p:90},
+    {n:'Cloud & Server Admin',p:80},
+    {n:'CCTV & Hardware Support',p:88}
+  ]},
+  { cat:'Graphic & CAD Design', items:[
+    {n:'Adobe Photoshop',p:92},
+    {n:'Modaris',p:85},
+    {n:'AutoCAD',p:80},
+    {n:'CorelDRAW',p:88}
+  ]}
 ];
 const skillsContainer = document.getElementById('skillsContainer');
 skillsContainer.innerHTML = skills.map(c => `
@@ -126,11 +134,28 @@ skillsContainer.innerHTML = skills.map(c => `
       </div>`).join('')}
   </div>`).join('');
 
+// ========== EDUCATION (from CV) ==========
+const eduData = [
+  { period:'Jun 2017 – Jun 2026', title:'BSc (Hons) Computer Networks & Security', company:'American College of Higher Education', desc:'CCNA Certified. Cisco Networking Academy, IEEE Student Branch, hackathons.' },
+  { period:'Feb 2016 – Aug 2016', title:'Diploma in Computer Software Engineering', company:'ICT Institute Polonnaruwa', desc:'C++, C#, and software development fundamentals.' }
+];
+const eduTimeline = document.getElementById('educationTimeline');
+eduTimeline.innerHTML = eduData.map((e,i) => `
+  <div class="timeline-item" data-aos="fade-up" data-aos-delay="${i*100}">
+    <div class="timeline-dot"></div>
+    <div class="timeline-content">
+      <div class="timeline-date">${e.period}</div>
+      <div class="timeline-title">${e.title}</div>
+      <div class="timeline-company">${e.company}</div>
+      <p>${e.desc}</p>
+    </div>
+  </div>`).join('');
+
 // ========== LINKEDIN ==========
 fetch('data/linkedin.json')
   .then(r => r.json()).then(d => {
-    document.getElementById('linkedinHeadline').textContent = d.headline || 'IT Manager at FIBC Lanka';
-  }).catch(() => document.getElementById('linkedinHeadline').textContent = 'IT Manager at FIBC Lanka');
+    document.getElementById('linkedinHeadline').textContent = d.headline || 'IT Manager & Digital Creative at FIBC Lanka (Pvt) Ltd';
+  }).catch(() => document.getElementById('linkedinHeadline').textContent = 'IT Manager & Digital Creative at FIBC Lanka (Pvt) Ltd');
 
 // ========== PROJECTS ==========
 const langIcons = {JavaScript:'devicon-javascript-plain',Python:'devicon-python-plain',HTML:'devicon-html5-plain',CSS:'devicon-css3-plain'};
@@ -239,222 +264,178 @@ if (isMobile) {
   });
 }
 
-// ========== 🏏 CRICKET MINI-GAME ==========
+// ========== CRICKET GAME (integrated) ==========
+const cricketBtn = document.getElementById('cricketBtn');
+const gameModal = document.getElementById('gameModal');
+const gameCloseBtn = document.getElementById('gameCloseBtn');
+const gameWindow = document.getElementById('gameWindow');
+const gameDragHandle = document.getElementById('gameDragHandle');
+
+cricketBtn.addEventListener('click', () => {
+  gameModal.classList.add('active');
+  startCricketGame();
+});
+function closeCricket() {
+  gameModal.classList.remove('active');
+  stopCricketGame();
+}
+gameCloseBtn.addEventListener('click', closeCricket);
+gameModal.addEventListener('click', (e) => {
+  if (e.target === gameModal) closeCricket();
+});
+
+// Draggable functionality (desktop only)
+if (!isMobile) {
+  let offsetX, offsetY, isDragging = false;
+  gameDragHandle.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    const rect = gameWindow.getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+    gameWindow.style.transition = 'none';
+  });
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    gameWindow.style.left = e.clientX - offsetX + 'px';
+    gameWindow.style.top = e.clientY - offsetY + 'px';
+  });
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    gameWindow.style.transition = '';
+  });
+} else {
+  // Mobile: no drag, just centered
+  gameWindow.style.left = '';
+  gameWindow.style.top = '';
+}
+
+// Cricket game logic
 const canvas = document.getElementById('cricketCanvas');
 const ctx = canvas.getContext('2d');
-const cricketBtn = document.getElementById('cricketBtn');
-let gameActive = false;
-let gameInterval;
+const scoreDisplay = document.getElementById('gameScore');
+let gameRunning = false;
+let animationId;
 let score = 0;
-let balls = [];
+let ball = { x: 50, y: 200, speed: 3, radius: 12 };
+let bat = { x: 290, y: 200, width: 10, height: 60, swing: false, swingTimer: 0 };
 
-// Game constants
-const BALL_RADIUS = 15;
-const BAT_WIDTH = 120;
-const BAT_HEIGHT = 20;
-let batX = 0;
-const GAME_WIDTH = canvas.width;
-const GAME_HEIGHT = canvas.height;
-
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  batX = canvas.width / 2 - BAT_WIDTH / 2;
+function resetBall() {
+  ball.x = 50;
+  ball.y = 180 + Math.random() * 40;
+  ball.speed = 3 + Math.random() * 2;
 }
-window.addEventListener('resize', resizeCanvas);
-
-function initGame() {
-  score = 0;
-  balls = [];
-  // Spawn balls gradually
-  spawnBall();
-  gameActive = true;
-  canvas.style.display = 'block';
-  cricketBtn.style.display = 'none'; // hide button while playing
-  resizeCanvas();
-  if (gameInterval) clearInterval(gameInterval);
-  gameInterval = setInterval(updateGame, 16);
-}
-
-function spawnBall() {
-  // Random position from top, or left side
-  const fromLeft = Math.random() < 0.5;
-  let x, y, dx, dy;
-  if (fromLeft) {
-    x = -BALL_RADIUS;
-    y = Math.random() * canvas.height * 0.6 + canvas.height * 0.2; // middle area
-    dx = (Math.random() * 4 + 2);
-    dy = (Math.random() - 0.5) * 3;
-  } else {
-    x = canvas.width + BALL_RADIUS;
-    y = Math.random() * canvas.height * 0.6 + canvas.height * 0.2;
-    dx = -(Math.random() * 4 + 2);
-    dy = (Math.random() - 0.5) * 3;
-  }
-  balls.push({ x, y, dx, dy });
-}
-
-function updateGame() {
-  if (!gameActive) return;
-  // Move balls
-  for (let i = balls.length - 1; i >= 0; i--) {
-    const b = balls[i];
-    b.x += b.dx;
-    b.y += b.dy;
-    // Boundary removal
-    if (b.x < -BALL_RADIUS || b.x > canvas.width + BALL_RADIUS ||
-        b.y < -BALL_RADIUS || b.y > canvas.height + BALL_RADIUS) {
-      balls.splice(i, 1);
-    }
-  }
-  // Spawn new balls occasionally
-  if (Math.random() < 0.02) {
-    spawnBall();
-  }
-  // Collision detection with bat (if mouse pressed?)
-  // We'll handle click/tap separately in event listener
-  drawGame();
-}
-
-function drawGame() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  // Draw pitch (green gradient)
-  const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  grad.addColorStop(0, '#2d5a27');
-  grad.addColorStop(0.5, '#4caf50');
-  grad.addColorStop(1, '#2d5a27');
-  ctx.fillStyle = grad;
+function drawPitch() {
+  ctx.fillStyle = '#2ecc71';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  // Pitch markings
-  ctx.strokeStyle = '#fff';
+  ctx.strokeStyle = '#ffffff';
   ctx.lineWidth = 2;
   ctx.setLineDash([10, 10]);
   ctx.beginPath();
-  ctx.moveTo(0, canvas.height * 0.75);
-  ctx.lineTo(canvas.width, canvas.height * 0.75);
+  ctx.moveTo(0, 200);
+  ctx.lineTo(canvas.width, 200);
   ctx.stroke();
   ctx.setLineDash([]);
-  // Batsman area
-  ctx.fillStyle = '#8d6e63';
-  ctx.fillRect(canvas.width/2 - 50, canvas.height * 0.75 - 10, 100, 20);
-  // Draw balls
-  balls.forEach(b => {
-    ctx.beginPath();
-    ctx.arc(b.x, b.y, BALL_RADIUS, 0, Math.PI * 2);
-    ctx.fillStyle = '#f44336';
-    ctx.fill();
-    ctx.strokeStyle = '#b71c1c';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    // seam
-    ctx.beginPath();
-    ctx.moveTo(b.x - BALL_RADIUS/2, b.y - BALL_RADIUS/2);
-    ctx.lineTo(b.x + BALL_RADIUS/2, b.y + BALL_RADIUS/2);
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-  });
-  // Bat (moves with mouse/touch)
-  ctx.fillStyle = '#d4a373';
-  ctx.fillRect(batX, canvas.height * 0.75 - BAT_HEIGHT, BAT_WIDTH, BAT_HEIGHT);
-  ctx.fillStyle = '#a97c50';
-  ctx.fillRect(batX + 10, canvas.height * 0.75 - BAT_HEIGHT - 5, 10, 5);
-  // Score
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 2rem Inter, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText(`Score: ${score}`, canvas.width / 2, 50);
-  // Instructions
-  ctx.font = '1rem Inter, sans-serif';
-  ctx.fillText('Click or tap to hit the ball', canvas.width/2, canvas.height - 30);
 }
-
-// Hit detection
-function attemptHit(x, y) {
-  if (!gameActive) return;
-  for (let i = balls.length - 1; i >= 0; i--) {
-    const b = balls[i];
-    // Check if ball is near bat
-    const batY = canvas.height * 0.75 - BAT_HEIGHT;
-    if (b.y + BALL_RADIUS > batY && b.y - BALL_RADIUS < batY + BAT_HEIGHT &&
-        b.x + BALL_RADIUS > batX && b.x - BALL_RADIUS < batX + BAT_WIDTH) {
-      // Hit! Increase score, remove ball, spawn new one
-      score += Math.floor(Math.random() * 6) + 1;
-      balls.splice(i, 1);
-      spawnBall();
-      return;
-    }
+function drawBat() {
+  ctx.fillStyle = '#8B4513';
+  ctx.fillRect(bat.x, bat.y - bat.height/2, bat.width, bat.height);
+  if (bat.swing) {
+    ctx.save();
+    ctx.translate(bat.x, bat.y);
+    ctx.rotate((Math.PI/6) * Math.sin(bat.swingTimer * 0.5));
+    ctx.fillStyle = '#D2B48C';
+    ctx.fillRect(0, -bat.height/2, bat.width, bat.height);
+    ctx.restore();
   }
 }
+function drawBall() {
+  ctx.fillStyle = '#c0392b';
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = 'white';
+  ctx.beginPath();
+  ctx.arc(ball.x-2, ball.y-2, 4, 0, Math.PI*2);
+  ctx.fill();
+}
+function drawScore() {
+  scoreDisplay.textContent = `Score: ${score}`;
+}
 
-// Mouse/Touch handlers
-canvas.addEventListener('click', (e) => {
-  const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  attemptHit(x, y);
-});
-canvas.addEventListener('touchstart', (e) => {
+function update() {
+  if (!gameRunning) return;
+  ball.x += ball.speed;
+
+  if (ball.x + ball.radius > bat.x - bat.width/2 &&
+      ball.x - ball.radius < bat.x + bat.width &&
+      ball.y + ball.radius > bat.y - bat.height/2 &&
+      ball.y - ball.radius < bat.y + bat.height/2) {
+    const hitPos = Math.abs(ball.y - bat.y);
+    let runs;
+    if (hitPos < 10) runs = 6;
+    else if (hitPos < 20) runs = 4;
+    else if (hitPos < 30) runs = 1;
+    else runs = 2;
+    score += runs;
+    resetBall();
+    bat.swing = true;
+    bat.swingTimer = 10;
+  }
+
+  if (ball.x > canvas.width) {
+    score = Math.max(0, score - 1);
+    resetBall();
+  }
+
+  if (bat.swing) {
+    bat.swingTimer--;
+    if (bat.swingTimer <= 0) bat.swing = false;
+  }
+
+  drawPitch();
+  drawBat();
+  drawBall();
+  drawScore();
+  animationId = requestAnimationFrame(update);
+}
+
+function handleBat(e) {
   e.preventDefault();
+  if (!gameRunning) return;
+  bat.swing = true;
+  bat.swingTimer = 10;
   const rect = canvas.getBoundingClientRect();
-  const x = e.touches[0].clientX - rect.left;
-  const y = e.touches[0].clientY - rect.top;
-  attemptHit(x, y);
-});
-// Move bat with mouse
+  const y = (e.clientY || e.touches[0].clientY) - rect.top;
+  bat.y = Math.min(canvas.height - bat.height/2, Math.max(bat.height/2, y));
+}
+canvas.addEventListener('mousedown', handleBat);
+canvas.addEventListener('touchstart', handleBat, {passive: false});
 canvas.addEventListener('mousemove', (e) => {
+  if (!gameRunning) return;
   const rect = canvas.getBoundingClientRect();
-  batX = e.clientX - rect.left - BAT_WIDTH/2;
-  if (batX < 0) batX = 0;
-  if (batX > canvas.width - BAT_WIDTH) batX = canvas.width - BAT_WIDTH;
+  bat.y = e.clientY - rect.top;
 });
 canvas.addEventListener('touchmove', (e) => {
   e.preventDefault();
+  if (!gameRunning) return;
   const rect = canvas.getBoundingClientRect();
-  batX = e.touches[0].clientX - rect.left - BAT_WIDTH/2;
-  if (batX < 0) batX = 0;
-  if (batX > canvas.width - BAT_WIDTH) batX = canvas.width - BAT_WIDTH;
+  bat.y = e.touches[0].clientY - rect.top;
 });
 
-// Close game button: add a floating close button inside canvas
-function closeGame() {
-  gameActive = false;
-  canvas.style.display = 'none';
-  cricketBtn.style.display = 'flex';
-  if (gameInterval) clearInterval(gameInterval);
+function startCricketGame() {
+  if (gameRunning) return;
+  gameRunning = true;
+  score = 0;
+  resetBall();
+  bat.y = 200;
+  update();
 }
-// Add a close button on canvas
-const closeBtn = document.createElement('button');
-closeBtn.innerHTML = '✕ Close Game';
-closeBtn.style.position = 'fixed';
-closeBtn.style.top = '20px';
-closeBtn.style.right = '20px';
-closeBtn.style.zIndex = '301';
-closeBtn.style.background = 'rgba(255,255,255,0.9)';
-closeBtn.style.border = 'none';
-closeBtn.style.padding = '10px 20px';
-closeBtn.style.borderRadius = '30px';
-closeBtn.style.fontFamily = 'Inter, sans-serif';
-closeBtn.style.fontWeight = '600';
-closeBtn.style.cursor = 'pointer';
-closeBtn.style.boxShadow = '0 4px 10px rgba(0,0,0,0.2)';
-closeBtn.addEventListener('click', closeGame);
-document.body.appendChild(closeBtn);
-closeBtn.style.display = 'none'; // hidden by default
-
-// Open game via button
-cricketBtn.addEventListener('click', () => {
-  initGame();
-  closeBtn.style.display = 'block';
-});
-// Also hide close button when game closed
-function closeGame() {
-  gameActive = false;
-  canvas.style.display = 'none';
-  cricketBtn.style.display = 'flex';
-  if (gameInterval) clearInterval(gameInterval);
-  closeBtn.style.display = 'none';
+function stopCricketGame() {
+  gameRunning = false;
+  if (animationId) cancelAnimationFrame(animationId);
 }
 
-// Start projects
+window.addEventListener('beforeunload', stopCricketGame);
+
+// Start projects on load
 window.addEventListener('load', () => loadProjects());
