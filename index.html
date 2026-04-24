@@ -202,20 +202,21 @@
   <!-- ========== CRICKET GAME FLOAT BUTTON ========== -->
   <button class="cricket-float" id="cricketBtn" title="Play Cricket">🏏</button>
 
-  <!-- ========== CRICKET GAME MODAL ========== -->
-  <div class="game-modal" id="gameModal">
-    <div class="game-window" id="gameWindow">
-      <div class="game-header" id="gameDragHandle">
-        <span>Cricket Game</span>
-        <button class="game-close" id="gameCloseBtn">✕</button>
-      </div>
-      <div class="game-body">
-        <canvas id="cricketCanvas" width="340" height="400"></canvas>
-        <div class="game-score" id="gameScore">Score: 0</div>
-        <div class="game-instruction">Tap or click to bat</div>
-      </div>
+<!-- ========== CRICKET GAME MODAL ========== -->
+<div class="game-modal" id="gameModal">
+  <div class="game-window" id="gameWindow">
+    <div class="game-header" id="gameDragHandle">
+      <span>2048 Cricket</span>
+      <button class="game-close" id="gameCloseBtn">✕</button>
+    </div>
+    <div class="game-body">
+      <iframe id="cricketFrame" src="https://doodlecricket.github.io/2048-cricket/"
+              style="width:100%; height:100%; border:none; border-radius:12px;"
+              allow="accelerometer; autoplay; gyroscope"
+              title="2048 Cricket Game"></iframe>
     </div>
   </div>
+</div>
 
   <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
   <script src="script.js"></script>
