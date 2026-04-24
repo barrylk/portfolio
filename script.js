@@ -3,11 +3,11 @@ function initAOS() {
   if (typeof AOS !== 'undefined') {
     AOS.init({ duration: 800, easing: 'ease-out-cubic', once: true });
   } else {
-    // If AOS still not loaded, try again after 200ms
     setTimeout(initAOS, 200);
   }
 }
 initAOS();
+
 // ========== THEME (iOS toggle + auto) ==========
 const bodyEl = document.body;
 const themeToggle = document.getElementById('themeToggleCheckbox');
@@ -239,7 +239,7 @@ document.getElementById('contactForm').addEventListener('submit', async function
   } catch { status.textContent = '❌ Network error.'; }
 });
 
-// ========== 3D BACKGROUND ==========
+// ========== 3D BACKGROUND (Three.js) ==========
 function init3D() {
   if (typeof THREE === 'undefined') return;
   const canvas = document.getElementById('bgCanvas');
@@ -359,7 +359,7 @@ function init3D() {
   });
 }
 
-// ========== NETWORK MONITOR ==========
+// ========== NETWORK MONITOR SIMULATION ==========
 setInterval(() => {
   document.getElementById('dlSpeed').textContent = (Math.random() * 50 + 10).toFixed(1) + ' Mbps';
   document.getElementById('ulSpeed').textContent = (Math.random() * 20 + 5).toFixed(1) + ' Mbps';
@@ -481,7 +481,7 @@ if (!isMobile) {
   document.addEventListener('mouseup', () => { dragging = false; snakeWindow.style.transition = ''; });
 }
 
-// ========== MUSIC PLAYER (YouTube) ==========
+// ========== MUSIC PLAYER (YouTube audio only) ==========
 const playlist = [
   { id: 'JGwWNGJdvx8', title: 'Shape of You', artist: 'Ed Sheeran' },
   { id: 'fKopy74weus', title: 'Blinding Lights', artist: 'The Weeknd' },
@@ -567,7 +567,7 @@ volumeBar.addEventListener('input', setVolume);
 if (typeof YT !== 'undefined' && YT.Player) initYouTubePlayer();
 else window.onYouTubeIframeAPIReady = initYouTubePlayer;
 
-// ========== INITIALIZE EVERYTHING ==========
+// ========== START EVERYTHING ==========
 window.addEventListener('load', () => {
   loadProjects();
   init3D();

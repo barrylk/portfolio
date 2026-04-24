@@ -56,8 +56,7 @@ body {
   overflow-x: hidden;
   margin: 0;
   padding-bottom: 70px;
-
-/* Three.js canvas */
+}
 #bgCanvas {
   position: fixed;
   top: 0;
@@ -87,7 +86,7 @@ body {
   position: fixed;
   inset: 0;
   background: #000;
-  z-index: 9999;
+  z-index: 10000;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -178,8 +177,6 @@ body.light .glass-nav {
   border-radius: 20px;
   white-space: nowrap;
 }
-
-/* iOS toggle switch */
 .ios-toggle { position: relative; display: inline-block; width: 51px; height: 31px; }
 .ios-toggle input { opacity: 0; width: 0; height: 0; }
 .ios-toggle-slider {
@@ -208,7 +205,7 @@ input:checked + .ios-toggle-slider:before {
   transform: translateX(20px);
 }
 
-/* Mobile Tab Bar (bottom) */
+/* Mobile Tab Bar */
 .mobile-tab-bar {
   position: fixed;
   bottom: 0;
@@ -345,7 +342,6 @@ body.light .mobile-tab-bar { background: rgba(255,255,255,0.5); }
 }
 .profile-img:hover { transform: scale(1.03); }
 .hero-text { flex: 1; }
-/* Dynamic Island */
 .dynamic-island {
   display: inline-flex;
   align-items: center;
@@ -569,12 +565,7 @@ body.light .mobile-tab-bar { background: rgba(255,255,255,0.5); }
   flex-direction: column;
   gap: 20px;
 }
-.music-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 600;
-}
+.music-header { display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
 .music-close { background: none; border: none; color: var(--text); font-size: 1.3rem; cursor: pointer; }
 .music-body { display: flex; flex-direction: column; gap: 15px; }
 .song-info { text-align: center; }
