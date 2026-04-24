@@ -413,7 +413,7 @@ body.dark .glass-nav {
   padding-top: 4rem;
 }
 .hero-image { flex: 0 0 auto; }
-/* Profile glow ring – perfectly round, exactly on the image edge */
+/* Profile glow ring – perfectly round */
 .profile-wrapper {
   position: relative;
   display: inline-block;

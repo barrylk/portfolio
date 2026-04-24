@@ -91,11 +91,20 @@ function updateClock() {
 }
 fetchGeoData();
 
-// ========== EXPERIENCE ==========
+// ========== EXPERIENCE (Updated from LinkedIn) ==========
 const expData = [
-  { period:'2024 – Present', title:'IT Manager', company:'FIBC Lanka Pvt Ltd', desc:'Network uptime, graphic design, social media.' },
-  { period:'2021 – 2024', title:'CAD Designer', company:'Brandix Apparel', desc:'3D patterns, Gerber/Lectra.' },
-  { period:'2020 – 2021', title:'Network Engineer Intern', company:'Dialog Axiata', desc:'ISP networking, fiber.' }
+  {
+    period: 'Dec 2024 – Present',
+    title: 'IT Manager',
+    company: 'FIBC Lanka (Pvt) Ltd, Polonnaruwa',
+    desc: 'Managing IT operations, networks, servers, cloud, security, ERP (Tally Prime), HRM (SignHR), CCTV, and hardware/software support. Also creating bag artwork and social media content.'
+  },
+  {
+    period: 'Jul 2021 – Oct 2023',
+    title: 'Computer Aided Design Designer',
+    company: 'Brandix, Polonnaruwa',
+    desc: 'Designed apparel patterns using Lectra Modaris and AutoCAD, ensuring precision and efficiency in mass production.'
+  }
 ];
 const timeline = document.getElementById('experienceTimeline');
 timeline.innerHTML = expData.map((e,i) => `
@@ -109,11 +118,35 @@ timeline.innerHTML = expData.map((e,i) => `
     </div>
   </div>`).join('');
 
-// ========== SKILLS ==========
+// ========== SKILLS (Updated categories) ==========
 const skills = [
-  { cat:'Network & SysAdmin', items:[{n:'TCP/IP & DNS',p:90},{n:'Windows Server',p:85},{n:'Fortinet',p:80},{n:'VLAN',p:88}] },
-  { cat:'Design', items:[{n:'Illustrator',p:92},{n:'Photoshop',p:88},{n:'InDesign',p:85},{n:'CorelDRAW',p:90}] },
-  { cat:'Video', items:[{n:'Premiere Pro',p:85},{n:'After Effects',p:75},{n:'DaVinci',p:80},{n:'Social Media',p:90}] }
+  {
+    cat: 'IT & ERP',
+    items: [
+      { n: 'Tally ERP / SignHR', p: 85 },
+      { n: 'Network & Security', p: 90 },
+      { n: 'Cloud & Server Admin', p: 80 },
+      { n: 'CCTV & Hardware Support', p: 88 }
+    ]
+  },
+  {
+    cat: 'Graphic & CAD Design',
+    items: [
+      { n: 'Adobe Photoshop', p: 92 },
+      { n: 'Lectra Modaris', p: 85 },
+      { n: 'AutoCAD', p: 80 },
+      { n: 'CorelDRAW', p: 88 }
+    ]
+  },
+  {
+    cat: 'Programming & Data',
+    items: [
+      { n: 'C++ / C#', p: 75 },
+      { n: 'Data Analysis', p: 70 },
+      { n: 'HTML / CSS / JS', p: 65 },
+      { n: 'SQL / Databases', p: 60 }
+    ]
+  }
 ];
 const skillsContainer = document.getElementById('skillsContainer');
 skillsContainer.innerHTML = skills.map(c => `
@@ -126,11 +159,46 @@ skillsContainer.innerHTML = skills.map(c => `
       </div>`).join('')}
   </div>`).join('');
 
+// ========== EDUCATION ==========
+const eduData = [
+  {
+    period: 'Jun 2017 – Jun 2026',
+    title: 'BSc (Hons) Computer Networks & Security',
+    school: 'American College of Higher Education',
+    desc: 'CCNA Certified. Cisco Networking Academy, IEEE Student Branch, hackathons.'
+  },
+  {
+    period: 'Feb 2016 – Aug 2016',
+    title: 'Diploma in Computer Software Engineering',
+    school: 'ICT Institute Polonnaruwa',
+    desc: 'C++, C#, and software development fundamentals.'
+  }
+];
+const eduContainer = document.getElementById('educationTimeline');
+if (eduContainer) {
+  eduContainer.innerHTML = eduData.map((e,i) => `
+    <div class="timeline-item" data-aos="fade-up" data-aos-delay="${i*100}">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-date">${e.period}</div>
+        <div class="timeline-title">${e.title}</div>
+        <div class="timeline-company">${e.school}</div>
+        <p>${e.desc}</p>
+      </div>
+    </div>`).join('');
+}
+
+// ========== BIO UPDATE (from About) ==========
+document.querySelector('.bio-quote').innerHTML = `
+  <i class="fas fa-quote-left"></i>
+  I manage IT at FIBC Lanka, keeping everything from networks, servers, cloud, ERP, and CCTV running smoothly. Alongside that, I handle digital design work—artwork for bags, social media posts, and other creative needs. My background is in computer networks and software engineering, with hands-on experience in both tech and design.
+`;
+
 // ========== LINKEDIN ==========
 fetch('data/linkedin.json')
   .then(r => r.json()).then(d => {
-    document.getElementById('linkedinHeadline').textContent = d.headline || 'IT Manager at FIBC Lanka';
-  }).catch(() => document.getElementById('linkedinHeadline').textContent = 'IT Manager at FIBC Lanka');
+    document.getElementById('linkedinHeadline').textContent = d.headline || 'IT Manager at FIBC Lanka (Pvt) Ltd';
+  }).catch(() => document.getElementById('linkedinHeadline').textContent = 'IT Manager at FIBC Lanka (Pvt) Ltd');
 
 // ========== PROJECTS ==========
 const langIcons = {JavaScript:'devicon-javascript-plain',Python:'devicon-python-plain',HTML:'devicon-html5-plain',CSS:'devicon-css3-plain'};
@@ -308,5 +376,5 @@ if (isMobile) {
   });
 }
 
-// Start projects
+// Start projects after load
 window.addEventListener('load', () => loadProjects());
