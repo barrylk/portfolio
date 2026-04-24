@@ -1,18 +1,8 @@
-// ========== FORCE HIDE LOADER AFTER 5 SECONDS (backup) ==========
-setTimeout(() => {
-  if (!document.body.classList.contains('loaded')) {
-    document.body.classList.add('loaded');
-    console.warn('Loader forced hide – page load may have been delayed.');
-  }
-}, 5000);
+// ========== LOADER – handled inline in HTML now ==========
+// This is a backup, but the inline script ensures it always works.
 
 // ========== AOS ==========
 AOS.init({ duration: 800, easing: 'ease-out-cubic', once: true });
-
-// ========== SPLASH LOADER ==========
-window.addEventListener('load', () => {
-  document.body.classList.add('loaded');
-});
 
 // ========== THEME (iOS toggle + auto) ==========
 const bodyEl = document.body;
@@ -256,13 +246,11 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.z = 40;
 
-// Central globe (wireframe icosahedron)
 const globeGeom = new THREE.IcosahedronGeometry(8, 2);
 const globeMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, wireframe: true, transparent: true, opacity: 0.2 });
 const globe = new THREE.Mesh(globeGeom, globeMat);
 scene.add(globe);
 
-// Particles around globe
 const particleCount = 1000;
 const particleGeom = new THREE.BufferGeometry();
 const positions = new Float32Array(particleCount * 3);
@@ -301,7 +289,6 @@ const particleMat = new THREE.PointsMaterial({
 const particles = new THREE.Points(particleGeom, particleMat);
 scene.add(particles);
 
-// Connecting lines (network)
 const lineGeom = new THREE.BufferGeometry();
 const linePositions = [];
 const lineColors = [];
@@ -327,7 +314,6 @@ const lineMat = new THREE.LineBasicMaterial({ vertexColors: true, blending: THRE
 const lines = new THREE.LineSegments(lineGeom, lineMat);
 scene.add(lines);
 
-// Mouse / tilt interaction
 const mouse = { x: 0, y: 0 };
 document.addEventListener('mousemove', (e) => {
   mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -343,8 +329,6 @@ if (window.matchMedia('(pointer: coarse)').matches) {
 
 function animate() {
   requestAnimationFrame(animate);
-
-  // Rotate globe & particles
   globe.rotation.y += 0.002;
   globe.rotation.x += 0.001;
   particles.rotation.y += 0.0005;
@@ -352,7 +336,6 @@ function animate() {
   lines.rotation.y = particles.rotation.y;
   lines.rotation.x = particles.rotation.x;
 
-  // React to mouse
   const targetRotX = mouse.y * 0.5;
   const targetRotY = mouse.x * 0.5;
   globe.rotation.x += (targetRotX - globe.rotation.x) * 0.01;
@@ -374,7 +357,7 @@ const dlEl = document.getElementById('dlSpeed');
 const ulEl = document.getElementById('ulSpeed');
 const latEl = document.getElementById('latency');
 function updateNetworkStats() {
-  const dl = (Math.random() * 50 + 10).toFixed(1); // 10‑60 Mbps
+  const dl = (Math.random() * 50 + 10).toFixed(1);
   const ul = (Math.random() * 20 + 5).toFixed(1);
   const lat = (Math.random() * 80 + 5).toFixed(0);
   dlEl.textContent = `${dl} Mbps`;
@@ -494,7 +477,6 @@ function closeSnake() { snakeModal.classList.remove('active'); stopSnakeGame(); 
 snakeClose.addEventListener('click', closeSnake);
 snakeModal.addEventListener('click', (e) => { if (e.target === snakeModal) closeSnake(); });
 
-// Draggable for snake (desktop only)
 const isMobile = window.matchMedia('(pointer: coarse)').matches;
 if (!isMobile) {
   let offX, offY, dragging = false;
@@ -513,7 +495,7 @@ if (!isMobile) {
   document.addEventListener('mouseup', () => { dragging = false; snakeWindow.style.transition = ''; });
 }
 
-// ========== MUSIC PLAYER (YouTube audio only) ==========
+// ========== MUSIC PLAYER ==========
 const playlist = [
   { id: 'JGwWNGJdvx8', title: 'Shape of You', artist: 'Ed Sheeran' },
   { id: 'fKopy74weus', title: 'Blinding Lights', artist: 'The Weeknd' },
@@ -551,7 +533,6 @@ function loadTrack(index) {
     clearInterval(progressInterval);
   }
 }
-
 function togglePlay() {
   if (!player) return;
   if (isPlaying) {
@@ -562,35 +543,25 @@ function togglePlay() {
     playBtn.innerHTML = '<i class="fas fa-pause"></i>';
   }
 }
-
 function onYouTubeIframeAPIReady() {
-  if (player) return; // already created
+  if (player) return;
   player = new YT.Player('ytPlayer', {
-    height: '0',
-    width: '0',
+    height: '0', width: '0',
     videoId: playlist[0].id,
     playerVars: {
-      autoplay: 0,
-      controls: 0,
-      disablekb: 1,
-      fs: 0,
-      iv_load_policy: 3,
-      modestbranding: 1,
-      rel: 0
+      autoplay: 0, controls: 0, disablekb: 1,
+      fs: 0, iv_load_policy: 3, modestbranding: 1, rel: 0
     },
     events: {
-      onReady: onPlayerReady,
+      onReady: () => {
+        setVolume();
+        updateDuration();
+        progressInterval = setInterval(updateProgress, 500);
+      },
       onStateChange: onPlayerStateChange
     }
   });
 }
-
-function onPlayerReady() {
-  setVolume();
-  updateDuration();
-  progressInterval = setInterval(updateProgress, 500);
-}
-
 function onPlayerStateChange(event) {
   if (event.data === YT.PlayerState.PLAYING) {
     isPlaying = true;
@@ -602,13 +573,7 @@ function onPlayerStateChange(event) {
     nextTrack();
   }
 }
-
-function setVolume() {
-  if (player) {
-    player.setVolume(volumeBar.value);
-  }
-}
-
+function setVolume() { if (player) player.setVolume(volumeBar.value); }
 function updateProgress() {
   if (player && player.getCurrentTime && player.getDuration) {
     const current = player.getCurrentTime();
@@ -620,34 +585,28 @@ function updateProgress() {
     }
   }
 }
-
 function updateDuration() {
   if (player && player.getDuration) {
     const dur = player.getDuration();
     if (dur) durationEl.textContent = formatTime(dur);
   }
 }
-
 function seekTo(value) {
   if (player && player.getDuration) {
-    const time = (value / 100) * player.getDuration();
-    player.seekTo(time, true);
+    player.seekTo((value / 100) * player.getDuration(), true);
   }
 }
-
 function formatTime(sec) {
   const m = Math.floor(sec / 60);
   const s = Math.floor(sec % 60);
   return `${m}:${s < 10 ? '0' : ''}${s}`;
 }
-
 function prevTrack() {
   let idx = currentTrackIndex - 1;
   if (idx < 0) idx = playlist.length - 1;
   loadTrack(idx);
   if (isPlaying) setTimeout(() => player.playVideo(), 500);
 }
-
 function nextTrack() {
   let idx = (currentTrackIndex + 1) % playlist.length;
   loadTrack(idx);
@@ -656,25 +615,17 @@ function nextTrack() {
 
 musicBtn.addEventListener('click', () => {
   musicModal.classList.add('active');
-  if (!player) {
-    // If YouTube API already loaded, initialize
-    if (typeof YT !== 'undefined' && YT.Player) {
-      onYouTubeIframeAPIReady();
-    }
+  if (!player && typeof YT !== 'undefined' && YT.Player) {
+    onYouTubeIframeAPIReady();
   }
 });
-
-musicCloseBtn.addEventListener('click', () => {
-  musicModal.classList.remove('active');
-});
-
+musicCloseBtn.addEventListener('click', () => { musicModal.classList.remove('active'); });
 playBtn.addEventListener('click', togglePlay);
 prevBtn.addEventListener('click', prevTrack);
 nextBtn.addEventListener('click', nextTrack);
 progressBar.addEventListener('input', () => seekTo(progressBar.value));
 volumeBar.addEventListener('input', setVolume);
 
-// Ensure YouTube API callback is set
 if (typeof YT !== 'undefined' && YT.Player) {
   onYouTubeIframeAPIReady();
 } else {
