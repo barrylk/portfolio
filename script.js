@@ -1,9 +1,17 @@
+// ========== FORCE HIDE LOADER AFTER 5 SECONDS (backup) ==========
+setTimeout(() => {
+  if (!document.body.classList.contains('loaded')) {
+    document.body.classList.add('loaded');
+    console.warn('Loader forced hide – page load may have been delayed.');
+  }
+}, 5000);
+
 // ========== AOS ==========
 AOS.init({ duration: 800, easing: 'ease-out-cubic', once: true });
 
 // ========== SPLASH LOADER ==========
 window.addEventListener('load', () => {
-  setTimeout(() => { document.body.classList.add('loaded'); }, 1500);
+  document.body.classList.add('loaded');
 });
 
 // ========== THEME (iOS toggle + auto) ==========
@@ -514,7 +522,7 @@ const playlist = [
   { id: 'RgKAFK5djSk', title: 'See You Again', artist: 'Wiz Khalifa' }
 ];
 let currentTrackIndex = 0;
-let player;
+let player = null;
 let isPlaying = false;
 let progressInterval;
 
@@ -556,6 +564,7 @@ function togglePlay() {
 }
 
 function onYouTubeIframeAPIReady() {
+  if (player) return; // already created
   player = new YT.Player('ytPlayer', {
     height: '0',
     width: '0',
@@ -576,7 +585,7 @@ function onYouTubeIframeAPIReady() {
   });
 }
 
-function onPlayerReady(event) {
+function onPlayerReady() {
   setVolume();
   updateDuration();
   progressInterval = setInterval(updateProgress, 500);
@@ -666,9 +675,10 @@ progressBar.addEventListener('input', () => seekTo(progressBar.value));
 volumeBar.addEventListener('input', setVolume);
 
 // Ensure YouTube API callback is set
-window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
 if (typeof YT !== 'undefined' && YT.Player) {
   onYouTubeIframeAPIReady();
+} else {
+  window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
 }
 
 // ========== LOAD PROJECTS ON START ==========
