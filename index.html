@@ -14,14 +14,6 @@
   <!-- Light beam -->
   <div class="light-beam" id="lightBeam"></div>
 
-  <!-- Meme overlay -->
-  <div class="meme-overlay" id="memeOverlay">
-    <div class="meme-content">
-      <span class="meme-text">999 Meme Found</span>
-      <div class="meme-timer">Refreshing in <span id="memeCountdown">12</span>s</div>
-    </div>
-  </div>
-
   <!-- Page Loader -->
   <div class="loader-wrapper">
     <div class="apple-loader"></div>
@@ -35,7 +27,6 @@
         <a href="#experience">Experience</a>
         <a href="#projects">Projects</a>
         <a href="#skills">Skills</a>
-        <a href="#education">Education</a>
         <a href="#contact">Contact</a>
       </div>
       <div class="nav-actions">
@@ -107,7 +98,7 @@
     <section class="bio-card glass-card" data-aos="fade-up" data-aos-duration="800">
       <p class="bio-quote">
         <i class="fas fa-quote-left"></i>
-        I manage IT at FIBC Lanka, keeping everything from networks, servers, cloud, ERP, and CCTV running smoothly. Alongside that, I handle digital design work & artwork for bags, social media posts, and other creative needs. My background is in computer networks and software engineering, with hands-on experience in both tech and design.
+        I manage IT at FIBC Lanka, keeping everything from networks, servers, cloud, ERP, and CCTV running smoothly. Alongside that, I handle digital design work & artwork for bags, social media posts, and other creative needs. My background is in computer networks and software engineering, with hands‑on experience in both tech and design.
       </p>
       <div class="linkedin-badge" id="linkedinStatus">
         <i class="fab fa-linkedin"></i> <span id="linkedinHeadline">Loading...</span>
@@ -139,15 +130,6 @@
         <h2>Tech Arsenal</h2>
       </div>
       <div class="skills-container" id="skillsContainer"></div>
-    </section>
-
-    <!-- Education -->
-    <section id="education" data-aos="fade-up">
-      <div class="section-header">
-        <span class="section-eyebrow">Learning</span>
-        <h2>Education</h2>
-      </div>
-      <div class="timeline" id="educationTimeline"></div>
     </section>
 
     <!-- Contact -->
@@ -206,6 +188,14 @@
       <div id="modalLinks"></div>
     </div>
   </div>
+
+  <!-- 🏏 Cricket Game Button -->
+  <div class="cricket-btn" id="cricketBtn" title="Play Cricket">
+    🏏
+  </div>
+
+  <!-- Cricket Game Canvas (hidden by default) -->
+  <canvas id="cricketCanvas" style="display:none;"></canvas>
 
   <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
   <script src="script.js"></script>

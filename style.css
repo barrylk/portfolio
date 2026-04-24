@@ -87,48 +87,6 @@ body {
   transition: opacity 0.5s;
 }
 
-/* Meme overlay */
-.meme-overlay {
-  position: fixed;
-  inset: 0;
-  background: #000000;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.8s, visibility 0.8s;
-}
-.meme-overlay.active {
-  opacity: 1;
-  visibility: visible;
-}
-.meme-content {
-  text-align: center;
-  color: #ff2d55;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-.meme-text {
-  font-size: clamp(4rem, 15vw, 8rem);
-  animation: glitch 0.3s infinite;
-}
-.meme-timer {
-  font-size: 1.5rem;
-  color: #86868b;
-  margin-top: 2rem;
-}
-@keyframes glitch {
-  0% { transform: translate(0); }
-  20% { transform: translate(-3px, 3px); }
-  40% { transform: translate(3px, -2px); }
-  60% { transform: translate(-2px, -3px); }
-  80% { transform: translate(2px, 2px); }
-  100% { transform: translate(0); }
-}
-
 /* Loader */
 .loader-wrapper {
   position: fixed;
@@ -252,7 +210,7 @@ body.dark .glass-nav {
 .shape-4 { width:250px; height:250px; background:var(--accent); border-radius:70% 30% 60% 40% / 40% 60% 40% 60%; top:20%; right:15%; }
 .shape-5 { width:180px; height:180px; background:var(--purple); border-radius:60% 40% 50% 50% / 50% 50% 40% 60%; bottom:5%; left:40%; }
 
-/* Floating Apple devices – realistic */
+/* Floating Apple devices */
 .floating-devices {
   position: fixed;
   top: 0;
@@ -269,7 +227,6 @@ body.dark .glass-nav {
   animation: floatDevice 18s ease-in-out infinite;
   will-change: transform;
 }
-/* MacBook */
 .floating-device.macbook {
   width: 160px;
   height: 100px;
@@ -319,7 +276,6 @@ body.dark .glass-nav {
   background: #333;
   border-radius: 3px;
 }
-/* iMac */
 .floating-device.imac {
   width: 130px;
   height: 100px;
@@ -355,7 +311,6 @@ body.dark .glass-nav {
   position: relative;
   border: 1.5px solid #777;
 }
-/* iPhone */
 .floating-device.iphone {
   width: 42px;
   height: 85px;
@@ -413,7 +368,6 @@ body.dark .glass-nav {
   padding-top: 4rem;
 }
 .hero-image { flex: 0 0 auto; }
-/* Profile glow ring – perfectly round */
 .profile-wrapper {
   position: relative;
   display: inline-block;
@@ -716,8 +670,48 @@ body.dark .glass-nav {
 .modal-content { max-width: 500px; padding: 2rem; }
 .modal-close { float: right; font-size: 1.5rem; cursor: pointer; }
 
+/* 🏏 Cricket Game Button & Canvas */
+.cricket-btn {
+  position: fixed;
+  bottom: 100px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  z-index: 50;
+  transition: var(--transition);
+  user-select: none;
+}
+.cricket-btn:hover {
+  transform: scale(1.1);
+  border-color: var(--accent);
+}
+#cricketCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 300;
+  background: #1a1a2e;
+  cursor: pointer;
+}
+
 @media (max-width: 768px) {
   .hero { flex-direction: column; min-height: auto; }
   .nav-links { display: none; }
   .light-beam { opacity: 0.2; }
+  .cricket-btn {
+    bottom: 100px;
+    right: 20px;
+  }
 }
