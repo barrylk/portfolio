@@ -1,22 +1,23 @@
 // ========== AOS ==========
 AOS.init({ duration: 800, easing: 'ease-out-cubic', once: true });
 
-// ========== LOADER ==========
-window.addEventListener('load', () => document.body.classList.add('loaded'));
+// ========== SPLASH LOADER ==========
+window.addEventListener('load', () => {
+  setTimeout(() => { document.body.classList.add('loaded'); }, 1500);
+});
 
-// ========== THEME (now toggles between dark/light, default dark) ==========
+// ========== THEME (iOS toggle + auto) ==========
 const bodyEl = document.body;
-const toggleBtn = document.getElementById('themeToggleBtnSmall');
-const toggleIcon = document.getElementById('toggleIconSmall');
+const themeToggle = document.getElementById('themeToggleCheckbox');
 let manualMode = false, userOverride = localStorage.getItem('themeOverride');
 
 function updateThemeUI(light) {
   if (light) {
     bodyEl.classList.add('light');
-    toggleIcon.className = 'fas fa-moon';
+    themeToggle.checked = true;
   } else {
     bodyEl.classList.remove('light');
-    toggleIcon.className = 'fas fa-sun';
+    themeToggle.checked = false;
   }
 }
 function isDay() { const h = new Date().getHours(); return h >= 6 && h < 18; }
@@ -26,10 +27,9 @@ function applyTheme() {
   else light = isDay();
   updateThemeUI(light);
 }
-toggleBtn.addEventListener('click', () => {
+themeToggle.addEventListener('change', () => {
   manualMode = true;
-  const currentlyLight = bodyEl.classList.contains('light');
-  userOverride = currentlyLight ? 'dark' : 'light';
+  userOverride = themeToggle.checked ? 'light' : 'dark';
   localStorage.setItem('themeOverride', userOverride);
   applyTheme();
 });
@@ -93,6 +93,21 @@ function updateClock() {
   document.getElementById('liveClock').textContent = now.toLocaleTimeString('en-US', options);
 }
 fetchGeoData();
+
+// ========== MOBILE TAB BAR ACTIVE STATE ==========
+const sections = ['hero', 'experience', 'projects', 'skills', 'education', 'contact'];
+const tabItems = document.querySelectorAll('.tab-item');
+window.addEventListener('scroll', () => {
+  let current = sections[0];
+  for (const section of sections) {
+    const el = document.getElementById(section);
+    if (el && window.scrollY >= el.offsetTop - 200) current = section;
+  }
+  tabItems.forEach(tab => {
+    tab.classList.remove('active');
+    if (tab.getAttribute('href') === `#${current}`) tab.classList.add('active');
+  });
+});
 
 // ========== EXPERIENCE ==========
 const expData = [
@@ -202,8 +217,8 @@ function openModal(p) {
   document.getElementById('modalTitle').textContent = p.name;
   document.getElementById('modalDescription').textContent = p.description||'';
   let links = '';
-  if (p.links?.github) links += `<a href="${p.links.github}" target="_blank" class="cta-btn">GitHub</a>`;
-  if (p.links?.drive) links += `<a href="${p.links.drive}" target="_blank" class="cta-btn">Drive</a>`;
+  if (p.links?.github) links += `<a href="${p.links.github}" target="_blank" class="cta-btn primary">GitHub</a>`;
+  if (p.links?.drive) links += `<a href="${p.links.drive}" target="_blank" class="cta-btn primary">Drive</a>`;
   document.getElementById('modalLinks').innerHTML = links;
   document.getElementById('projectModal').style.display = 'flex';
 }
@@ -233,24 +248,24 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.z = 30;
 
-// Particle system
-const particleCount = 600;
+const particleCount = 800;
 const geometry = new THREE.BufferGeometry();
 const positions = new Float32Array(particleCount * 3);
 const colors = new Float32Array(particleCount * 3);
 
-const color1 = new THREE.Color(0x00f0ff); // cyan
-const color2 = new THREE.Color(0xb44bff); // purple
-const color3 = new THREE.Color(0xff4d7d); // pink
+const color1 = new THREE.Color(0x00f0ff);
+const color2 = new THREE.Color(0xb44bff);
+const color3 = new THREE.Color(0xff4d7d);
 
 for (let i = 0; i < particleCount; i++) {
-  positions[i * 3] = (Math.random() - 0.5) * 50;
-  positions[i * 3 + 1] = (Math.random() - 0.5) * 30;
-  positions[i * 3 + 2] = (Math.random() - 0.5) * 30;
+  positions[i * 3] = (Math.random() - 0.5) * 60;
+  positions[i * 3 + 1] = (Math.random() - 0.5) * 40;
+  positions[i * 3 + 2] = (Math.random() - 0.5) * 40;
 
   let color;
-  if (Math.random() < 0.33) color = color1;
-  else if (Math.random() < 0.66) color = color2;
+  const r = Math.random();
+  if (r < 0.33) color = color1;
+  else if (r < 0.66) color = color2;
   else color = color3;
   colors[i * 3] = color.r;
   colors[i * 3 + 1] = color.g;
@@ -260,22 +275,21 @@ geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
 const material = new THREE.PointsMaterial({
-  size: 0.15,
+  size: 0.2,
   vertexColors: true,
   blending: THREE.AdditiveBlending,
   depthWrite: false,
   transparent: true,
-  opacity: 0.8
+  opacity: 0.9
 });
-
 const particles = new THREE.Points(geometry, material);
 scene.add(particles);
 
-// Lines between nearby particles (simple wireframe grid)
+// Network lines
 const lineGeometry = new THREE.BufferGeometry();
 const linePositions = [];
 const lineColors = [];
-const maxDist = 8;
+const maxDist = 10;
 for (let i = 0; i < particleCount; i++) {
   for (let j = i + 1; j < particleCount; j++) {
     const dx = positions[i * 3] - positions[j * 3];
@@ -293,41 +307,34 @@ for (let i = 0; i < particleCount; i++) {
 }
 lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
 lineGeometry.setAttribute('color', new THREE.Float32BufferAttribute(lineColors, 3));
-const lineMaterial = new THREE.LineBasicMaterial({ vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.3 });
+const lineMaterial = new THREE.LineBasicMaterial({ vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.25 });
 const lines = new THREE.LineSegments(lineGeometry, lineMaterial);
 scene.add(lines);
 
-// Mouse interaction
 const mouse = { x: 0, y: 0 };
 document.addEventListener('mousemove', (e) => {
   mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 });
-// For mobile, use device orientation
 if (window.matchMedia('(pointer: coarse)').matches) {
   window.addEventListener('deviceorientation', (e) => {
     if (e.gamma === null || e.beta === null) return;
-    mouse.x = (e.gamma / 45); // roughly -1..1
+    mouse.x = (e.gamma / 45);
     mouse.y = -(e.beta / 45);
   });
 }
 
 function animate() {
   requestAnimationFrame(animate);
-
   particles.rotation.x += 0.0002;
   particles.rotation.y += 0.0001;
-
-  // Rotate towards mouse
-  particles.rotation.x += (mouse.y * 0.1 - particles.rotation.x) * 0.01;
-  particles.rotation.y += (mouse.x * 0.1 - particles.rotation.y) * 0.01;
+  particles.rotation.x += (mouse.y * 0.05 - particles.rotation.x) * 0.01;
+  particles.rotation.y += (mouse.x * 0.05 - particles.rotation.y) * 0.01;
   lines.rotation.x = particles.rotation.x;
   lines.rotation.y = particles.rotation.y;
-
   renderer.render(scene, camera);
 }
 animate();
-
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -335,7 +342,6 @@ window.addEventListener('resize', () => {
 });
 
 // ========== SNAKE GAME ==========
-// (same as before, no changes needed)
 const snakeBtn = document.getElementById('snakeBtn');
 const snakeModal = document.getElementById('snakeGameModal');
 const snakeClose = document.getElementById('snakeGameCloseBtn');
@@ -390,9 +396,7 @@ function moveSnake() {
   if (snake.some(p => p.x === head.x && p.y === head.y)) { endGame(); return; }
   snake.unshift(head);
   if (head.x === food.x && head.y === food.y) {
-    score += 10;
-    updateScore();
-    placeFood();
+    score += 10; updateScore(); placeFood();
   } else { snake.pop(); }
 }
 function endGame() {
@@ -411,7 +415,6 @@ function startSnakeGame() {
   if (gameRunning) return;
   initSnake();
   gameInterval = setInterval(gameLoop, 100);
-  scoreSpan.textContent = `Score: 0`;
 }
 function stopSnakeGame() { gameRunning = false; clearInterval(gameInterval); }
 
@@ -423,7 +426,6 @@ document.addEventListener('keydown', (e) => {
   if (['arrowleft','a'].includes(key) && direction.x === 0) nextDirection = {x:-1, y:0};
   if (['arrowright','d'].includes(key) && direction.x === 0) nextDirection = {x:1, y:0};
 });
-
 let touchStartX, touchStartY;
 snakeCanvas.addEventListener('touchstart', (e) => {
   touchStartX = e.touches[0].clientX;
@@ -449,7 +451,6 @@ function closeSnake() { snakeModal.classList.remove('active'); stopSnakeGame(); 
 snakeClose.addEventListener('click', closeSnake);
 snakeModal.addEventListener('click', (e) => { if (e.target === snakeModal) closeSnake(); });
 
-// Draggable (desktop only)
 const isMobile = window.matchMedia('(pointer: coarse)').matches;
 if (!isMobile) {
   let offX, offY, dragging = false;
@@ -468,5 +469,5 @@ if (!isMobile) {
   document.addEventListener('mouseup', () => { dragging = false; snakeWindow.style.transition = ''; });
 }
 
-// Load projects
+// Load projects on start
 window.addEventListener('load', () => loadProjects());

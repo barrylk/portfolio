@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
   <title>Nadeeja Nirmala · IT & Creative</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -11,19 +11,20 @@
 </head>
 <body class="loading dark">
 
-  <!-- Three.js canvas background -->
+  <!-- 3D Canvas -->
   <canvas id="bgCanvas"></canvas>
 
-  <!-- Page Loader -->
-  <div class="loader-wrapper">
-    <div class="apple-loader"></div>
+  <!-- Splash Loader -->
+  <div class="splash-loader" id="splashLoader">
+    <div class="apple-logo"></div>
+    <div class="loading-bar"></div>
   </div>
 
-  <!-- Sticky Navigation -->
+  <!-- iOS-style Navigation (top) -->
   <nav class="nav-bar glass-nav" id="navbar">
-    <div class="nav-container container">
+    <div class="nav-container">
       <a href="#" class="nav-logo">Nadeeja<span>.</span></a>
-      <div class="nav-links">
+      <div class="nav-links desktop-only">
         <a href="#experience">Experience</a>
         <a href="#projects">Projects</a>
         <a href="#skills">Skills</a>
@@ -35,23 +36,32 @@
           <span id="visitorFlag">🌐</span>
           <span id="liveClock">00:00</span>
         </div>
-        <button class="theme-btn-small" id="themeToggleBtnSmall">
-          <i class="fas" id="toggleIconSmall"></i>
-        </button>
+        <!-- iOS-style toggle switch -->
+        <label class="ios-toggle" for="themeToggleCheckbox">
+          <input type="checkbox" id="themeToggleCheckbox" />
+          <span class="ios-toggle-slider"></span>
+        </label>
       </div>
     </div>
   </nav>
 
-  <!-- Background Effects (CSS) -->
-  <div class="bg-grid"></div>
+  <!-- Mobile Bottom Tab Bar (iOS style) -->
+  <div class="mobile-tab-bar glass-nav" id="mobileTabBar">
+    <a href="#hero" class="tab-item active"><i class="fas fa-home"></i><span>Home</span></a>
+    <a href="#experience" class="tab-item"><i class="fas fa-briefcase"></i><span>Work</span></a>
+    <a href="#projects" class="tab-item"><i class="fas fa-code-branch"></i><span>Projects</span></a>
+    <a href="#skills" class="tab-item"><i class="fas fa-chart-bar"></i><span>Skills</span></a>
+    <a href="#contact" class="tab-item"><i class="fas fa-paper-plane"></i><span>Contact</span></a>
+  </div>
+
+  <!-- Background Effects -->
   <div class="bg-shapes">
     <div class="shape shape-1"></div>
     <div class="shape shape-2"></div>
     <div class="shape shape-3"></div>
-    <div class="shape shape-4"></div>
-    <div class="shape shape-5"></div>
   </div>
-  <!-- Floating Apple Devices (CSS) -->
+
+  <!-- Floating Apple Devices -->
   <div class="floating-devices">
     <div class="floating-device macbook">
       <div class="screen"></div>
@@ -67,7 +77,7 @@
   </div>
 
   <main class="container main-content">
-    <!-- Hero -->
+    <!-- Hero with dynamic island -->
     <section class="hero" id="hero">
       <div class="hero-image" data-aos="fade-down" data-aos-duration="1000">
         <div class="profile-wrapper">
@@ -75,10 +85,14 @@
         </div>
       </div>
       <div class="hero-text" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
+        <div class="dynamic-island">
+          <span class="island-dot"></span>
+          <span>IT Manager & Digital Creative</span>
+          <span class="island-dot"></span>
+        </div>
         <h1 class="hero-title">
           <span class="gradient-text">Nadeeja Nirmala<br>Hendavitharana</span>
         </h1>
-        <p class="hero-subtitle">IT Manager & Digital Creative</p>
         <div class="hero-location">
           <i class="fas fa-map-pin"></i> Polonnaruwa, Sri Lanka · <span id="ageDisplay">26</span> y/o
         </div>
@@ -88,7 +102,7 @@
           <a href="mailto:nirmala.itdev@proton.me" class="icon-btn" data-tooltip="ProtonMail"><i class="fas fa-shield-halved"></i></a>
         </div>
         <div class="hero-cta">
-          <a href="https://linkedin.com/in/nadeejanirmala/" target="_blank" class="cta-btn"><i class="fab fa-linkedin"></i> Hire Me</a>
+          <a href="https://linkedin.com/in/nadeejanirmala/" target="_blank" class="cta-btn primary"><i class="fab fa-linkedin"></i> Hire Me</a>
           <a href="#contact" class="cta-btn secondary">Get in Touch</a>
         </div>
       </div>
@@ -168,7 +182,7 @@
           <textarea id="message" name="message" rows="5" required placeholder=" "></textarea>
           <label for="message">Your Message</label>
         </div>
-        <button type="submit" class="cta-btn submit-btn">Send Message <i class="fas fa-arrow-right"></i></button>
+        <button type="submit" class="cta-btn primary submit-btn">Send Message <i class="fas fa-arrow-right"></i></button>
         <p id="form-status"></p>
       </form>
     </section>
@@ -183,14 +197,19 @@
     </footer>
   </main>
 
-  <!-- Floating Buttons -->
-  <a href="https://wa.me/message/4YGA7K2KMFCNK1" target="_blank" class="whatsapp-float"><i class="fab fa-whatsapp"></i></a>
-  <button class="snake-float" id="snakeBtn" title="Play Snake"><i class="fas fa-gamepad"></i></button>
+  <!-- Floating action buttons -->
+  <div class="fab-container">
+    <a href="https://wa.me/message/4YGA7K2KMFCNK1" target="_blank" class="fab whatsapp-fab"><i class="fab fa-whatsapp"></i></a>
+    <button class="fab snake-fab" id="snakeBtn" title="Play Snake"><i class="fas fa-gamepad"></i></button>
+  </div>
 
   <!-- Snake Game Modal -->
   <div class="game-modal" id="snakeGameModal">
     <div class="game-window" id="snakeGameWindow">
-      <div class="game-header" id="snakeDragHandle"><span>Snake Game</span><button class="game-close" id="snakeGameCloseBtn">✕</button></div>
+      <div class="game-header" id="snakeDragHandle">
+        <span>Snake Game</span>
+        <button class="game-close" id="snakeGameCloseBtn">✕</button>
+      </div>
       <div class="game-body">
         <canvas id="snakeCanvas" width="300" height="300"></canvas>
         <div class="game-score" id="snakeScore">Score: 0</div>
