@@ -20,7 +20,30 @@
     <div class="loading-bar"></div>
   </div>
 
-  <!-- iOS-style Navigation (top) -->
+  <!-- Real‑time Network Monitor (top‑left) -->
+  <div class="network-monitor glass-card" id="networkMonitor">
+    <div class="monitor-header">
+      <i class="fas fa-network-wired"></i>
+      <span>Network Monitor</span>
+    </div>
+    <div class="monitor-stats">
+      <div class="stat-row">
+        <span>↓ Download</span>
+        <span id="dlSpeed">0 Mbps</span>
+      </div>
+      <div class="stat-row">
+        <span>↑ Upload</span>
+        <span id="ulSpeed">0 Mbps</span>
+      </div>
+      <div class="stat-row">
+        <span>🌐 Latency</span>
+        <span id="latency">0 ms</span>
+      </div>
+    </div>
+    <div class="monitor-wave"></div>
+  </div>
+
+  <!-- iOS‑style Navigation (top) -->
   <nav class="nav-bar glass-nav" id="navbar">
     <div class="nav-container">
       <a href="#" class="nav-logo">Nadeeja<span>.</span></a>
@@ -36,7 +59,7 @@
           <span id="visitorFlag">🌐</span>
           <span id="liveClock">00:00</span>
         </div>
-        <!-- iOS-style toggle switch -->
+        <!-- iOS‑style toggle switch -->
         <label class="ios-toggle" for="themeToggleCheckbox">
           <input type="checkbox" id="themeToggleCheckbox" />
           <span class="ios-toggle-slider"></span>
@@ -197,10 +220,11 @@
     </footer>
   </main>
 
-  <!-- Floating action buttons -->
+  <!-- Floating action buttons (WhatsApp, Snake, Music) -->
   <div class="fab-container">
     <a href="https://wa.me/message/4YGA7K2KMFCNK1" target="_blank" class="fab whatsapp-fab"><i class="fab fa-whatsapp"></i></a>
     <button class="fab snake-fab" id="snakeBtn" title="Play Snake"><i class="fas fa-gamepad"></i></button>
+    <button class="fab music-fab" id="musicBtn" title="Bored?"><i class="fas fa-music"></i></button>
   </div>
 
   <!-- Snake Game Modal -->
@@ -218,6 +242,40 @@
     </div>
   </div>
 
+  <!-- Music Player Modal (Bored?) -->
+  <div class="music-modal" id="musicModal">
+    <div class="music-player glass-card">
+      <div class="music-header">
+        <span>Bored? 🎧</span>
+        <button class="music-close" id="musicCloseBtn">✕</button>
+      </div>
+      <div class="music-body">
+        <div class="song-info">
+          <span id="songTitle">Select a song</span>
+          <span id="songArtist"></span>
+        </div>
+        <div class="progress-container">
+          <input type="range" id="progressBar" value="0" min="0" max="100">
+          <div class="time">
+            <span id="currentTime">0:00</span>
+            <span id="duration">0:00</span>
+          </div>
+        </div>
+        <div class="controls">
+          <button id="prevBtn"><i class="fas fa-backward"></i></button>
+          <button id="playBtn"><i class="fas fa-play"></i></button>
+          <button id="nextBtn"><i class="fas fa-forward"></i></button>
+        </div>
+        <div class="volume-container">
+          <i class="fas fa-volume-up"></i>
+          <input type="range" id="volumeBar" value="80" min="0" max="100">
+        </div>
+      </div>
+      <!-- Hidden YouTube iframe (audio only) -->
+      <div id="ytPlayer" style="position:absolute; width:0; height:0; overflow:hidden;"></div>
+    </div>
+  </div>
+
   <!-- Project Modal -->
   <div class="modal" id="projectModal">
     <div class="modal-content glass-card">
@@ -230,6 +288,7 @@
 
   <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://www.youtube.com/iframe_api"></script>
   <script src="script.js"></script>
 </body>
 </html>

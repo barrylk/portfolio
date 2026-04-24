@@ -237,7 +237,7 @@ document.getElementById('contactForm').addEventListener('submit', async function
   } catch { status.textContent = '❌ Network error.'; }
 });
 
-// ========== THREE.JS NETWORK PARTICLES ==========
+// ========== ENHANCED 3D BACKGROUND (Central Globe + Particles) ==========
 const canvas = document.getElementById('bgCanvas');
 const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -246,21 +246,30 @@ renderer.setClearColor(0x000000, 0);
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.z = 30;
+camera.position.z = 40;
 
-const particleCount = 800;
-const geometry = new THREE.BufferGeometry();
+// Central globe (wireframe icosahedron)
+const globeGeom = new THREE.IcosahedronGeometry(8, 2);
+const globeMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, wireframe: true, transparent: true, opacity: 0.2 });
+const globe = new THREE.Mesh(globeGeom, globeMat);
+scene.add(globe);
+
+// Particles around globe
+const particleCount = 1000;
+const particleGeom = new THREE.BufferGeometry();
 const positions = new Float32Array(particleCount * 3);
 const colors = new Float32Array(particleCount * 3);
-
 const color1 = new THREE.Color(0x00f0ff);
 const color2 = new THREE.Color(0xb44bff);
 const color3 = new THREE.Color(0xff4d7d);
 
 for (let i = 0; i < particleCount; i++) {
-  positions[i * 3] = (Math.random() - 0.5) * 60;
-  positions[i * 3 + 1] = (Math.random() - 0.5) * 40;
-  positions[i * 3 + 2] = (Math.random() - 0.5) * 40;
+  const radius = 12 + Math.random() * 8;
+  const theta = Math.random() * Math.PI * 2;
+  const phi = Math.asin((Math.random() * 2) - 1);
+  positions[i * 3] = Math.cos(theta) * Math.cos(phi) * radius;
+  positions[i * 3 + 1] = Math.sin(phi) * radius;
+  positions[i * 3 + 2] = Math.sin(theta) * Math.cos(phi) * radius;
 
   let color;
   const r = Math.random();
@@ -271,10 +280,9 @@ for (let i = 0; i < particleCount; i++) {
   colors[i * 3 + 1] = color.g;
   colors[i * 3 + 2] = color.b;
 }
-geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-const material = new THREE.PointsMaterial({
+particleGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+particleGeom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+const particleMat = new THREE.PointsMaterial({
   size: 0.2,
   vertexColors: true,
   blending: THREE.AdditiveBlending,
@@ -282,14 +290,14 @@ const material = new THREE.PointsMaterial({
   transparent: true,
   opacity: 0.9
 });
-const particles = new THREE.Points(geometry, material);
+const particles = new THREE.Points(particleGeom, particleMat);
 scene.add(particles);
 
-// Network lines
-const lineGeometry = new THREE.BufferGeometry();
+// Connecting lines (network)
+const lineGeom = new THREE.BufferGeometry();
 const linePositions = [];
 const lineColors = [];
-const maxDist = 10;
+const maxDist = 2.5;
 for (let i = 0; i < particleCount; i++) {
   for (let j = i + 1; j < particleCount; j++) {
     const dx = positions[i * 3] - positions[j * 3];
@@ -305,12 +313,13 @@ for (let i = 0; i < particleCount; i++) {
     }
   }
 }
-lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
-lineGeometry.setAttribute('color', new THREE.Float32BufferAttribute(lineColors, 3));
-const lineMaterial = new THREE.LineBasicMaterial({ vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.25 });
-const lines = new THREE.LineSegments(lineGeometry, lineMaterial);
+lineGeom.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+lineGeom.setAttribute('color', new THREE.Float32BufferAttribute(lineColors, 3));
+const lineMat = new THREE.LineBasicMaterial({ vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.15 });
+const lines = new THREE.LineSegments(lineGeom, lineMat);
 scene.add(lines);
 
+// Mouse / tilt interaction
 const mouse = { x: 0, y: 0 };
 document.addEventListener('mousemove', (e) => {
   mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -326,12 +335,23 @@ if (window.matchMedia('(pointer: coarse)').matches) {
 
 function animate() {
   requestAnimationFrame(animate);
+
+  // Rotate globe & particles
+  globe.rotation.y += 0.002;
+  globe.rotation.x += 0.001;
+  particles.rotation.y += 0.0005;
   particles.rotation.x += 0.0002;
-  particles.rotation.y += 0.0001;
-  particles.rotation.x += (mouse.y * 0.05 - particles.rotation.x) * 0.01;
-  particles.rotation.y += (mouse.x * 0.05 - particles.rotation.y) * 0.01;
-  lines.rotation.x = particles.rotation.x;
   lines.rotation.y = particles.rotation.y;
+  lines.rotation.x = particles.rotation.x;
+
+  // React to mouse
+  const targetRotX = mouse.y * 0.5;
+  const targetRotY = mouse.x * 0.5;
+  globe.rotation.x += (targetRotX - globe.rotation.x) * 0.01;
+  globe.rotation.y += (targetRotY - globe.rotation.y) * 0.01;
+  particles.rotation.x += (targetRotX * 0.1 - particles.rotation.x) * 0.01;
+  particles.rotation.y += (targetRotY * 0.1 - particles.rotation.y) * 0.01;
+
   renderer.render(scene, camera);
 }
 animate();
@@ -340,6 +360,21 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+// ========== NETWORK MONITOR SIMULATION ==========
+const dlEl = document.getElementById('dlSpeed');
+const ulEl = document.getElementById('ulSpeed');
+const latEl = document.getElementById('latency');
+function updateNetworkStats() {
+  const dl = (Math.random() * 50 + 10).toFixed(1); // 10‑60 Mbps
+  const ul = (Math.random() * 20 + 5).toFixed(1);
+  const lat = (Math.random() * 80 + 5).toFixed(0);
+  dlEl.textContent = `${dl} Mbps`;
+  ulEl.textContent = `${ul} Mbps`;
+  latEl.textContent = `${lat} ms`;
+}
+setInterval(updateNetworkStats, 1500);
+updateNetworkStats();
 
 // ========== SNAKE GAME ==========
 const snakeBtn = document.getElementById('snakeBtn');
@@ -451,6 +486,7 @@ function closeSnake() { snakeModal.classList.remove('active'); stopSnakeGame(); 
 snakeClose.addEventListener('click', closeSnake);
 snakeModal.addEventListener('click', (e) => { if (e.target === snakeModal) closeSnake(); });
 
+// Draggable for snake (desktop only)
 const isMobile = window.matchMedia('(pointer: coarse)').matches;
 if (!isMobile) {
   let offX, offY, dragging = false;
@@ -469,5 +505,171 @@ if (!isMobile) {
   document.addEventListener('mouseup', () => { dragging = false; snakeWindow.style.transition = ''; });
 }
 
-// Load projects on start
+// ========== MUSIC PLAYER (YouTube audio only) ==========
+const playlist = [
+  { id: 'JGwWNGJdvx8', title: 'Shape of You', artist: 'Ed Sheeran' },
+  { id: 'fKopy74weus', title: 'Blinding Lights', artist: 'The Weeknd' },
+  { id: '9bZkp7q19f0', title: 'Gangnam Style', artist: 'PSY' },
+  { id: 'kJQP7kiw5Fk', title: 'Despacito', artist: 'Luis Fonsi' },
+  { id: 'RgKAFK5djSk', title: 'See You Again', artist: 'Wiz Khalifa' }
+];
+let currentTrackIndex = 0;
+let player;
+let isPlaying = false;
+let progressInterval;
+
+const musicBtn = document.getElementById('musicBtn');
+const musicModal = document.getElementById('musicModal');
+const musicCloseBtn = document.getElementById('musicCloseBtn');
+const playBtn = document.getElementById('playBtn');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const progressBar = document.getElementById('progressBar');
+const volumeBar = document.getElementById('volumeBar');
+const currentTimeEl = document.getElementById('currentTime');
+const durationEl = document.getElementById('duration');
+const songTitleEl = document.getElementById('songTitle');
+const songArtistEl = document.getElementById('songArtist');
+
+function loadTrack(index) {
+  currentTrackIndex = index;
+  const track = playlist[index];
+  songTitleEl.textContent = track.title;
+  songArtistEl.textContent = track.artist;
+  if (player && player.loadVideoById) {
+    player.loadVideoById(track.id);
+    isPlaying = false;
+    playBtn.innerHTML = '<i class="fas fa-play"></i>';
+    clearInterval(progressInterval);
+  }
+}
+
+function togglePlay() {
+  if (!player) return;
+  if (isPlaying) {
+    player.pauseVideo();
+    playBtn.innerHTML = '<i class="fas fa-play"></i>';
+  } else {
+    player.playVideo();
+    playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+  }
+}
+
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player('ytPlayer', {
+    height: '0',
+    width: '0',
+    videoId: playlist[0].id,
+    playerVars: {
+      autoplay: 0,
+      controls: 0,
+      disablekb: 1,
+      fs: 0,
+      iv_load_policy: 3,
+      modestbranding: 1,
+      rel: 0
+    },
+    events: {
+      onReady: onPlayerReady,
+      onStateChange: onPlayerStateChange
+    }
+  });
+}
+
+function onPlayerReady(event) {
+  setVolume();
+  updateDuration();
+  progressInterval = setInterval(updateProgress, 500);
+}
+
+function onPlayerStateChange(event) {
+  if (event.data === YT.PlayerState.PLAYING) {
+    isPlaying = true;
+    playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+  } else if (event.data === YT.PlayerState.PAUSED) {
+    isPlaying = false;
+    playBtn.innerHTML = '<i class="fas fa-play"></i>';
+  } else if (event.data === YT.PlayerState.ENDED) {
+    nextTrack();
+  }
+}
+
+function setVolume() {
+  if (player) {
+    player.setVolume(volumeBar.value);
+  }
+}
+
+function updateProgress() {
+  if (player && player.getCurrentTime && player.getDuration) {
+    const current = player.getCurrentTime();
+    const duration = player.getDuration();
+    if (duration) {
+      progressBar.value = (current / duration) * 100;
+      currentTimeEl.textContent = formatTime(current);
+      durationEl.textContent = formatTime(duration);
+    }
+  }
+}
+
+function updateDuration() {
+  if (player && player.getDuration) {
+    const dur = player.getDuration();
+    if (dur) durationEl.textContent = formatTime(dur);
+  }
+}
+
+function seekTo(value) {
+  if (player && player.getDuration) {
+    const time = (value / 100) * player.getDuration();
+    player.seekTo(time, true);
+  }
+}
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${s < 10 ? '0' : ''}${s}`;
+}
+
+function prevTrack() {
+  let idx = currentTrackIndex - 1;
+  if (idx < 0) idx = playlist.length - 1;
+  loadTrack(idx);
+  if (isPlaying) setTimeout(() => player.playVideo(), 500);
+}
+
+function nextTrack() {
+  let idx = (currentTrackIndex + 1) % playlist.length;
+  loadTrack(idx);
+  if (isPlaying) setTimeout(() => player.playVideo(), 500);
+}
+
+musicBtn.addEventListener('click', () => {
+  musicModal.classList.add('active');
+  if (!player) {
+    // If YouTube API already loaded, initialize
+    if (typeof YT !== 'undefined' && YT.Player) {
+      onYouTubeIframeAPIReady();
+    }
+  }
+});
+
+musicCloseBtn.addEventListener('click', () => {
+  musicModal.classList.remove('active');
+});
+
+playBtn.addEventListener('click', togglePlay);
+prevBtn.addEventListener('click', prevTrack);
+nextBtn.addEventListener('click', nextTrack);
+progressBar.addEventListener('input', () => seekTo(progressBar.value));
+volumeBar.addEventListener('input', setVolume);
+
+// Ensure YouTube API callback is set
+window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+if (typeof YT !== 'undefined' && YT.Player) {
+  onYouTubeIframeAPIReady();
+}
+
+// ========== LOAD PROJECTS ON START ==========
 window.addEventListener('load', () => loadProjects());
