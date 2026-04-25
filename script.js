@@ -785,4 +785,5 @@ function drawRealWorldMap() {
   requestAnimationFrame(animate);
 }
 
-window.addEventListener('load', initMap);
+window.addEventListener('load', initMap);t e s t  
+ 
