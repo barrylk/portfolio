@@ -11,7 +11,7 @@ function initAOS() {
 initAOS();
 
 /* ============================
-   THEME TOGGLE (iOS switch + auto)
+   THEME TOGGLE (iOS switch + auto day/night)
    ============================ */
 const bodyEl = document.body;
 const themeToggle = document.getElementById('themeToggleCheckbox');
@@ -62,13 +62,13 @@ ageEl.textContent = age;
 document.getElementById('currentYear').textContent = today.getFullYear();
 
 /* ============================
-   VISITOR FLAG & CLOCK (IP‑based)
+   VISITOR FLAG & CLOCK (IP‑based timezone)
    ============================ */
 let visitorTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 let clockInterval = null;
 
 async function fetchGeoData() {
-  // Try ipapi.co first
+  // Try ipapi.co
   try {
     const res = await fetch('https://ipapi.co/json/');
     if (res.ok) {
@@ -83,7 +83,7 @@ async function fetchGeoData() {
       }
     }
   } catch (e) {}
-  // Fallback to ip-api.com
+  // Fallback to ip‑api.com
   try {
     const res = await fetch('https://ip-api.com/json/?fields=status,countryCode,timezone');
     if (res.ok) {
@@ -100,7 +100,7 @@ async function fetchGeoData() {
       }
     }
   } catch (e) {}
-  // If all fail, show globe and use device timezone
+  // If all fail, show globe
   document.getElementById('visitorFlag').textContent = '🌐';
   startClock();
 }
@@ -139,10 +139,18 @@ window.addEventListener('scroll', () => {
    EXPERIENCE DATA
    ============================ */
 const expData = [
-  { period: 'Dec 2024 – Present', title: 'IT Manager', company: 'FIBC Lanka (Pvt) Ltd, Polonnaruwa',
-    desc: 'Managing IT operations, networks, servers, cloud, security, ERP (Tally Prime), HRM (SignHR), CCTV, and hardware/software support. Also creating bag artwork and social media content.' },
-  { period: 'Jul 2021 – Oct 2023', title: 'Computer Aided Design Designer', company: 'Brandix, Polonnaruwa',
-    desc: 'Designed apparel patterns using Lectra Modaris and AutoCAD, ensuring precision and efficiency in mass production.' }
+  {
+    period: 'Dec 2024 – Present',
+    title: 'IT Manager',
+    company: 'FIBC Lanka (Pvt) Ltd, Polonnaruwa',
+    desc: 'Managing IT operations, networks, servers, cloud, security, ERP (Tally Prime), HRM (SignHR), CCTV, and hardware/software support. Also creating bag artwork and social media content.'
+  },
+  {
+    period: 'Jul 2021 – Oct 2023',
+    title: 'Computer Aided Design Designer',
+    company: 'Brandix, Polonnaruwa',
+    desc: 'Designed apparel patterns using Lectra Modaris and AutoCAD, ensuring precision and efficiency in mass production.'
+  }
 ];
 document.getElementById('experienceTimeline').innerHTML = expData.map((e, i) => `
   <div class="timeline-item" data-aos="fade-up" data-aos-delay="${i * 100}">
@@ -160,18 +168,24 @@ document.getElementById('experienceTimeline').innerHTML = expData.map((e, i) => 
    SKILLS DATA
    ============================ */
 const skills = [
-  { cat: 'IT & ERP', items: [
-    { n: 'Tally ERP / SignHR', p: 85 },
-    { n: 'Network & Security', p: 90 },
-    { n: 'Cloud & Server Admin', p: 80 },
-    { n: 'CCTV & Hardware Support', p: 88 }
-  ]},
-  { cat: 'Graphic & CAD Design', items: [
-    { n: 'Adobe Photoshop', p: 92 },
-    { n: 'Modaris', p: 85 },
-    { n: 'AutoCAD', p: 80 },
-    { n: 'CorelDRAW', p: 88 }
-  ]}
+  {
+    cat: 'IT & ERP',
+    items: [
+      { n: 'Tally ERP / SignHR', p: 85 },
+      { n: 'Network & Security', p: 90 },
+      { n: 'Cloud & Server Admin', p: 80 },
+      { n: 'CCTV & Hardware Support', p: 88 }
+    ]
+  },
+  {
+    cat: 'Graphic & CAD Design',
+    items: [
+      { n: 'Adobe Photoshop', p: 92 },
+      { n: 'Modaris', p: 85 },
+      { n: 'AutoCAD', p: 80 },
+      { n: 'CorelDRAW', p: 88 }
+    ]
+  }
 ];
 document.getElementById('skillsContainer').innerHTML = skills.map(c => `
   <div class="skill-category" data-aos="fade-up">
@@ -189,10 +203,18 @@ document.getElementById('skillsContainer').innerHTML = skills.map(c => `
    EDUCATION DATA
    ============================ */
 const eduData = [
-  { period: 'Jun 2017 – Jun 2026', title: 'BSc (Hons) Computer Networks & Security', company: 'American College of Higher Education',
-    desc: 'CCNA Certified. Cisco Networking Academy, IEEE Student Branch, hackathons.' },
-  { period: 'Feb 2016 – Aug 2016', title: 'Diploma in Computer Software Engineering', company: 'ICT Institute Polonnaruwa',
-    desc: 'C++, C#, and software development fundamentals.' }
+  {
+    period: 'Jun 2017 – Jun 2026',
+    title: 'BSc (Hons) Computer Networks & Security',
+    company: 'American College of Higher Education',
+    desc: 'CCNA Certified. Cisco Networking Academy, IEEE Student Branch, hackathons.'
+  },
+  {
+    period: 'Feb 2016 – Aug 2016',
+    title: 'Diploma in Computer Software Engineering',
+    company: 'ICT Institute Polonnaruwa',
+    desc: 'C++, C#, and software development fundamentals.'
+  }
 ];
 document.getElementById('educationTimeline').innerHTML = eduData.map((e, i) => `
   <div class="timeline-item" data-aos="fade-up" data-aos-delay="${i * 100}">
@@ -207,7 +229,7 @@ document.getElementById('educationTimeline').innerHTML = eduData.map((e, i) => `
 `).join('');
 
 /* ============================
-   LINKEDIN HEADLINE
+   LINKEDIN HEADLINE (from local JSON)
    ============================ */
 fetch('data/linkedin.json')
   .then(r => r.json())
@@ -219,7 +241,7 @@ fetch('data/linkedin.json')
   });
 
 /* ============================
-   PROJECTS (fetch from JSON and GitHub)
+   PROJECTS (local JSON + GitHub API)
    ============================ */
 const langIcons = {
   JavaScript: 'devicon-javascript-plain', Python: 'devicon-python-plain',
@@ -282,6 +304,7 @@ async function loadProjects() {
     </div>`;
   }).join('');
 }
+
 function openModal(p) {
   document.getElementById('modalTitle').textContent = p.name;
   document.getElementById('modalDescription').textContent = p.description || '';
@@ -295,7 +318,7 @@ window.closeModal = () => document.getElementById('projectModal').style.display 
 window.onclick = e => { if (e.target === document.getElementById('projectModal')) closeModal(); };
 
 /* ============================
-   CONTACT FORM SUBMISSION
+   CONTACT FORM SUBMISSION (Formspree)
    ============================ */
 document.getElementById('contactForm').addEventListener('submit', async function(e) {
   e.preventDefault();
@@ -440,7 +463,7 @@ if (!isMobile) {
 }
 
 /* ============================
-   MUSIC PLAYER (YouTube audio)
+   MUSIC PLAYER (YouTube audio only)
    ============================ */
 const playlist = [
   { id: 'JGwWNGJdvx8', title: 'Shape of You', artist: 'Ed Sheeran' },
@@ -554,197 +577,146 @@ if (isMobile) {
 })();
 
 /* ============================
-   3D EARTH – CHECK POINT STYLE INTERNET TRAFFIC
-   (large, responsive, pulsating arcs, moving dots)
+   2D WORLD MAP WITH LIVE TRAFFIC (replaces 3D globe)
    ============================ */
-function init3D() {
-  if (typeof THREE === 'undefined') return;      // wait until Three.js loads
+function initMap() {
+  const canvas = document.getElementById('mapCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
 
-  const canvas = document.getElementById('bgCanvas');
-  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-  renderer.setSize(innerWidth, innerHeight);
-  renderer.setClearColor(0x000000, 0);
-
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 1000);
-  camera.position.z = 28;          // far enough to see the large globe
-
-  // Earth group (will rotate)
-  const earthGroup = new THREE.Group();
-  scene.add(earthGroup);
-
-  // ------- Earth sphere (large: radius 12) -------
-  const earthTex = new THREE.TextureLoader().load(
-    'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg'
+  // Simplified world map (polygons of major continents)
+  // This path is a rough outline to keep things lightweight.
+  const worldOutline = new Path2D(
+    // North America
+    "M 100 50 L 250 30 L 280 90 L 240 170 L 180 200 L 160 260 L 200 280 L 240 240 L 300 200 L 320 120 L 300 80 Z " +
+    // South America
+    "M 260 300 L 280 380 L 260 440 L 230 450 L 210 400 L 240 340 Z " +
+    // Europe
+    "M 420 40 L 460 30 L 500 50 L 530 60 L 560 100 L 520 140 L 480 150 L 450 130 L 430 100 Z " +
+    // Africa
+    "M 460 160 L 490 140 L 530 150 L 560 200 L 550 260 L 520 300 L 480 280 L 460 230 Z " +
+    // Asia (simplified)
+    "M 540 50 L 680 40 L 760 80 L 800 140 L 780 200 L 720 240 L 650 260 L 600 240 L 580 200 L 560 150 L 530 110 Z " +
+    // Australia
+    "M 700 320 L 740 310 L 760 340 L 740 370 L 700 360 Z"
   );
-  const earthMat = new THREE.MeshPhongMaterial({ map: earthTex, shininess: 3, specular: 0x222222 });
-  const earth = new THREE.Mesh(new THREE.SphereGeometry(12, 96, 96), earthMat);
-  earthGroup.add(earth);
 
-  // Atmosphere glow
-  const atmosMat = new THREE.MeshPhongMaterial({ color: 0x3366ff, transparent: true, opacity: 0.08, side: THREE.FrontSide });
-  earthGroup.add(new THREE.Mesh(new THREE.SphereGeometry(12.18, 96, 96), atmosMat));
-
-  // Wireframe overlay
-  const wireframeMat = new THREE.MeshBasicMaterial({ color: 0x3366ff, wireframe: true, transparent: true, opacity: 0.06 });
-  earthGroup.add(new THREE.Mesh(new THREE.SphereGeometry(12.08, 48, 48), wireframeMat));
-
-  // Lighting
-  scene.add(new THREE.AmbientLight(0x303060));
-  const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
-  dirLight.position.set(5, 3, 5);
-  scene.add(dirLight);
-
-  // ------- Sri Lanka marker + photo -------
-  function ll2pos(lat, lon, r = 12.25) {
-    const phi = (90 - lat) * Math.PI / 180;
-    const theta = lon * Math.PI / 180;
-    return new THREE.Vector3(
-      -r * Math.sin(phi) * Math.cos(theta),
-      r * Math.cos(phi),
-      r * Math.sin(phi) * Math.sin(theta)
-    );
-  }
-
-  const slPos = ll2pos(6.9, 79.9);
-  const marker = new THREE.Mesh(
-    new THREE.SphereGeometry(0.3, 16, 16),
-    new THREE.MeshBasicMaterial({ color: 0xff4444 })
-  );
-  marker.position.copy(slPos);
-  earthGroup.add(marker);
-
-  // Photo sprite (from your profile image)
-  const sc = document.createElement('canvas');
-  sc.width = 64; sc.height = 64;
-  const sctx = sc.getContext('2d');
-  const img = new Image();
-  img.src = 'images/nadeeja-profile.jpg';
-  img.onload = () => {
-    sctx.beginPath();
-    sctx.arc(32, 32, 30, 0, 2 * Math.PI);
-    sctx.closePath();
-    sctx.clip();
-    sctx.drawImage(img, 2, 2, 60, 60);
-    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(sc) }));
-    sprite.scale.set(1.3, 1.3, 1);
-    sprite.position.copy(slPos.clone().multiplyScalar(1.08));
-    earthGroup.add(sprite);
-  };
-
-  // ------- DESTINATION CITIES (world capitals) -------
-  const destinations = [
-    [40.7, -74.0], [51.5, -0.1], [35.7, 139.7], [-33.9, 151.2],
-    [55.8, 37.6], [25.2, 55.3], [1.3, 103.8], [-23.5, -46.6],
-    [19.4, -99.1], [48.9, 2.3], [39.9, 32.9], [-26.2, 28.0],
-    [37.6, 127.0], [-1.3, 36.8], [28.6, 77.2], [13.8, 100.5],
-    [14.6, 121.0], [-6.2, 106.8], [3.1, 101.7], [22.3, 114.2]
+  // Cities with [lat, lon, name, importance]
+  const cities = [
+    [40.7, -74.0, "New York", 2],
+    [51.5, -0.1, "London", 2],
+    [35.7, 139.7, "Tokyo", 2],
+    [-33.9, 151.2, "Sydney", 1],
+    [55.8, 37.6, "Moscow", 1],
+    [25.2, 55.3, "Dubai", 1],
+    [1.3, 103.8, "Singapore", 1],
+    [-23.5, -46.6, "São Paulo", 1],
+    [19.4, -99.1, "Mexico City", 1],
+    [48.9, 2.3, "Paris", 1],
+    [39.9, 32.9, "Ankara", 1],
+    [-26.2, 28.0, "Johannesburg", 1],
+    [37.6, 127.0, "Seoul", 1],
+    [-1.3, 36.8, "Nairobi", 1],
+    [28.6, 77.2, "Delhi", 1],
+    [13.8, 100.5, "Bangkok", 1],
+    [14.6, 121.0, "Manila", 1],
+    [-6.2, 106.8, "Jakarta", 1],
+    [3.1, 101.7, "Kuala Lumpur", 1],
+    [22.3, 114.2, "Hong Kong", 1]
   ];
 
-  // Active arcs array
-  let activeArcs = [];
+  // Traffic arcs
+  let arcs = [];
 
-  // Create a new traffic arc (pulsating line + moving dots)
-  function createArc(from, to, color, hue) {
-    const start  = ll2pos(from[0], from[1], 12.3);
-    const end    = ll2pos(to[0], to[1], 12.3);
-    const mid    = start.clone().add(end).multiplyScalar(0.5).normalize().multiplyScalar(17 + Math.random() * 5);
-    const curve  = new THREE.QuadraticBezierCurve3(start, mid, end);
-    const points = curve.getPoints(80);
-    const geom   = new THREE.BufferGeometry().setFromPoints(points);
-    const mat    = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false });
-    const line   = new THREE.Line(geom, mat);
-
-    // Traffic dots
-    const dots = [];
-    for (let j = 0; j < 2; j++) {
-      const dotGeom = new THREE.SphereGeometry(0.12, 6, 6);
-      const dotMat  = new THREE.MeshBasicMaterial({ color: new THREE.Color().setHSL(hue, 1, 0.8), blending: THREE.AdditiveBlending });
-      const dot = new THREE.Mesh(dotGeom, dotMat);
-      dot.userData = { curve, t: Math.random(), speed: 0.003 + Math.random() * 0.006, dir: Math.random() > 0.5 ? 1 : -1 };
-      dots.push(dot);
-      earthGroup.add(dot);
-    }
-    earthGroup.add(line);
-    return { line, dots, opacity: 0.7, life: 4 + Math.random() * 6, age: 0, alive: true };
+  // Mercator projection helper
+  function project(lat, lon) {
+    const x = (lon + 180) * (w / 360);
+    const latRad = lat * Math.PI / 180;
+    const mercN = Math.log(Math.tan((Math.PI / 4) + (latRad / 2)));
+    const y = (h / 2) - (w * mercN / (2 * Math.PI));
+    return [x, y];
   }
 
-  function randomColor() { return new THREE.Color().setHSL(Math.random(), 0.8, 0.6); }
-
-  // Spawn a new arc from Sri Lanka to a random city
-  function spawnArc() {
-    const from = [6.9, 79.9];
-    const to = destinations[Math.floor(Math.random() * destinations.length)];
-    const hue = Math.random();
-    const arc = createArc(from, to, randomColor(), hue);
-    activeArcs.push(arc);
-    // Limit total arcs
-    if (activeArcs.length > 30) {
-      const old = activeArcs.shift();
-      old.line.geometry.dispose();
-      old.line.material.dispose();
-      old.line.removeFromParent();
-      old.dots.forEach(d => { d.geometry.dispose(); d.material.dispose(); d.removeFromParent(); });
-    }
+  // Draw map outlines
+  function drawMap() {
+    ctx.save();
+    ctx.globalAlpha = 0.15;
+    ctx.fillStyle = '#4a90e2';
+    ctx.fill(worldOutline);
+    ctx.restore();
   }
 
-  // Spawn initial arcs
-  for (let i = 0; i < 20; i++) setTimeout(spawnArc, i * 150);
-
-  // Animation loop
-  const clock = new THREE.Clock();
+  // Main animation loop
   function animate() {
     requestAnimationFrame(animate);
-    const dt = Math.min(clock.getDelta(), 0.1);
+    ctx.clearRect(0, 0, w, h);
+    drawMap();
 
-    // Rotate Earth slowly
-    earthGroup.rotation.x += 0.0008;
-    earthGroup.rotation.z += 0.00015;
+    // Draw city dots
+    ctx.fillStyle = '#4ae2ff';
+    cities.forEach(c => {
+      const [x, y] = project(c[0], c[1]);
+      ctx.beginPath();
+      ctx.arc(x, y, 1.5 + c[3], 0, 2 * Math.PI);
+      ctx.fill();
+    });
 
-    // Update arcs
-    for (let i = activeArcs.length - 1; i >= 0; i--) {
-      const a = activeArcs[i];
-      a.age += dt;
-      // Pulsating opacity (breathing)
-      const cycle = Math.sin(a.age * 1.8) * 0.5 + 0.5;
-      a.line.material.opacity = cycle * 0.6 + 0.15;
+    // Sri Lanka blinking red dot
+    const [slX, slY] = project(6.9, 79.9);
+    const blink = Math.sin(Date.now() * 0.01) * 0.5 + 0.5;
+    ctx.fillStyle = `rgba(255, 50, 50, ${blink})`;
+    ctx.beginPath();
+    ctx.arc(slX, slY, 4, 0, 2 * Math.PI);
+    ctx.fill();
 
-      // Remove old arcs
-      if (a.age > a.life) {
-        a.line.geometry.dispose();
-        a.line.material.dispose();
-        a.line.removeFromParent();
-        a.dots.forEach(d => { d.geometry.dispose(); d.material.dispose(); d.removeFromParent(); });
-        activeArcs.splice(i, 1);
-        continue;
-      }
+    // Draw traffic arcs
+    arcs.forEach(a => {
+      const [x1, y1] = project(a.from[0], a.from[1]);
+      const [x2, y2] = project(a.to[0], a.to[1]);
+      // Quadratic curve for a nicer arc
+      const midX = (x1 + x2) / 2 + (y2 - y1) * 0.3;
+      const midY = (y1 + y2) / 2 - (x2 - x1) * 0.3;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.quadraticCurveTo(midX, midY, x2, y2);
+      ctx.strokeStyle = a.color;
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
 
-      // Move traffic dots
-      a.dots.forEach(dot => {
-        let t = dot.userData.t + dot.userData.speed * dot.userData.dir;
-        if (t > 1 || t < 0) {
-          dot.userData.dir *= -1;
-          t = Math.max(0, Math.min(1, t));
-        }
-        dot.userData.t = t;
-        dot.position.copy(dot.userData.curve.getPointAt(t));
+      // Moving dots along the arc
+      a.dots.forEach(d => {
+        const t = d.t;
+        const dx = (1-t)*(1-t)*x1 + 2*(1-t)*t*midX + t*t*x2;
+        const dy = (1-t)*(1-t)*y1 + 2*(1-t)*t*midY + t*t*y2;
+        ctx.beginPath();
+        ctx.arc(dx, dy, 1.5, 0, 2*Math.PI);
+        ctx.fillStyle = a.color;
+        ctx.fill();
+        d.t += d.speed * d.dir;
+        if (d.t > 1 || d.t < 0) d.dir *= -1;
       });
+    });
+
+    // Spawn new arcs periodically
+    if (Math.random() < 0.02) {
+      const to = cities[Math.floor(Math.random() * cities.length)];
+      arcs.push({
+        from: [6.9, 79.9],
+        to: [to[0], to[1]],
+        color: `hsl(${Math.random() * 360}, 80%, 60%)`,
+        dots: [{ t: 0, speed: 0.003 + Math.random() * 0.006, dir: 1 }]
+      });
+      if (arcs.length > 25) arcs.shift();
     }
-
-    // Randomly spawn new arcs
-    if (Math.random() < 0.04) spawnArc();
-
-    renderer.render(scene, camera);
   }
-  animate();
 
-  // Resize handler – makes the Earth responsive to any screen
-  window.addEventListener('resize', () => {
-    camera.aspect = innerWidth / innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(innerWidth, innerHeight);
-  });
+  function resize() {
+    w = canvas.width = innerWidth;
+    h = canvas.height = innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  animate();
 }
 
 /* ============================
@@ -752,5 +724,5 @@ function init3D() {
    ============================ */
 window.addEventListener('load', () => {
   loadProjects();
-  init3D();
+  initMap();
 });

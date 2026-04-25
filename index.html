@@ -4,23 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
   <title>Nadeeja Nirmala · IT & Creative</title>
-  
+
   <!-- Stylesheets -->
   <link rel="stylesheet" href="style.css">
   <!-- Font Awesome 6 for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <!-- Google Fonts: Inter (modern, Apple-like) -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-  <!-- AOS (Animate on Scroll) for smooth reveal animations -->
+  <!-- AOS (Animate on Scroll) for reveal animations -->
   <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body class="loading dark">
 
-  <!-- ==================== BACKGROUND CANVAS ==================== -->
-  <!-- Three.js will render the 3D Earth and traffic here -->
-  <canvas id="bgCanvas"></canvas>
+  <!-- ==================== 2D WORLD MAP CANVAS ==================== -->
+  <!-- This canvas draws the live traffic map in the background -->
+  <canvas id="mapCanvas"></canvas>
 
-  <!-- ==================== SPLASH LOADER ==================== -->
+  <!-- ==================== SPLASH LOADER (Apple-style) ==================== -->
   <div class="splash-loader" id="splashLoader">
     <div class="apple-logo"></div>
     <div class="loading-bar"></div>
@@ -49,7 +49,7 @@
     <div class="monitor-wave"></div>
   </div>
 
-  <!-- ==================== NAVIGATION BAR ==================== -->
+  <!-- ==================== NAVIGATION BAR  ==================== -->
   <nav class="nav-bar glass-nav" id="navbar">
     <div class="nav-container">
       <a href="#" class="nav-logo">Nadeeja<span>.</span></a>
@@ -65,7 +65,7 @@
           <span id="visitorFlag">🌐</span>
           <span id="liveClock">00:00</span>
         </div>
-        <!-- iOS-style toggle switch for light/dark mode -->
+        <!-- iOS-style toggle switch for dark/light mode -->
         <label class="ios-toggle" for="themeToggleCheckbox">
           <input type="checkbox" id="themeToggleCheckbox" />
           <span class="ios-toggle-slider"></span>
@@ -74,7 +74,7 @@
     </div>
   </nav>
 
-  <!-- ==================== MOBILE TAB BAR ==================== -->
+  <!-- ==================== MOBILE TAB BAR (bottom) ==================== -->
   <div class="mobile-tab-bar glass-nav" id="mobileTabBar">
     <a href="#hero" class="tab-item active"><i class="fas fa-home"></i><span>Home</span></a>
     <a href="#experience" class="tab-item"><i class="fas fa-briefcase"></i><span>Work</span></a>
@@ -175,6 +175,7 @@
         <span class="section-eyebrow">Connect</span>
         <h2>Get in Touch</h2>
       </div>
+      <!-- Using your Formspree endpoint -->
       <form class="contact-form glass-card" id="contactForm" action="https://formspree.io/f/mkokkena" method="POST">
         <div class="form-row">
           <div class="form-group">
@@ -213,7 +214,7 @@
 
   </main>
 
-  <!-- ==================== FLOATING ACTION BUTTONS ==================== -->
+  <!-- ==================== FLOATING ACTION BUTTONS (WhatsApp, Snake, Music) ==================== -->
   <div class="fab-container">
     <a href="https://wa.me/message/4YGA7K2KMFCNK1" target="_blank" class="fab whatsapp-fab"><i class="fab fa-whatsapp"></i></a>
     <button class="fab snake-fab" id="snakeBtn" title="Play Snake"><i class="fas fa-gamepad"></i></button>
@@ -235,7 +236,7 @@
     </div>
   </div>
 
-  <!-- ==================== MUSIC PLAYER MODAL ==================== -->
+  <!-- ==================== MUSIC PLAYER MODAL (YouTube audio only) ==================== -->
   <div class="music-modal" id="musicModal">
     <div class="music-player glass-card">
       <div class="music-header">
@@ -264,7 +265,7 @@
           <input type="range" id="volumeBar" value="80" min="0" max="100">
         </div>
       </div>
-      <!-- Hidden YouTube player (audio only) -->
+      <!-- Hidden YouTube player -->
       <div id="ytPlayer" style="position:absolute;width:0;height:0;overflow:hidden;"></div>
     </div>
   </div>
@@ -280,15 +281,14 @@
   </div>
 
   <!-- ==================== SCRIPTS ==================== -->
+  <!-- AOS animation library -->
   <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-  <!-- Three.js for 3D globe -->
-  <script async src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <!-- YouTube IFrame API for music player -->
   <script async src="https://www.youtube.com/iframe_api"></script>
   <!-- Our main JavaScript file -->
   <script src="script.js"></script>
 
-  <!-- FAILSAFE LOADER HIDE (in case main script fails) -->
+  <!-- FAILSAFE LOADER HIDE (guarantees the splash disappears) -->
   <script>
     (function() {
       var hide = function() { document.body.classList.add('loaded'); };
