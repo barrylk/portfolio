@@ -431,229 +431,292 @@ function initMap() {
   const ctx = canvas.getContext('2d');
   let w, h;
 
-  // Load a clean, low‑resolution world map SVG
+  // ── Offscreen canvas to sample land pixels from SVG ────
+  const offscreen = document.createElement('canvas');
+  const offCtx = offscreen.getContext('2d', { willReadFrequently: true });
+  offscreen.width = 1400;
+  offscreen.height = 700;
+
   const mapImage = new Image();
   mapImage.crossOrigin = 'anonymous';
   mapImage.src = 'https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg';
+  let dotCache = [];   // { nx, ny } normalised land dot positions
   let mapReady = false;
-  mapImage.onload = () => { mapReady = true; };
 
-  // Cities (names, lat, lon)
+  mapImage.onload = () => {
+    offCtx.drawImage(mapImage, 0, 0, offscreen.width, offscreen.height);
+    const DOT_STEP = 7;
+    const imgData = offCtx.getImageData(0, 0, offscreen.width, offscreen.height).data;
+    for (let y = 0; y < offscreen.height; y += DOT_STEP) {
+      for (let x = 0; x < offscreen.width; x += DOT_STEP) {
+        const i = (y * offscreen.width + x) * 4;
+        const r = imgData[i], g = imgData[i + 1], b = imgData[i + 2], a = imgData[i + 3];
+        if (a < 80) continue;                            // transparent → skip
+        const isOcean  = b > r + 15 && b > g + 5 && b > 140;  // light blue ocean
+        const isWhite  = r > 230 && g > 230 && b > 230;        // white areas
+        if (!isOcean && !isWhite) dotCache.push({ nx: x / offscreen.width, ny: y / offscreen.height });
+      }
+    }
+    mapReady = true;
+  };
+
+  // ── Cities ─────────────────────────────────────────────
   const cities = [
-    { name: 'Colombo', lat: 6.9271, lon: 79.8612 },
-    { name: 'Singapore', lat: 1.3521, lon: 103.8198 },
-    { name: 'Mumbai', lat: 19.0760, lon: 72.8777 },
-    { name: 'Dubai', lat: 25.2048, lon: 55.2708 },
-    { name: 'Frankfurt', lat: 50.1109, lon: 8.6821 },
-    { name: 'London', lat: 51.5072, lon: -0.1276 },
-    { name: 'Amsterdam', lat: 52.3676, lon: 4.9041 },
-    { name: 'Tokyo', lat: 35.6762, lon: 139.6503 },
-    { name: 'Seoul', lat: 37.5665, lon: 126.9780 },
-    { name: 'Sydney', lat: -33.8688, lon: 151.2093 },
-    { name: 'New York', lat: 40.7128, lon: -74.0060 },
-    { name: 'Los Angeles', lat: 34.0522, lon: -118.2437 },
-    { name: 'Toronto', lat: 43.6532, lon: -79.3832 },
-    { name: 'São Paulo', lat: -23.5558, lon: -46.6396 },
-    { name: 'Johannesburg', lat: -26.2041, lon: 28.0473 }
+    { name: 'Colombo',      lat:   6.9271, lon:  79.8612 },
+    { name: 'Singapore',    lat:   1.3521, lon: 103.8198 },
+    { name: 'Mumbai',       lat:  19.0760, lon:  72.8777 },
+    { name: 'Dubai',        lat:  25.2048, lon:  55.2708 },
+    { name: 'Frankfurt',    lat:  50.1109, lon:   8.6821 },
+    { name: 'London',       lat:  51.5072, lon:  -0.1276 },
+    { name: 'Amsterdam',    lat:  52.3676, lon:   4.9041 },
+    { name: 'Tokyo',        lat:  35.6762, lon: 139.6503 },
+    { name: 'Seoul',        lat:  37.5665, lon: 126.9780 },
+    { name: 'Sydney',       lat: -33.8688, lon: 151.2093 },
+    { name: 'New York',     lat:  40.7128, lon: -74.0060 },
+    { name: 'Los Angeles',  lat:  34.0522, lon: -118.2437 },
+    { name: 'Toronto',      lat:  43.6532, lon: -79.3832 },
+    { name: 'São Paulo',    lat: -23.5558, lon: -46.6396 },
+    { name: 'Johannesburg', lat: -26.2041, lon:  28.0473 }
   ];
 
-  // Traffic flows (pairs from Colombo or between major hubs)
+  // ── Routes ─────────────────────────────────────────────
   const routes = [
-    ['Colombo', 'Singapore'],
-    ['Colombo', 'Mumbai'],
-    ['Colombo', 'Dubai'],
-    ['Singapore', 'Tokyo'],
-    ['Singapore', 'Sydney'],
-    ['Mumbai', 'Frankfurt'],
-    ['Dubai', 'Frankfurt'],
-    ['Dubai', 'London'],
-    ['Frankfurt', 'London'],
-    ['Frankfurt', 'New York'],
-    ['London', 'New York'],
-    ['New York', 'Los Angeles'],
-    ['Tokyo', 'Los Angeles'],
-    ['Amsterdam', 'Toronto'],
-    ['São Paulo', 'London'],
-    ['Johannesburg', 'Dubai']
+    ['Colombo','Singapore'], ['Colombo','Mumbai'],   ['Colombo','Dubai'],
+    ['Singapore','Tokyo'],   ['Singapore','Sydney'], ['Mumbai','Frankfurt'],
+    ['Dubai','Frankfurt'],   ['Dubai','London'],     ['Frankfurt','London'],
+    ['Frankfurt','New York'],['London','New York'],  ['New York','Los Angeles'],
+    ['Tokyo','Los Angeles'], ['Amsterdam','Toronto'],['São Paulo','London'],
+    ['Johannesburg','Dubai']
   ];
 
-  let flows = [];
-  let particles = [];
+  let flows = [], particles = [];
+  let totalAttacks = 4800000 + Math.floor(Math.random() * 800000);
 
   const isMobile = window.matchMedia('(max-width: 768px)').matches;
   const targetFPS = isMobile ? 24 : 60;
   const frameDelay = 1000 / targetFPS;
-  let lastTime = 0;
-  let frame = 0;
+  let lastTime = 0, frame = 0;
 
-  // Equirectangular projection that matches the SVG map
-  function project(lat, lon) {
-    const mapRatio = 2;               // world map 2:1
-    let mapW = w * 1.12;             // slightly zoomed in
-    let mapH = mapW / mapRatio;
-
-    if (mapH < h * 0.72) {
-      mapH = h * 0.72;
-      mapW = mapH * mapRatio;
-    }
-
-    const mapX = (w - mapW) / 2;
-    const mapY = (h - mapH) / 2 + h * 0.02;
-
-    const x = mapX + ((lon + 180) / 360) * mapW;
-    const y = mapY + ((90 - lat) / 180) * mapH;
-    return { x, y };
-  }
-
-  // Draw the world map image as background
-  function drawMap() {
-    if (!mapReady) {
-      // dark fallback while image loads
-      ctx.fillStyle = '#0a0a18';
-      ctx.fillRect(0, 0, w, h);
-      return;
-    }
-
+  // ── Projection (equirectangular, same alignment as dot cache) ──
+  function mapBounds() {
     const mapRatio = 2;
-    let mapW = w * 1.12;
-    let mapH = mapW / mapRatio;
-    if (mapH < h * 0.72) {
-      mapH = h * 0.72;
-      mapW = mapH * mapRatio;
-    }
-    const mapX = (w - mapW) / 2;
-    const mapY = (h - mapH) / 2 + h * 0.02;
-
-    ctx.drawImage(mapImage, mapX, mapY, mapW, mapH);
+    let mapW = w * 1.12, mapH = mapW / mapRatio;
+    if (mapH < h * 0.72) { mapH = h * 0.72; mapW = mapH * mapRatio; }
+    return { mapW, mapH, mapX: (w - mapW) / 2, mapY: (h - mapH) / 2 + h * 0.02 };
   }
 
-  // Draw city labels (faint)
-  function drawCities() {
-    ctx.fillStyle = 'rgba(180,190,210,0.5)';
-    ctx.font = '11px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    cities.forEach(c => {
-      const p = project(c.lat, c.lon);
-      ctx.fillText(c.name, p.x, p.y - 6);
+  function project(lat, lon) {
+    const { mapW, mapH, mapX, mapY } = mapBounds();
+    return {
+      x: mapX + ((lon + 180) / 360) * mapW,
+      y: mapY + ((90 - lat) / 180) * mapH
+    };
+  }
+
+  // ── Background ─────────────────────────────────────────
+  function drawBackground() {
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, '#0f0c1a');
+    grad.addColorStop(1, '#07060f');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Subtle latitude / longitude grid
+    ctx.strokeStyle = 'rgba(255,255,255,0.025)';
+    ctx.lineWidth = 0.5;
+    const { mapW, mapH, mapX, mapY } = mapBounds();
+    for (let lon = -180; lon <= 180; lon += 30) {
+      const x = mapX + ((lon + 180) / 360) * mapW;
+      ctx.beginPath(); ctx.moveTo(x, mapY); ctx.lineTo(x, mapY + mapH); ctx.stroke();
+    }
+    for (let lat = -90; lat <= 90; lat += 30) {
+      const y = mapY + ((90 - lat) / 180) * mapH;
+      ctx.beginPath(); ctx.moveTo(mapX, y); ctx.lineTo(mapX + mapW, y); ctx.stroke();
+    }
+  }
+
+  // ── Dotted world map ───────────────────────────────────
+  function drawDottedMap() {
+    if (!mapReady || !dotCache.length) return;
+    const { mapW, mapH, mapX, mapY } = mapBounds();
+    const r = isMobile ? 1.1 : 1.5;
+    ctx.fillStyle = 'rgba(115, 105, 140, 0.52)';
+    dotCache.forEach(d => {
+      const x = mapX + d.nx * mapW;
+      const y = mapY + d.ny * mapH;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
     });
   }
 
-  // Spawn a new flow between two cities
-  function spawnFlow() {
-    if (flows.length > (isMobile ? 10 : 24)) return;
-    const pair = routes[Math.floor(Math.random() * routes.length)];
-    const fromCity = cities.find(c => c.name === pair[0]);
-    const toCity = cities.find(c => c.name === pair[1]);
-    if (!fromCity || !toCity) return;
+  // ── City markers + labels ──────────────────────────────
+  function drawCities() {
+    const t = Date.now() / 900;
+    cities.forEach((c, idx) => {
+      const p = project(c.lat, c.lon);
+      const pulse = (Math.sin(t + idx * 1.3) + 1) / 2;
 
-    const flow = {
-      from: fromCity,
-      to: toCity,
-      start: project(fromCity.lat, fromCity.lon),
-      end: project(toCity.lat, toCity.lon),
-      life: 0,
-      maxLife: 140 + Math.random() * 100,
-      opacity: 0.12 + Math.random() * 0.15
-    };
-    flows.push(flow);
+      // Outer pulse ring
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 4 + pulse * 7, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(200, 170, 90, ${0.08 + pulse * 0.14})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
 
-    // add moving particles
-    const count = isMobile ? 1 : 3;
-    for (let i = 0; i < count; i++) {
-      particles.push({
-        flow,
-        t: Math.random() * 0.3,
-        speed: 0.008 + Math.random() * 0.006,
-        size: isMobile ? 1.6 : 2.2
-      });
-    }
+      // Inner glow ring
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(230, 190, 80, ${0.35 + pulse * 0.25})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Core dot
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 1.8, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 210, 100, ${0.7 + pulse * 0.3})`;
+      ctx.shadowColor = 'rgba(255, 190, 60, 0.9)';
+      ctx.shadowBlur = 6;
+      ctx.fill();
+      ctx.restore();
+
+      // City label
+      ctx.save();
+      ctx.font = `${isMobile ? 9 : 10}px Inter, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = 'rgba(220, 205, 160, 0.75)';
+      ctx.fillText(c.name, p.x, p.y - 9);
+      ctx.restore();
+    });
   }
 
-  // Calculate quadratic bezier control point for curved arcs
+  // ── Attack counter on canvas ───────────────────────────
+  function drawCounter() {
+    totalAttacks += Math.floor(Math.random() * 4 + 1);
+    const txt = totalAttacks.toLocaleString() + '  ATTACKS ON THIS DAY';
+    ctx.save();
+    ctx.font = `bold ${isMobile ? 11 : 14}px Inter, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.shadowColor = 'rgba(255, 50, 90, 0.55)';
+    ctx.shadowBlur = 14;
+    ctx.fillStyle = '#ff3d6a';
+    ctx.fillText(txt, w / 2, 38);
+    ctx.restore();
+  }
+
+  // ── Bezier helper ──────────────────────────────────────
   function curvePoint(a, b, t) {
-    const midX = (a.x + b.x) / 2;
-    const midY = (a.y + b.y) / 2;
-    const dx = b.x - a.x;
-    const dy = b.y - a.y;
+    const midX = (a.x + b.x) / 2, midY = (a.y + b.y) / 2;
+    const dx = b.x - a.x, dy = b.y - a.y;
     const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-    const curveHeight = Math.min(isMobile ? 70 : 140, Math.max(30, dist * 0.18));
-    const nx = -dy / dist;
-    const ny =  dx / dist;
-
-    const cx = midX + nx * curveHeight;
-    const cy = midY + ny * curveHeight;
-
+    const lift = Math.min(isMobile ? 65 : 130, Math.max(28, dist * 0.18));
+    const nx = -dy / dist, ny = dx / dist;
+    const cx = midX + nx * lift, cy = midY + ny * lift;
     return {
       x: (1 - t) * (1 - t) * a.x + 2 * (1 - t) * t * cx + t * t * b.x,
       y: (1 - t) * (1 - t) * a.y + 2 * (1 - t) * t * cy + t * t * b.y,
-      cx,
-      cy
+      cx, cy
     };
   }
 
-  // Update flows and particles
+  // ── Spawn flows ────────────────────────────────────────
+  function spawnFlow() {
+    if (flows.length > (isMobile ? 10 : 22)) return;
+    const pair = routes[Math.floor(Math.random() * routes.length)];
+    const fromCity = cities.find(c => c.name === pair[0]);
+    const toCity   = cities.find(c => c.name === pair[1]);
+    if (!fromCity || !toCity) return;
+    const flow = {
+      from: fromCity, to: toCity,
+      start: project(fromCity.lat, fromCity.lon),
+      end:   project(toCity.lat,   toCity.lon),
+      life: 0, maxLife: 130 + Math.random() * 100,
+      opacity: 0.25 + Math.random() * 0.35
+    };
+    flows.push(flow);
+    const count = isMobile ? 1 : 3;
+    for (let i = 0; i < count; i++) {
+      particles.push({ flow, t: Math.random() * 0.2, speed: 0.007 + Math.random() * 0.007, size: isMobile ? 1.8 : 2.6 });
+    }
+  }
+
+  // ── Update state ───────────────────────────────────────
   function updateTraffic() {
     if (frame % (isMobile ? 12 : 7) === 0) spawnFlow();
-
     flows.forEach(f => f.life++);
     flows = flows.filter(f => f.life < f.maxLife);
-
     particles.forEach(p => p.t += p.speed);
     particles = particles.filter(p => p.t <= 1 && flows.includes(p.flow));
   }
 
-  // Render the traffic arcs and particles
+  // ── Draw gold arcs + glowing particles ────────────────
   function drawTraffic() {
     flows.forEach(f => {
-      const fadeIn = Math.min(1, f.life / 35);
-      const fadeOut = Math.min(1, (f.maxLife - f.life) / 45);
-      const alpha = f.opacity * Math.min(fadeIn, fadeOut);
+      const fadeIn  = Math.min(1, f.life / 30);
+      const fadeOut = Math.min(1, (f.maxLife - f.life) / 40);
+      const alpha   = f.opacity * Math.min(fadeIn, fadeOut);
+      const cp = curvePoint(f.start, f.end, 0.5);
 
-      const c = curvePoint(f.start, f.end, 0.5);
-
+      // Outer glow
       ctx.save();
       ctx.beginPath();
       ctx.moveTo(f.start.x, f.start.y);
-      ctx.quadraticCurveTo(c.cx, c.cy, f.end.x, f.end.y);
-      ctx.strokeStyle = `rgba(34, 211, 238, ${alpha})`;
-      ctx.lineWidth = isMobile ? 0.7 : 1;
+      ctx.quadraticCurveTo(cp.cx, cp.cy, f.end.x, f.end.y);
+      ctx.strokeStyle = `rgba(200, 140, 20, ${alpha * 0.35})`;
+      ctx.lineWidth = isMobile ? 2.5 : 4;
+      ctx.filter = 'blur(3px)';
+      ctx.stroke();
+      ctx.restore();
+
+      // Core arc
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(f.start.x, f.start.y);
+      ctx.quadraticCurveTo(cp.cx, cp.cy, f.end.x, f.end.y);
+      const grad = ctx.createLinearGradient(f.start.x, f.start.y, f.end.x, f.end.y);
+      grad.addColorStop(0,   `rgba(255, 180,  40, ${alpha * 0.6})`);
+      grad.addColorStop(0.5, `rgba(255, 210,  80, ${alpha})`);
+      grad.addColorStop(1,   `rgba(255, 150,  20, ${alpha * 0.5})`);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = isMobile ? 0.8 : 1.2;
       ctx.stroke();
       ctx.restore();
     });
 
+    // Glowing gold head particles
     particles.forEach(p => {
       const pos = curvePoint(p.flow.start, p.flow.end, p.t);
       ctx.save();
+      const grd = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, p.size * 3.5);
+      grd.addColorStop(0,   'rgba(255, 230,  90, 1)');
+      grd.addColorStop(0.3, 'rgba(255, 170,  30, 0.75)');
+      grd.addColorStop(1,   'rgba(255, 120,   0, 0)');
       ctx.beginPath();
-      ctx.arc(pos.x, pos.y, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(125, 249, 255, 0.9)';
+      ctx.arc(pos.x, pos.y, p.size * 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = grd;
       ctx.fill();
       ctx.restore();
     });
   }
 
+  // ── HUD update ─────────────────────────────────────────
   function updateHud() {
-     const activeFlowsEl = document.getElementById('activeFlows');
-     const packetRateEl = document.getElementById('packetRate');
-     const avgLatencyEl = document.getElementById('avgLatency');
-     const dataFlowEl = document.getElementById('dataFlow');
+    const activeFlowsEl = document.getElementById('activeFlows');
+    const packetRateEl  = document.getElementById('packetRate');
+    const avgLatencyEl  = document.getElementById('avgLatency');
+    const dataFlowEl    = document.getElementById('dataFlow');
+    if (!activeFlowsEl) return;
+    const active = flows.length;
+    activeFlowsEl.textContent = active.toString().padStart(2, '0');
+    packetRateEl.textContent  = Math.round(3800 + active * 420 + Math.random() * 1200).toLocaleString();
+    avgLatencyEl.textContent  = Math.round(24 + Math.random() * 38) + ' ms';
+    if (!window.__trafficTotalData) window.__trafficTotalData = 164.2;
+    window.__trafficTotalData += 0.03 + Math.random() * 0.08;
+    dataFlowEl.textContent = window.__trafficTotalData.toFixed(1) + ' GB';
+  }
 
-   if (!activeFlowsEl || !packetRateEl || !avgLatencyEl || !dataFlowEl) return;
-
-     const active = flows.length;
-     const packets = Math.round(3800 + active * 420 + Math.random() * 1200);
-     const latency = Math.round(24 + Math.random() * 38);
-
-   if (!window.__trafficTotalData) window.__trafficTotalData = 164.2;
-       window.__trafficTotalData += 0.03 + Math.random() * 0.08;
-
-      activeFlowsEl.textContent = active.toString().padStart(2, '0');
-      packetRateEl.textContent = packets.toLocaleString();
-      avgLatencyEl.textContent = latency + ' ms';
-      dataFlowEl.textContent = window.__trafficTotalData.toFixed(1) + ' GB';
-}
-
-  // Main animation loop
+  // ── Main loop ──────────────────────────────────────────
   function animate(now) {
     requestAnimationFrame(animate);
     if (now - lastTime < frameDelay) return;
@@ -661,25 +724,24 @@ function initMap() {
     frame++;
 
     ctx.clearRect(0, 0, w, h);
-    drawMap();
-    drawCities();
+    drawBackground();
+    drawDottedMap();
     updateTraffic();
     drawTraffic();
+    drawCities();
+    drawCounter();
 
     if (frame % 18 === 0) updateHud();
   }
 
-  // Resize canvas to fill screen
   function resize() {
-    w = canvas.width = innerWidth;
+    w = canvas.width  = innerWidth;
     h = canvas.height = innerHeight;
   }
   window.addEventListener('resize', resize);
   resize();
 
-  // Start with a few initial flows
   for (let i = 0; i < (isMobile ? 5 : 12); i++) spawnFlow();
-
   requestAnimationFrame(animate);
 }
 

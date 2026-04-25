@@ -74,10 +74,11 @@ body {
   height: 100%;
   z-index: -3;          /* behind everything */
   opacity: 0.95;
+  background: #0f0c1a;  /* matches canvas drawBackground() colour */
 }
 
 body.light #mapCanvas {
-  opacity: 0.5;
+  opacity: 0.45;
 }
 
 /* ============================
