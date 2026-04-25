@@ -21,6 +21,35 @@
   <!-- ==================== BACKGROUND CANVAS ==================== -->
   <!-- The 2D world map with internet traffic is drawn here (see script.js) -->
   <canvas id="mapCanvas"></canvas>
+  
+
+  <!-- ==================== LIVE NETWORK TRAFFIC OVERLAY ==================== -->
+<div class="traffic-hud" id="trafficHud">
+  <div class="traffic-hud-header">
+    <span class="traffic-live-dot"></span>
+    <span>Live Network Traffic</span>
+  </div>
+
+  <div class="traffic-hud-grid">
+    <div>
+      <small>Active Flows</small>
+      <strong id="activeFlows">0</strong>
+    </div>
+    <div>
+      <small>Packets / sec</small>
+      <strong id="packetRate">0</strong>
+    </div>
+    <div>
+      <small>Avg Latency</small>
+      <strong id="avgLatency">0 ms</strong>
+    </div>
+    <div>
+      <small>Data Flow</small>
+      <strong id="dataFlow">0 GB</strong>
+    </div>
+  </div>
+</div>
+
 
   <!-- ==================== SPLASH LOADER (Apple style) ==================== -->
   <!-- Disappears when the page is ready (or after 3 seconds fallback) -->

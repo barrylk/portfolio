@@ -431,224 +431,382 @@ if (isMobile) { window.addEventListener('deviceorientation', e => { if (e.gamma 
 (function moveBlobs() { const arr = Array.from(blobsEls); arr.forEach((b, i) => { const factor = (i + 1) * 0.1; const x = (mX - innerWidth/2) * factor, y = (mY - innerHeight/2) * factor; b.style.transform = `translate(${x}px, ${y}px)`; }); requestAnimationFrame(moveBlobs); })();
 
 /* ============================
-   2D WORLD TRAFFIC MAP (Check Point style)
-   - Realistic continent outlines
-   - City labels appear only when traffic flows
-   - Arcs fade in/out, moving dots
+   CHECKPOINT-STYLE LIVE NETWORK TRAFFIC MAP
+   Option A: realistic simulated traffic
+   -------------------------------------
+   What this does:
+   - Draws a dark professional world map background
+   - Uses glowing city nodes
+   - Sends animated curved packet flows between cities
+   - Shows dashboard-style live network metrics
+   - No cyber threat text, no attack wording
+   - No external API required
    ============================ */
+
 function initMap() {
   const canvas = document.getElementById('mapCanvas');
+  if (!canvas) return;
+
   const ctx = canvas.getContext('2d');
-  let w, h;
 
-  /* ----- DETAILED CONTINENT OUTLINES (simplified from Natural Earth) -----
-     Each continent is an array of polygons. Each polygon is an array of [lat, lon] points. */
-  const continents = [
-    // North America
-    { polys: [[[-56.5,-33.0],[-48.0,-36.0],[-40.0,-40.0],[-35.0,-40.0],[-30.0,-38.0],[-25.0,-35.0],[-20.0,-30.0],[-15.0,-25.0],[-10.0,-17.0],[-5.0,-10.0],[0.0,-5.0],[5.0,0.0],[10.0,5.0],[15.0,10.0],[20.0,8.0],[25.0,10.0],[30.0,15.0],[33.0,20.0],[35.0,25.0],[32.0,30.0],[30.0,32.0],[28.0,35.0],[25.0,40.0],[20.0,45.0],[15.0,48.0],[10.0,50.0],[5.0,52.0],[0.0,55.0],[-5.0,58.0],[-10.0,60.0],[-15.0,62.0],[-20.0,65.0],[-30.0,68.0],[-40.0,72.0],[-50.0,75.0],[-60.0,78.0],[-70.0,80.0],[-80.0,80.0],[-90.0,78.0],[-100.0,72.0],[-110.0,65.0],[-120.0,55.0],[-130.0,45.0],[-135.0,35.0],[-130.0,25.0],[-120.0,15.0],[-110.0,10.0],[-100.0,5.0],[-90.0,0.0],[-80.0,-5.0],[-70.0,-10.0],[-60.0,-15.0],[-56.5,-33.0]]], fill: '#0b3d6b' },
-    // South America
-    { polys: [[[-70.0,10.0],[-66.0,5.0],[-60.0,2.0],[-54.0,-3.0],[-48.0,-10.0],[-42.0,-15.0],[-36.0,-20.0],[-33.0,-25.0],[-36.0,-30.0],[-40.0,-35.0],[-45.0,-40.0],[-50.0,-45.0],[-55.0,-50.0],[-60.0,-55.0],[-65.0,-55.0],[-70.0,-50.0],[-75.0,-40.0],[-80.0,-30.0],[-85.0,-20.0],[-82.0,-10.0],[-75.0,0.0],[-70.0,10.0]]], fill: '#0b3d6b' },
-    // Europe
-    { polys: [[[-10.0,36.0],[-5.0,40.0],[0.0,42.0],[5.0,45.0],[10.0,48.0],[15.0,52.0],[20.0,55.0],[25.0,58.0],[30.0,60.0],[35.0,62.0],[40.0,65.0],[45.0,68.0],[50.0,70.0],[55.0,72.0],[60.0,75.0],[65.0,78.0],[70.0,80.0],[80.0,80.0],[90.0,78.0],[100.0,72.0],[105.0,65.0],[100.0,58.0],[95.0,52.0],[90.0,45.0],[85.0,40.0],[80.0,35.0],[75.0,30.0],[70.0,25.0],[65.0,20.0],[60.0,15.0],[55.0,12.0],[50.0,10.0],[45.0,15.0],[40.0,20.0],[35.0,25.0],[30.0,30.0],[25.0,35.0],[20.0,38.0],[15.0,40.0],[10.0,42.0],[5.0,43.0],[-10.0,36.0]]], fill: '#0b3d6b' },
-    // Africa
-    { polys: [[[-17.0,14.0],[-10.0,10.0],[-5.0,5.0],[0.0,0.0],[5.0,-5.0],[10.0,-10.0],[15.0,-15.0],[20.0,-20.0],[25.0,-25.0],[30.0,-30.0],[35.0,-35.0],[40.0,-35.0],[45.0,-30.0],[50.0,-25.0],[55.0,-20.0],[55.0,-15.0],[50.0,-10.0],[45.0,-5.0],[40.0,0.0],[35.0,5.0],[30.0,10.0],[25.0,15.0],[20.0,20.0],[15.0,25.0],[10.0,30.0],[5.0,35.0],[0.0,37.0],[-5.0,35.0],[-10.0,30.0],[-15.0,25.0],[-17.0,14.0]]], fill: '#0b3d6b' },
-    // Asia
-    { polys: [[[50.0,140.0],[55.0,145.0],[60.0,150.0],[65.0,155.0],[70.0,160.0],[75.0,165.0],[80.0,170.0],[85.0,175.0],[90.0,180.0],[95.0,-175.0],[100.0,-170.0],[105.0,-165.0],[110.0,-160.0],[115.0,-155.0],[120.0,-150.0],[125.0,-145.0],[130.0,-140.0],[135.0,-135.0],[140.0,-130.0],[145.0,-125.0],[150.0,-120.0],[155.0,-115.0],[160.0,-110.0],[165.0,-105.0],[170.0,-100.0],[175.0,-95.0],[180.0,-90.0],[175.0,-85.0],[170.0,-80.0],[165.0,-75.0],[160.0,-70.0],[155.0,-65.0],[150.0,-60.0],[145.0,-55.0],[140.0,-50.0],[135.0,-45.0],[130.0,-40.0],[125.0,-35.0],[120.0,-30.0],[115.0,-25.0],[110.0,-20.0],[105.0,-15.0],[100.0,-10.0],[95.0,-5.0],[90.0,0.0],[85.0,5.0],[80.0,10.0],[75.0,15.0],[70.0,20.0],[65.0,25.0],[60.0,30.0],[55.0,35.0],[50.0,40.0],[45.0,45.0],[40.0,50.0],[35.0,55.0],[30.0,60.0],[25.0,65.0],[20.0,70.0],[15.0,75.0],[10.0,80.0],[5.0,85.0],[0.0,90.0],[-5.0,95.0],[-10.0,100.0],[-15.0,105.0],[-20.0,110.0],[-25.0,115.0],[-30.0,120.0],[-35.0,125.0],[-40.0,130.0],[-45.0,135.0],[-50.0,140.0],[50.0,140.0]]], fill: '#0b3d6b' },
-    // Australia
-    { polys: [[[-15.0,125.0],[-10.0,130.0],[-5.0,135.0],[0.0,140.0],[-5.0,145.0],[-10.0,150.0],[-15.0,155.0],[-20.0,155.0],[-25.0,150.0],[-30.0,145.0],[-35.0,140.0],[-35.0,135.0],[-30.0,125.0],[-25.0,120.0],[-20.0,115.0],[-15.0,125.0]]], fill: '#0b3d6b' }
-  ];
+  let w = 0;
+  let h = 0;
+  let dpr = window.devicePixelRatio || 1;
+  let time = 0;
 
-  /* ----- CITY DATA (name, lat, lon) ----- */
+  /* ---------- HUD ELEMENTS ---------- */
+  const activeFlowsEl = document.getElementById('activeFlows');
+  const packetRateEl = document.getElementById('packetRate');
+  const avgLatencyEl = document.getElementById('avgLatency');
+  const dataFlowEl = document.getElementById('dataFlow');
+
+  /* ---------- HIGH-VALUE GLOBAL NETWORK POINTS ---------- */
   const cities = [
-    { lat: 40.7, lon: -74.0, name: 'New York', country: 'United States' },
-    { lat: 51.5, lon: -0.1, name: 'London', country: 'United Kingdom' },
-    { lat: 35.7, lon: 139.7, name: 'Tokyo', country: 'Japan' },
-    { lat: -33.9, lon: 151.2, name: 'Sydney', country: 'Australia' },
-    { lat: 55.8, lon: 37.6, name: 'Moscow', country: 'Russia' },
-    { lat: 25.2, lon: 55.3, name: 'Dubai', country: 'UAE' },
-    { lat: 1.3, lon: 103.8, name: 'Singapore', country: 'Singapore' },
-    { lat: -23.5, lon: -46.6, name: 'São Paulo', country: 'Brazil' },
-    { lat: 19.4, lon: -99.1, name: 'Mexico City', country: 'Mexico' },
-    { lat: 48.9, lon: 2.3, name: 'Paris', country: 'France' },
-    { lat: 39.9, lon: 32.9, name: 'Ankara', country: 'Turkey' },
-    { lat: -26.2, lon: 28.0, name: 'Johannesburg', country: 'South Africa' },
-    { lat: 37.6, lon: 127.0, name: 'Seoul', country: 'South Korea' },
-    { lat: -1.3, lon: 36.8, name: 'Nairobi', country: 'Kenya' },
-    { lat: 28.6, lon: 77.2, name: 'Delhi', country: 'India' },
-    { lat: 13.8, lon: 100.5, name: 'Bangkok', country: 'Thailand' },
-    { lat: 14.6, lon: 121.0, name: 'Manila', country: 'Philippines' },
-    { lat: -6.2, lon: 106.8, name: 'Jakarta', country: 'Indonesia' },
-    { lat: 3.1, lon: 101.7, name: 'Kuala Lumpur', country: 'Malaysia' },
-    { lat: 22.3, lon: 114.2, name: 'Hong Kong', country: 'China' }
+    { name: 'Colombo',     lat: 6.9271,   lon: 79.8612,  tier: 1 },
+    { name: 'Singapore',   lat: 1.3521,   lon: 103.8198, tier: 1 },
+    { name: 'Mumbai',      lat: 19.0760,  lon: 72.8777,  tier: 1 },
+    { name: 'Dubai',       lat: 25.2048,  lon: 55.2708,  tier: 1 },
+    { name: 'Frankfurt',   lat: 50.1109,  lon: 8.6821,   tier: 1 },
+    { name: 'London',      lat: 51.5072,  lon: -0.1276,  tier: 1 },
+    { name: 'Amsterdam',   lat: 52.3676,  lon: 4.9041,   tier: 2 },
+    { name: 'Tokyo',       lat: 35.6762,  lon: 139.6503, tier: 1 },
+    { name: 'Seoul',       lat: 37.5665,  lon: 126.9780, tier: 2 },
+    { name: 'Sydney',      lat: -33.8688, lon: 151.2093, tier: 2 },
+    { name: 'New York',    lat: 40.7128,  lon: -74.0060, tier: 1 },
+    { name: 'Los Angeles', lat: 34.0522,  lon: -118.2437,tier: 2 },
+    { name: 'Toronto',     lat: 43.6532,  lon: -79.3832, tier: 2 },
+    { name: 'São Paulo',   lat: -23.5558, lon: -46.6396, tier: 2 },
+    { name: 'Johannesburg',lat: -26.2041, lon: 28.0473,  tier: 2 }
   ];
 
-  /* ----- ACTIVE TRAFFIC ARCS ----- */
-  let arcs = [];       // each arc: { from, to, color, startTime, duration, dots[] }
+  /* ---------- CURATED TRAFFIC ROUTES ---------- */
+  const routePairs = [
+    ['Colombo', 'Singapore'],
+    ['Colombo', 'Mumbai'],
+    ['Colombo', 'Dubai'],
+    ['Singapore', 'Tokyo'],
+    ['Singapore', 'Sydney'],
+    ['Mumbai', 'Frankfurt'],
+    ['Dubai', 'Frankfurt'],
+    ['Dubai', 'London'],
+    ['Frankfurt', 'London'],
+    ['Frankfurt', 'New York'],
+    ['London', 'New York'],
+    ['New York', 'Los Angeles'],
+    ['Tokyo', 'Los Angeles'],
+    ['Amsterdam', 'Toronto'],
+    ['São Paulo', 'London'],
+    ['Johannesburg', 'Dubai']
+  ];
 
-  /** Mercator projection: converts lat/lon to canvas pixel coordinates */
+  const cityByName = Object.fromEntries(cities.map(c => [c.name, c]));
+
+  let flows = [];
+  let particles = [];
+  let lastFlowSpawn = 0;
+  let totalData = 128.4;
+
+  /* ---------- MAP PROJECTION ---------- */
   function project(lat, lon) {
-    const x = (lon + 180) * (w / 360);
+    const paddingX = w * 0.08;
+    const paddingY = h * 0.14;
+
+    const usableW = w - paddingX * 2;
+    const usableH = h - paddingY * 2;
+
+    const x = paddingX + ((lon + 180) / 360) * usableW;
+
     const latRad = lat * Math.PI / 180;
-    const mercN = Math.log(Math.tan((Math.PI / 4) + (latRad / 2)));
-    const y = (h / 2) - (w * mercN / (2 * Math.PI));
-    return [x, y];
+    const mercN = Math.log(Math.tan(Math.PI / 4 + latRad / 2));
+    const y = paddingY + (usableH / 2) - (usableW * mercN / (2 * Math.PI));
+
+    return { x, y };
   }
 
-  /** Draw continent outlines (filled polygons with stroke) */
-  function drawMap() {
+  function resizeCanvas() {
+    dpr = window.devicePixelRatio || 1;
+    w = window.innerWidth;
+    h = window.innerHeight;
+
+    canvas.width = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  /* ---------- BACKGROUND GRID ---------- */
+  function drawGrid() {
     ctx.save();
-    ctx.globalAlpha = 0.3;
-    continents.forEach(c => {
-      c.polys.forEach(poly => {
-        ctx.beginPath();
-        const first = project(poly[0][0], poly[0][1]);
-        ctx.moveTo(first[0], first[1]);
-        for (let i = 1; i < poly.length; i++) {
-          const pt = project(poly[i][0], poly[i][1]);
-          ctx.lineTo(pt[0], pt[1]);
-        }
-        ctx.closePath();
-        ctx.fillStyle = c.fill;
-        ctx.fill();
-        ctx.strokeStyle = '#1a4a8a';
-        ctx.lineWidth = 0.6;
-        ctx.stroke();
-      });
-    });
-    ctx.restore();
-  }
 
-  /** Draw a city label (only when traffic is active) */
-  function drawCityLabel(city, alpha = 1) {
-    const [x, y] = project(city.lat, city.lon);
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = '#aaccff';
-    ctx.font = '11px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(city.name, x, y - 8);
-    ctx.restore();
-  }
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.055)';
+    ctx.lineWidth = 1;
 
-  /** Spawn a new arc from Colombo (Sri Lanka) to a random world city */
-  function spawnArc() {
-    const fromCity = { lat: 6.9, lon: 79.9, name: 'Colombo', country: 'Sri Lanka' };
-    const to = cities[Math.floor(Math.random() * cities.length)];
-    const hue = Math.random() * 360;
-    const color = `hsl(${hue}, 80%, 60%)`;
-    const newArc = {
-      from: fromCity,
-      to: to,
-      color: color,
-      startTime: performance.now(),
-      duration: 5000 + Math.random() * 4000,   // 5–9 seconds
-      dots: [ { t: 0, speed: 0.003 + Math.random() * 0.005, dir: 1 } ]
-    };
-    arcs.push(newArc);
-    if (arcs.length > 25) arcs.shift();   // keep array size manageable
-  }
+    const gridSize = 72;
 
-  /** Calculate opacity based on arc lifetime (fade in / fade out) */
-  function getArcOpacity(arc, now) {
-    const elapsed = now - arc.startTime;
-    const fadeIn = 600;    // ms to fade in
-    const fadeOut = 800;   // ms to fade out
-    const total = arc.duration;
-    if (elapsed < fadeIn) return elapsed / fadeIn;
-    if (elapsed > total - fadeOut) return Math.max(0, (total - elapsed) / fadeOut);
-    return 1;
-  }
-
-  /** Main animation loop */
-  function animate() {
-    requestAnimationFrame(animate);
-    const now = performance.now();
-    ctx.clearRect(0, 0, w, h);
-
-    // Draw the static map
-    drawMap();
-
-    // Draw permanent city labels (faint)
-    ctx.fillStyle = '#6b9cff';
-    ctx.font = '11px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    cities.forEach(c => {
-      const [x, y] = project(c.lat, c.lon);
-      ctx.fillText(c.name, x, y - 6);
-    });
-    // Sri Lanka label
-    const [slX, slY] = project(6.9, 79.9);
-    ctx.fillText('Sri Lanka', slX, slY - 10);
-    ctx.fillText('(Colombo)', slX, slY + 4);
-
-    // Blinking red dot over Sri Lanka
-    const blink = Math.sin(now * 0.005) * 0.4 + 0.6;
-    ctx.fillStyle = `rgba(255, 50, 50, ${blink})`;
-    ctx.beginPath(); ctx.arc(slX, slY, 4, 0, 2 * Math.PI); ctx.fill();
-
-    // Remove expired arcs (completely faded out)
-    arcs = arcs.filter(a => now - a.startTime < a.duration + 800);
-
-    // Draw active arcs
-    arcs.forEach(arc => {
-      const opacity = getArcOpacity(arc, now);
-      if (opacity <= 0) return;
-
-      const [x1, y1] = project(arc.from.lat, arc.from.lon);
-      const [x2, y2] = project(arc.to.lat, arc.to.lon);
-      const midX = (x1 + x2) / 2 + (y2 - y1) * 0.25;
-      const midY = (y1 + y2) / 2 - (x2 - x1) * 0.25;
-
-      // Draw the arc line
+    for (let x = 0; x <= w; x += gridSize) {
       ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.quadraticCurveTo(midX, midY, x2, y2);
-      ctx.strokeStyle = arc.color;
-      ctx.lineWidth = 1.3;
-      ctx.globalAlpha = opacity * 0.8;
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, h);
       ctx.stroke();
-      ctx.globalAlpha = 1;
+    }
 
-      // Show city names only when arc is clearly visible
-      if (opacity > 0.5) {
-        drawCityLabel(arc.from, opacity);
-        drawCityLabel(arc.to, opacity);
+    for (let y = 0; y <= h; y += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+
+  /* ---------- SIMPLE PROFESSIONAL WORLD OUTLINE ---------- */
+  const landMasses = [
+    [[-168,72],[-140,62],[-123,49],[-105,42],[-95,30],[-82,25],[-70,18],[-60,8],[-78,6],[-95,16],[-112,30],[-130,44],[-150,58],[-168,72]],
+    [[-81,12],[-70,4],[-62,-10],[-55,-22],[-50,-35],[-60,-53],[-72,-40],[-78,-20],[-81,12]],
+    [[-10,35],[5,43],[20,50],[35,55],[45,48],[30,38],[12,36],[-10,35]],
+    [[-18,32],[8,35],[28,25],[40,5],[34,-20],[20,-35],[5,-30],[-8,-5],[-18,32]],
+    [[35,55],[65,60],[95,55],[125,50],[145,42],[135,25],[110,15],[95,5],[75,20],[55,28],[35,55]],
+    [[100,8],[115,5],[125,-5],[110,-8],[100,8]],
+    [[112,-10],[154,-24],[146,-42],[118,-36],[112,-10]]
+  ];
+
+  function drawWorld() {
+    ctx.save();
+
+    landMasses.forEach(poly => {
+      ctx.beginPath();
+
+      poly.forEach(([lon, lat], i) => {
+        const p = project(lat, lon);
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+
+      ctx.closePath();
+
+      ctx.fillStyle = 'rgba(14, 47, 80, 0.42)';
+      ctx.fill();
+
+      ctx.strokeStyle = 'rgba(103, 232, 249, 0.16)';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+    });
+
+    ctx.restore();
+  }
+
+  /* ---------- CURVED ROUTE GEOMETRY ---------- */
+  function getCurvePoint(a, b, t) {
+    const midX = (a.x + b.x) / 2;
+    const midY = (a.y + b.y) / 2;
+
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    const curveHeight = Math.min(180, Math.max(42, dist * 0.18));
+
+    const normalX = -dy / dist;
+    const normalY = dx / dist;
+
+    const cx = midX + normalX * curveHeight;
+    const cy = midY + normalY * curveHeight;
+
+    const x =
+      (1 - t) * (1 - t) * a.x +
+      2 * (1 - t) * t * cx +
+      t * t * b.x;
+
+    const y =
+      (1 - t) * (1 - t) * a.y +
+      2 * (1 - t) * t * cy +
+      t * t * b.y;
+
+    return { x, y, cx, cy };
+  }
+
+  function drawRoute(a, b, opacity) {
+    const control = getCurvePoint(a, b, 0.5);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.quadraticCurveTo(control.cx, control.cy, b.x, b.y);
+
+    ctx.strokeStyle = `rgba(34, 211, 238, ${opacity})`;
+    ctx.lineWidth = 1.15;
+    ctx.shadowColor = 'rgba(34, 211, 238, 0.45)';
+    ctx.shadowBlur = 12;
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  /* ---------- TRAFFIC FLOW SYSTEM ---------- */
+  function spawnFlow() {
+    const pair = routePairs[Math.floor(Math.random() * routePairs.length)];
+    const from = cityByName[pair[0]];
+    const to = cityByName[pair[1]];
+
+    if (!from || !to) return;
+
+    const start = project(from.lat, from.lon);
+    const end = project(to.lat, to.lon);
+
+    const flow = {
+      from,
+      to,
+      start,
+      end,
+      life: 0,
+      maxLife: 160 + Math.random() * 120,
+      speed: 0.008 + Math.random() * 0.006,
+      intensity: 0.45 + Math.random() * 0.45
+    };
+
+    flows.push(flow);
+
+    for (let i = 0; i < 3; i++) {
+      particles.push({
+        flow,
+        t: Math.random() * 0.25,
+        speed: flow.speed * (0.75 + Math.random() * 0.7),
+        size: 1.5 + Math.random() * 2.2,
+        alpha: 0.65 + Math.random() * 0.35
+      });
+    }
+  }
+
+  function updateTraffic() {
+    lastFlowSpawn++;
+
+    if (lastFlowSpawn > 9) {
+      spawnFlow();
+      lastFlowSpawn = 0;
+    }
+
+    flows.forEach(f => f.life++);
+    flows = flows.filter(f => f.life < f.maxLife);
+
+    particles.forEach(p => {
+      p.t += p.speed;
+    });
+
+    particles = particles.filter(p => p.t <= 1 && flows.includes(p.flow));
+  }
+
+  function drawTraffic() {
+    flows.forEach(f => {
+      const fadeIn = Math.min(1, f.life / 40);
+      const fadeOut = Math.min(1, (f.maxLife - f.life) / 50);
+      const opacity = 0.08 + 0.22 * Math.min(fadeIn, fadeOut) * f.intensity;
+
+      drawRoute(f.start, f.end, opacity);
+    });
+
+    particles.forEach(p => {
+      const pos = getCurvePoint(p.flow.start, p.flow.end, p.t);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(125, 249, 255, ${p.alpha})`;
+      ctx.shadowColor = 'rgba(125, 249, 255, 1)';
+      ctx.shadowBlur = 18;
+      ctx.fill();
+      ctx.restore();
+    });
+  }
+
+  /* ---------- CITY NODES ---------- */
+  function drawCities() {
+    cities.forEach(city => {
+      const p = project(city.lat, city.lon);
+
+      const active = flows.some(f => f.from.name === city.name || f.to.name === city.name);
+      const pulse = active ? 1 + Math.sin(time * 0.07) * 0.35 : 1;
+
+      ctx.save();
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, city.tier === 1 ? 4.5 * pulse : 3.2 * pulse, 0, Math.PI * 2);
+      ctx.fillStyle = active ? 'rgba(34, 211, 238, 0.95)' : 'rgba(148, 163, 184, 0.55)';
+      ctx.shadowColor = active ? 'rgba(34, 211, 238, 0.95)' : 'rgba(148, 163, 184, 0.4)';
+      ctx.shadowBlur = active ? 20 : 7;
+      ctx.fill();
+
+      if (active || city.tier === 1) {
+        ctx.font = '600 11px Inter, sans-serif';
+        ctx.fillStyle = active ? 'rgba(226, 252, 255, 0.9)' : 'rgba(203, 213, 225, 0.55)';
+        ctx.shadowBlur = 0;
+        ctx.fillText(city.name, p.x + 9, p.y - 8);
       }
 
-      // Animate moving dots
-      arc.dots.forEach(d => {
-        const t = d.t;
-        const dx = (1-t)*(1-t)*x1 + 2*(1-t)*t*midX + t*t*x2;
-        const dy = (1-t)*(1-t)*y1 + 2*(1-t)*t*midY + t*t*y2;
-        ctx.beginPath();
-        ctx.arc(dx, dy, 2.2, 0, 2 * Math.PI);
-        ctx.fillStyle = arc.color;
-        ctx.globalAlpha = opacity;
-        ctx.fill();
-        ctx.globalAlpha = 1;
-        d.t += d.speed * d.dir;
-        if (d.t > 1 || d.t < 0) d.dir *= -1;
-      });
+      ctx.restore();
     });
-
-    // Randomly spawn new arcs (simulate traffic)
-    if (Math.random() < 0.02) spawnArc();
   }
 
-  /** Handle canvas resize */
-  function resize() {
-    w = canvas.width = innerWidth;
-    h = canvas.height = innerHeight;
+  /* ---------- SCANNING LINE EFFECT ---------- */
+  function drawScanLine() {
+    const y = (time * 0.65) % h;
+
+    const grad = ctx.createLinearGradient(0, y - 45, 0, y + 45);
+    grad.addColorStop(0, 'rgba(34, 211, 238, 0)');
+    grad.addColorStop(0.5, 'rgba(34, 211, 238, 0.08)');
+    grad.addColorStop(1, 'rgba(34, 211, 238, 0)');
+
+    ctx.save();
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, y - 45, w, 90);
+    ctx.restore();
   }
-  window.addEventListener('resize', resize);
-  resize();
+
+  /* ---------- HUD NUMBERS ---------- */
+  function updateHud() {
+    if (!activeFlowsEl) return;
+
+    const active = flows.length;
+    const packets = Math.round(4200 + active * 380 + Math.random() * 1600);
+    const latency = Math.round(24 + Math.random() * 42);
+    totalData += 0.03 + Math.random() * 0.09;
+
+    activeFlowsEl.textContent = String(active).padStart(2, '0');
+    packetRateEl.textContent = packets.toLocaleString();
+    avgLatencyEl.textContent = latency + ' ms';
+    dataFlowEl.textContent = totalData.toFixed(1) + ' GB';
+  }
+
+  /* ---------- MAIN LOOP ---------- */
+  function animate() {
+    time++;
+
+    ctx.clearRect(0, 0, w, h);
+
+    drawGrid();
+    drawWorld();
+    drawScanLine();
+
+    updateTraffic();
+    drawTraffic();
+    drawCities();
+
+    if (time % 18 === 0) updateHud();
+
+    requestAnimationFrame(animate);
+  }
+
+  /* Start with a few active routes immediately */
+  for (let i = 0; i < 10; i++) spawnFlow();
+
+  updateHud();
   animate();
 }
 
-/* ============================
-   START EVERYTHING
-   ============================ */
-window.addEventListener('load', () => {
-  loadProjects();
-  initMap();
-});
+/* Start map safely after page load */
+window.addEventListener('load', initMap);
