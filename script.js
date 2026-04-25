@@ -632,9 +632,31 @@ function initMap() {
     });
   }
 
+  function updateHud() {
+     const activeFlowsEl = document.getElementById('activeFlows');
+     const packetRateEl = document.getElementById('packetRate');
+     const avgLatencyEl = document.getElementById('avgLatency');
+     const dataFlowEl = document.getElementById('dataFlow');
+
+   if (!activeFlowsEl || !packetRateEl || !avgLatencyEl || !dataFlowEl) return;
+
+     const active = flows.length;
+     const packets = Math.round(3800 + active * 420 + Math.random() * 1200);
+     const latency = Math.round(24 + Math.random() * 38);
+
+   if (!window.__trafficTotalData) window.__trafficTotalData = 164.2;
+       window.__trafficTotalData += 0.03 + Math.random() * 0.08;
+
+      activeFlowsEl.textContent = active.toString().padStart(2, '0');
+      packetRateEl.textContent = packets.toLocaleString();
+      avgLatencyEl.textContent = latency + ' ms';
+      dataFlowEl.textContent = window.__trafficTotalData.toFixed(1) + ' GB';
+}
+
   // Main animation loop
   function animate(now) {
     requestAnimationFrame(animate);
+    updateHud();
     if (now - lastTime < frameDelay) return;
     lastTime = now;
     frame++;
@@ -644,6 +666,8 @@ function initMap() {
     drawCities();
     updateTraffic();
     drawTraffic();
+
+    if (frame % 18 === 0) updateHud();
   }
 
   // Resize canvas to fill screen
