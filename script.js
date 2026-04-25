@@ -334,14 +334,6 @@ document.getElementById('contactForm').addEventListener('submit', async function
   } catch { status.textContent = '❌ Network error.'; }
 });
 
-/* ============================
-   NETWORK MONITOR SIMULATION
-   ============================ */
-setInterval(() => {
-  document.getElementById('dlSpeed').textContent = (Math.random() * 50 + 10).toFixed(1) + ' Mbps';
-  document.getElementById('ulSpeed').textContent = (Math.random() * 20 + 5).toFixed(1) + ' Mbps';
-  document.getElementById('latency').textContent = (Math.random() * 80 + 5).toFixed(0) + ' ms';
-}, 1500);
 
 /* ============================
    SNAKE GAME (unchanged, fully functional)
@@ -431,56 +423,65 @@ if (isMobile) { window.addEventListener('deviceorientation', e => { if (e.gamma 
 (function moveBlobs() { const arr = Array.from(blobsEls); arr.forEach((b, i) => { const factor = (i + 1) * 0.1; const x = (mX - innerWidth/2) * factor, y = (mY - innerHeight/2) * factor; b.style.transform = `translate(${x}px, ${y}px)`; }); requestAnimationFrame(moveBlobs); })();
 
 /* ============================
-   CHECKPOINT-STYLE LIVE NETWORK TRAFFIC MAP
-   Option A: realistic simulated traffic
-   -------------------------------------
-   What this does:
-   - Draws a dark professional world map background
-   - Uses glowing city nodes
-   - Sends animated curved packet flows between cities
-   - Shows dashboard-style live network metrics
-   - No cyber threat text, no attack wording
-   - No external API required
+   REAL 2D WORLD MAP + OPTIMIZED LIVE NETWORK TRAFFIC
+   Option A: simulated live network traffic
+   - Real SVG world map image
+   - Canvas traffic layer
+   - Mobile optimized
+   - Reduced lag
    ============================ */
 
 function initMap() {
   const canvas = document.getElementById('mapCanvas');
   if (!canvas) return;
 
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { alpha: true });
 
   let w = 0;
   let h = 0;
-  let dpr = window.devicePixelRatio || 1;
-  let time = 0;
+  let dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let frame = 0;
+  let lastTime = 0;
 
-  /* ---------- HUD ELEMENTS ---------- */
+  const isMobile = window.matchMedia('(max-width: 768px)').matches;
+  const targetFPS = isMobile ? 24 : 60;
+  const frameDelay = 1000 / targetFPS;
+
   const activeFlowsEl = document.getElementById('activeFlows');
   const packetRateEl = document.getElementById('packetRate');
   const avgLatencyEl = document.getElementById('avgLatency');
   const dataFlowEl = document.getElementById('dataFlow');
 
-  /* ---------- HIGH-VALUE GLOBAL NETWORK POINTS ---------- */
+  let totalData = 164.2;
+  let flows = [];
+  let particles = [];
+
+  /* Real world map image */
+  const worldMap = new Image();
+  worldMap.crossOrigin = 'anonymous';
+  worldMap.src = 'https://upload.wikimedia.org/wikipedia/commons/8/83/Equirectangular_projection_SW.jpg';
+
   const cities = [
-    { name: 'Colombo',     lat: 6.9271,   lon: 79.8612,  tier: 1 },
-    { name: 'Singapore',   lat: 1.3521,   lon: 103.8198, tier: 1 },
-    { name: 'Mumbai',      lat: 19.0760,  lon: 72.8777,  tier: 1 },
-    { name: 'Dubai',       lat: 25.2048,  lon: 55.2708,  tier: 1 },
-    { name: 'Frankfurt',   lat: 50.1109,  lon: 8.6821,   tier: 1 },
-    { name: 'London',      lat: 51.5072,  lon: -0.1276,  tier: 1 },
-    { name: 'Amsterdam',   lat: 52.3676,  lon: 4.9041,   tier: 2 },
-    { name: 'Tokyo',       lat: 35.6762,  lon: 139.6503, tier: 1 },
-    { name: 'Seoul',       lat: 37.5665,  lon: 126.9780, tier: 2 },
-    { name: 'Sydney',      lat: -33.8688, lon: 151.2093, tier: 2 },
-    { name: 'New York',    lat: 40.7128,  lon: -74.0060, tier: 1 },
-    { name: 'Los Angeles', lat: 34.0522,  lon: -118.2437,tier: 2 },
-    { name: 'Toronto',     lat: 43.6532,  lon: -79.3832, tier: 2 },
-    { name: 'São Paulo',   lat: -23.5558, lon: -46.6396, tier: 2 },
-    { name: 'Johannesburg',lat: -26.2041, lon: 28.0473,  tier: 2 }
+    { name: 'Colombo', lat: 6.9271, lon: 79.8612, tier: 1 },
+    { name: 'Singapore', lat: 1.3521, lon: 103.8198, tier: 1 },
+    { name: 'Mumbai', lat: 19.0760, lon: 72.8777, tier: 1 },
+    { name: 'Dubai', lat: 25.2048, lon: 55.2708, tier: 1 },
+    { name: 'Frankfurt', lat: 50.1109, lon: 8.6821, tier: 1 },
+    { name: 'London', lat: 51.5072, lon: -0.1276, tier: 1 },
+    { name: 'Amsterdam', lat: 52.3676, lon: 4.9041, tier: 2 },
+    { name: 'Tokyo', lat: 35.6762, lon: 139.6503, tier: 1 },
+    { name: 'Seoul', lat: 37.5665, lon: 126.9780, tier: 2 },
+    { name: 'Sydney', lat: -33.8688, lon: 151.2093, tier: 2 },
+    { name: 'New York', lat: 40.7128, lon: -74.0060, tier: 1 },
+    { name: 'Los Angeles', lat: 34.0522, lon: -118.2437, tier: 2 },
+    { name: 'Toronto', lat: 43.6532, lon: -79.3832, tier: 2 },
+    { name: 'São Paulo', lat: -23.5558, lon: -46.6396, tier: 2 },
+    { name: 'Johannesburg', lat: -26.2041, lon: 28.0473, tier: 2 }
   ];
 
-  /* ---------- CURATED TRAFFIC ROUTES ---------- */
-  const routePairs = [
+  const cityByName = Object.fromEntries(cities.map(c => [c.name, c]));
+
+  const routes = [
     ['Colombo', 'Singapore'],
     ['Colombo', 'Mumbai'],
     ['Colombo', 'Dubai'],
@@ -499,34 +500,10 @@ function initMap() {
     ['Johannesburg', 'Dubai']
   ];
 
-  const cityByName = Object.fromEntries(cities.map(c => [c.name, c]));
-
-  let flows = [];
-  let particles = [];
-  let lastFlowSpawn = 0;
-  let totalData = 128.4;
-
-  /* ---------- MAP PROJECTION ---------- */
-  function project(lat, lon) {
-    const paddingX = w * 0.08;
-    const paddingY = h * 0.14;
-
-    const usableW = w - paddingX * 2;
-    const usableH = h - paddingY * 2;
-
-    const x = paddingX + ((lon + 180) / 360) * usableW;
-
-    const latRad = lat * Math.PI / 180;
-    const mercN = Math.log(Math.tan(Math.PI / 4 + latRad / 2));
-    const y = paddingY + (usableH / 2) - (usableW * mercN / (2 * Math.PI));
-
-    return { x, y };
-  }
-
   function resizeCanvas() {
-    dpr = window.devicePixelRatio || 1;
     w = window.innerWidth;
     h = window.innerHeight;
+    dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1.25 : 2);
 
     canvas.width = Math.floor(w * dpr);
     canvas.height = Math.floor(h * dpr);
@@ -536,277 +513,247 @@ function initMap() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
 
-  /* ---------- BACKGROUND GRID ---------- */
-  function drawGrid() {
-    ctx.save();
+  /* Equirectangular projection — matches the real map image */
+  function project(lat, lon) {
+    const mapRatio = 2; // world map 2:1
+    let mapW = w * 1.12;
+    let mapH = mapW / mapRatio;
 
-    ctx.strokeStyle = 'rgba(56, 189, 248, 0.055)';
+    if (mapH < h * 0.72) {
+      mapH = h * 0.72;
+      mapW = mapH * mapRatio;
+    }
+
+    const mapX = (w - mapW) / 2;
+    const mapY = (h - mapH) / 2 + h * 0.02;
+
+    const x = mapX + ((lon + 180) / 360) * mapW;
+    const y = mapY + ((90 - lat) / 180) * mapH;
+
+    return { x, y };
+  }
+
+  function drawBackground() {
+    const gradient = ctx.createLinearGradient(0, 0, 0, h);
+    gradient.addColorStop(0, '#020611');
+    gradient.addColorStop(0.5, '#030712');
+    gradient.addColorStop(1, '#01030a');
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.045)';
     ctx.lineWidth = 1;
 
-    const gridSize = 72;
+    const grid = isMobile ? 96 : 72;
 
-    for (let x = 0; x <= w; x += gridSize) {
+    for (let x = 0; x < w; x += grid) {
       ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x, h);
       ctx.stroke();
     }
 
-    for (let y = 0; y <= h; y += gridSize) {
+    for (let y = 0; y < h; y += grid) {
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(w, y);
       ctx.stroke();
     }
-
-    ctx.restore();
   }
 
-  /* ---------- SIMPLE PROFESSIONAL WORLD OUTLINE ---------- */
-  const landMasses = [
-    [[-168,72],[-140,62],[-123,49],[-105,42],[-95,30],[-82,25],[-70,18],[-60,8],[-78,6],[-95,16],[-112,30],[-130,44],[-150,58],[-168,72]],
-    [[-81,12],[-70,4],[-62,-10],[-55,-22],[-50,-35],[-60,-53],[-72,-40],[-78,-20],[-81,12]],
-    [[-10,35],[5,43],[20,50],[35,55],[45,48],[30,38],[12,36],[-10,35]],
-    [[-18,32],[8,35],[28,25],[40,5],[34,-20],[20,-35],[5,-30],[-8,-5],[-18,32]],
-    [[35,55],[65,60],[95,55],[125,50],[145,42],[135,25],[110,15],[95,5],[75,20],[55,28],[35,55]],
-    [[100,8],[115,5],[125,-5],[110,-8],[100,8]],
-    [[112,-10],[154,-24],[146,-42],[118,-36],[112,-10]]
-  ];
+  function drawRealWorldMap() {
+    const mapRatio = 2;
+    let mapW = w * 1.12;
+    let mapH = mapW / mapRatio;
 
-  function drawWorld() {
-    ctx.save();
+    if (mapH < h * 0.72) {
+      mapH = h * 0.72;
+      mapW = mapH * mapRatio;
+    }
 
-    landMasses.forEach(poly => {
-      ctx.beginPath();
+    const mapX = (w - mapW) / 2;
+    const mapY = (h - mapH) / 2 + h * 0.02;
 
-      poly.forEach(([lon, lat], i) => {
-        const p = project(lat, lon);
-        if (i === 0) ctx.moveTo(p.x, p.y);
-        else ctx.lineTo(p.x, p.y);
-      });
+    if (worldMap.complete) {
+      ctx.save();
+      ctx.globalAlpha = isMobile ? 0.28 : 0.42;
+      ctx.drawImage(worldMap, mapX, mapY, mapW, mapH);
 
-      ctx.closePath();
-
-      ctx.fillStyle = 'rgba(14, 47, 80, 0.42)';
-      ctx.fill();
-
-      ctx.strokeStyle = 'rgba(103, 232, 249, 0.16)';
-      ctx.lineWidth = 1.2;
-      ctx.stroke();
-    });
-
-    ctx.restore();
+      ctx.globalCompositeOperation = 'source-atop';
+      ctx.fillStyle = 'rgba(8, 38, 68, 0.74)';
+      ctx.fillRect(mapX, mapY, mapW, mapH);
+      ctx.restore();
+    }
   }
 
-  /* ---------- CURVED ROUTE GEOMETRY ---------- */
-  function getCurvePoint(a, b, t) {
+  function curvePoint(a, b, t) {
     const midX = (a.x + b.x) / 2;
     const midY = (a.y + b.y) / 2;
-
     const dx = b.x - a.x;
     const dy = b.y - a.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
 
-    const curveHeight = Math.min(180, Math.max(42, dist * 0.18));
+    const curveHeight = Math.min(isMobile ? 90 : 170, Math.max(35, dist * 0.18));
+    const nx = -dy / dist;
+    const ny = dx / dist;
 
-    const normalX = -dy / dist;
-    const normalY = dx / dist;
+    const cx = midX + nx * curveHeight;
+    const cy = midY + ny * curveHeight;
 
-    const cx = midX + normalX * curveHeight;
-    const cy = midY + normalY * curveHeight;
-
-    const x =
-      (1 - t) * (1 - t) * a.x +
-      2 * (1 - t) * t * cx +
-      t * t * b.x;
-
-    const y =
-      (1 - t) * (1 - t) * a.y +
-      2 * (1 - t) * t * cy +
-      t * t * b.y;
-
-    return { x, y, cx, cy };
+    return {
+      x: (1 - t) * (1 - t) * a.x + 2 * (1 - t) * t * cx + t * t * b.x,
+      y: (1 - t) * (1 - t) * a.y + 2 * (1 - t) * t * cy + t * t * b.y,
+      cx,
+      cy
+    };
   }
 
-  function drawRoute(a, b, opacity) {
-    const control = getCurvePoint(a, b, 0.5);
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(a.x, a.y);
-    ctx.quadraticCurveTo(control.cx, control.cy, b.x, b.y);
-
-    ctx.strokeStyle = `rgba(34, 211, 238, ${opacity})`;
-    ctx.lineWidth = 1.15;
-    ctx.shadowColor = 'rgba(34, 211, 238, 0.45)';
-    ctx.shadowBlur = 12;
-    ctx.stroke();
-
-    ctx.restore();
-  }
-
-  /* ---------- TRAFFIC FLOW SYSTEM ---------- */
   function spawnFlow() {
-    const pair = routePairs[Math.floor(Math.random() * routePairs.length)];
+    if (flows.length > (isMobile ? 12 : 26)) return;
+
+    const pair = routes[Math.floor(Math.random() * routes.length)];
     const from = cityByName[pair[0]];
     const to = cityByName[pair[1]];
-
-    if (!from || !to) return;
-
-    const start = project(from.lat, from.lon);
-    const end = project(to.lat, to.lon);
 
     const flow = {
       from,
       to,
-      start,
-      end,
+      start: project(from.lat, from.lon),
+      end: project(to.lat, to.lon),
       life: 0,
-      maxLife: 160 + Math.random() * 120,
-      speed: 0.008 + Math.random() * 0.006,
-      intensity: 0.45 + Math.random() * 0.45
+      maxLife: 130 + Math.random() * 120,
+      opacity: 0.14 + Math.random() * 0.16
     };
 
     flows.push(flow);
 
-    for (let i = 0; i < 3; i++) {
+    const particleCount = isMobile ? 1 : 3;
+
+    for (let i = 0; i < particleCount; i++) {
       particles.push({
         flow,
-        t: Math.random() * 0.25,
-        speed: flow.speed * (0.75 + Math.random() * 0.7),
-        size: 1.5 + Math.random() * 2.2,
-        alpha: 0.65 + Math.random() * 0.35
+        t: Math.random() * 0.22,
+        speed: 0.009 + Math.random() * 0.006,
+        size: isMobile ? 1.6 : 2.2
       });
     }
   }
 
   function updateTraffic() {
-    lastFlowSpawn++;
-
-    if (lastFlowSpawn > 9) {
-      spawnFlow();
-      lastFlowSpawn = 0;
-    }
+    if (frame % (isMobile ? 12 : 7) === 0) spawnFlow();
 
     flows.forEach(f => f.life++);
     flows = flows.filter(f => f.life < f.maxLife);
 
-    particles.forEach(p => {
-      p.t += p.speed;
-    });
-
+    particles.forEach(p => p.t += p.speed);
     particles = particles.filter(p => p.t <= 1 && flows.includes(p.flow));
   }
 
   function drawTraffic() {
     flows.forEach(f => {
-      const fadeIn = Math.min(1, f.life / 40);
-      const fadeOut = Math.min(1, (f.maxLife - f.life) / 50);
-      const opacity = 0.08 + 0.22 * Math.min(fadeIn, fadeOut) * f.intensity;
+      const fadeIn = Math.min(1, f.life / 35);
+      const fadeOut = Math.min(1, (f.maxLife - f.life) / 45);
+      const alpha = f.opacity * Math.min(fadeIn, fadeOut);
 
-      drawRoute(f.start, f.end, opacity);
+      const c = curvePoint(f.start, f.end, 0.5);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(f.start.x, f.start.y);
+      ctx.quadraticCurveTo(c.cx, c.cy, f.end.x, f.end.y);
+      ctx.strokeStyle = `rgba(34, 211, 238, ${alpha})`;
+      ctx.lineWidth = isMobile ? 0.8 : 1.1;
+
+      if (!isMobile) {
+        ctx.shadowColor = 'rgba(34, 211, 238, 0.5)';
+        ctx.shadowBlur = 10;
+      }
+
+      ctx.stroke();
+      ctx.restore();
     });
 
     particles.forEach(p => {
-      const pos = getCurvePoint(p.flow.start, p.flow.end, p.t);
+      const pos = curvePoint(p.flow.start, p.flow.end, p.t);
 
       ctx.save();
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(125, 249, 255, ${p.alpha})`;
-      ctx.shadowColor = 'rgba(125, 249, 255, 1)';
-      ctx.shadowBlur = 18;
+      ctx.fillStyle = 'rgba(125, 249, 255, 0.9)';
+
+      if (!isMobile) {
+        ctx.shadowColor = 'rgba(125, 249, 255, 1)';
+        ctx.shadowBlur = 16;
+      }
+
       ctx.fill();
       ctx.restore();
     });
   }
 
-  /* ---------- CITY NODES ---------- */
   function drawCities() {
     cities.forEach(city => {
       const p = project(city.lat, city.lon);
-
       const active = flows.some(f => f.from.name === city.name || f.to.name === city.name);
-      const pulse = active ? 1 + Math.sin(time * 0.07) * 0.35 : 1;
 
       ctx.save();
 
       ctx.beginPath();
-      ctx.arc(p.x, p.y, city.tier === 1 ? 4.5 * pulse : 3.2 * pulse, 0, Math.PI * 2);
+      ctx.arc(p.x, p.y, active ? 4 : 2.6, 0, Math.PI * 2);
       ctx.fillStyle = active ? 'rgba(34, 211, 238, 0.95)' : 'rgba(148, 163, 184, 0.55)';
-      ctx.shadowColor = active ? 'rgba(34, 211, 238, 0.95)' : 'rgba(148, 163, 184, 0.4)';
-      ctx.shadowBlur = active ? 20 : 7;
       ctx.fill();
 
-      if (active || city.tier === 1) {
+      if (!isMobile && (active || city.tier === 1)) {
         ctx.font = '600 11px Inter, sans-serif';
         ctx.fillStyle = active ? 'rgba(226, 252, 255, 0.9)' : 'rgba(203, 213, 225, 0.55)';
-        ctx.shadowBlur = 0;
-        ctx.fillText(city.name, p.x + 9, p.y - 8);
+        ctx.fillText(city.name, p.x + 8, p.y - 7);
       }
 
       ctx.restore();
     });
   }
 
-  /* ---------- SCANNING LINE EFFECT ---------- */
-  function drawScanLine() {
-    const y = (time * 0.65) % h;
-
-    const grad = ctx.createLinearGradient(0, y - 45, 0, y + 45);
-    grad.addColorStop(0, 'rgba(34, 211, 238, 0)');
-    grad.addColorStop(0.5, 'rgba(34, 211, 238, 0.08)');
-    grad.addColorStop(1, 'rgba(34, 211, 238, 0)');
-
-    ctx.save();
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, y - 45, w, 90);
-    ctx.restore();
-  }
-
-  /* ---------- HUD NUMBERS ---------- */
   function updateHud() {
     if (!activeFlowsEl) return;
 
     const active = flows.length;
-    const packets = Math.round(4200 + active * 380 + Math.random() * 1600);
-    const latency = Math.round(24 + Math.random() * 42);
-    totalData += 0.03 + Math.random() * 0.09;
+    const packets = Math.round(3800 + active * 420 + Math.random() * 900);
+    const latency = Math.round(24 + Math.random() * 38);
 
-    activeFlowsEl.textContent = String(active).padStart(2, '0');
+    totalData += 0.03 + Math.random() * 0.08;
+
+    activeFlowsEl.textContent = active.toString().padStart(2, '0');
     packetRateEl.textContent = packets.toLocaleString();
     avgLatencyEl.textContent = latency + ' ms';
     dataFlowEl.textContent = totalData.toFixed(1) + ' GB';
   }
 
-  /* ---------- MAIN LOOP ---------- */
-  function animate() {
-    time++;
+  function animate(now) {
+    requestAnimationFrame(animate);
+
+    if (now - lastTime < frameDelay) return;
+    lastTime = now;
+    frame++;
 
     ctx.clearRect(0, 0, w, h);
 
-    drawGrid();
-    drawWorld();
-    drawScanLine();
-
+    drawBackground();
+    drawRealWorldMap();
     updateTraffic();
     drawTraffic();
     drawCities();
 
-    if (time % 18 === 0) updateHud();
-
-    requestAnimationFrame(animate);
+    if (frame % 18 === 0) updateHud();
   }
 
-  /* Start with a few active routes immediately */
-  for (let i = 0; i < 10; i++) spawnFlow();
+  for (let i = 0; i < (isMobile ? 6 : 14); i++) spawnFlow();
 
   updateHud();
-  animate();
+  requestAnimationFrame(animate);
 }
 
-/* Start map safely after page load */
 window.addEventListener('load', initMap);
