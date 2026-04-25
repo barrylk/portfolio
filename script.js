@@ -459,7 +459,7 @@ function initMap() {
   /* Real world map image */
   const worldMap = new Image();
   worldMap.crossOrigin = 'anonymous';
-  worldMap.src = 'https://upload.wikimedia.org/wikipedia/commons/8/83/Equirectangular_projection_SW.jpg';
+ worldMap.src = 'https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg';
 
   const cities = [
     { name: 'Colombo', lat: 6.9271, lon: 79.8612, tier: 1 },
@@ -565,29 +565,58 @@ function initMap() {
     }
   }
 
-  function drawRealWorldMap() {
-    const mapRatio = 2;
-    let mapW = w * 1.12;
-    let mapH = mapW / mapRatio;
+function drawRealWorldMap() {
+  const mapRatio = 2;
+  let mapW = w * 1.12;
+  let mapH = mapW / mapRatio;
 
-    if (mapH < h * 0.72) {
-      mapH = h * 0.72;
-      mapW = mapH * mapRatio;
+  if (mapH < h * 0.72) {
+    mapH = h * 0.72;
+    mapW = mapH * mapRatio;
+  }
+
+  const mapX = (w - mapW) / 2;
+  const mapY = (h - mapH) / 2 + h * 0.02;
+
+  if (!worldMap.complete) return;
+
+  /* Step 1: draw map into hidden canvas */
+  const temp = document.createElement('canvas');
+  const tctx = temp.getContext('2d');
+
+  const dotGap = isMobile ? 8 : 6;
+  const dotSize = isMobile ? 1.15 : 1.35;
+
+  temp.width = Math.floor(mapW);
+  temp.height = Math.floor(mapH);
+
+  tctx.drawImage(worldMap, 0, 0, temp.width, temp.height);
+
+  const img = tctx.getImageData(0, 0, temp.width, temp.height).data;
+
+  ctx.save();
+
+  /* Step 2: convert map pixels into dots */
+  for (let y = 0; y < temp.height; y += dotGap) {
+    for (let x = 0; x < temp.width; x += dotGap) {
+      const index = (y * temp.width + x) * 4;
+      const alpha = img[index + 3];
+
+      if (alpha > 30) {
+        ctx.beginPath();
+        ctx.arc(mapX + x, mapY + y, dotSize, 0, Math.PI * 2);
+
+        ctx.fillStyle = isMobile
+          ? 'rgba(148, 163, 184, 0.24)'
+          : 'rgba(180, 190, 210, 0.32)';
+
+        ctx.fill();
+      }
     }
+  }
 
-    const mapX = (w - mapW) / 2;
-    const mapY = (h - mapH) / 2 + h * 0.02;
-
-    if (worldMap.complete) {
-      ctx.save();
-      ctx.globalAlpha = isMobile ? 0.28 : 0.42;
-      ctx.drawImage(worldMap, mapX, mapY, mapW, mapH);
-
-      ctx.globalCompositeOperation = 'source-atop';
-      ctx.fillStyle = 'rgba(8, 38, 68, 0.74)';
-      ctx.fillRect(mapX, mapY, mapW, mapH);
-      ctx.restore();
-    }
+  ctx.restore();
+}
   }
 
   function curvePoint(a, b, t) {

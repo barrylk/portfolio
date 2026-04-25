@@ -76,8 +76,8 @@ body {
   z-index: -4;
   opacity: 0.95;
   background:
-    radial-gradient(circle at 50% 45%, rgba(30, 80, 160, 0.20), transparent 35%),
-    linear-gradient(180deg, #020611 0%, #030712 45%, #01030a 100%);
+    radial-gradient(circle at 45% 45%, rgba(120, 35, 60, 0.18), transparent 38%),
+    linear-gradient(180deg, #100b14 0%, #090812 52%, #05050a 100%);
 }
 
 /* In light mode keep the map visible but soft */
