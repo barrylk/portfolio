@@ -1,10 +1,11 @@
 /* ============================
-   AOS (Animate on Scroll)
+   AOS (Animate on Scroll) – safe init
    ============================ */
 function initAOS() {
   if (typeof AOS !== 'undefined') {
     AOS.init({ duration: 800, easing: 'ease-out-cubic', once: true });
   } else {
+    // If AOS hasn't loaded yet, wait and try again
     setTimeout(initAOS, 200);
   }
 }
@@ -16,7 +17,7 @@ initAOS();
 const bodyEl = document.body;
 const themeToggle = document.getElementById('themeToggleCheckbox');
 let manualMode = false;
-let userOverride = localStorage.getItem('themeOverride');
+let userOverride = localStorage.getItem('themeOverride');  // remember manual choice
 
 function updateThemeUI(light) {
   if (light) {
@@ -68,7 +69,6 @@ let visitorTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 let clockInterval = null;
 
 async function fetchGeoData() {
-  // Try ipapi.co
   try {
     const res = await fetch('https://ipapi.co/json/');
     if (res.ok) {
@@ -83,7 +83,6 @@ async function fetchGeoData() {
       }
     }
   } catch (e) {}
-  // Fallback to ip‑api.com
   try {
     const res = await fetch('https://ip-api.com/json/?fields=status,countryCode,timezone');
     if (res.ok) {
@@ -100,7 +99,6 @@ async function fetchGeoData() {
       }
     }
   } catch (e) {}
-  // If all fail, show globe
   document.getElementById('visitorFlag').textContent = '🌐';
   startClock();
 }
@@ -266,12 +264,10 @@ function getIcon(p) {
 async function loadProjects() {
   const grid = document.getElementById('projectsGrid');
   let projects = [];
-  // Load from local projects.json
   try {
     const r = await fetch('data/projects.json');
     if (r.ok) projects = await r.json();
   } catch (e) {}
-  // Fetch GitHub repos
   try {
     const gh = await fetch('https://api.github.com/users/barrylk/repos?sort=updated&per_page=6');
     if (gh.ok) {
@@ -286,7 +282,6 @@ async function loadProjects() {
     }
   } catch (e) {}
   if (!projects.length) projects = [{ name: 'Sample Project', description: 'Add projects in data/projects.json', icon: 'fa-code' }];
-  // Load Devicon CSS if needed
   if (!document.querySelector('link[href*="devicon"]')) {
     const l = document.createElement('link');
     l.rel = 'stylesheet';
@@ -325,16 +320,10 @@ document.getElementById('contactForm').addEventListener('submit', async function
   const form = e.target;
   const status = document.getElementById('form-status');
   try {
-    const res = await fetch(form.action, {
-      method: 'POST',
-      body: new FormData(form),
-      headers: { 'Accept': 'application/json' }
-    });
+    const res = await fetch(form.action, { method:'POST', body: new FormData(form), headers:{'Accept':'application/json'} });
     status.textContent = res.ok ? '✅ Message sent!' : '❌ Error, try again.';
     if (res.ok) form.reset();
-  } catch {
-    status.textContent = '❌ Network error.';
-  }
+  } catch { status.textContent = '❌ Network error.'; }
 });
 
 /* ============================
@@ -347,7 +336,7 @@ setInterval(() => {
 }, 1500);
 
 /* ============================
-   SNAKE GAME
+   SNAKE GAME (unchanged)
    ============================ */
 const snakeBtn = document.getElementById('snakeBtn');
 const snakeModal = document.getElementById('snakeGameModal');
@@ -359,17 +348,14 @@ const ctx = snakeCanvas.getContext('2d');
 const scoreSpan = document.getElementById('snakeScore');
 
 let snake, food, direction, nextDirection, score, gameInterval, gameRunning;
-const gridSize = 20;
-const tileCount = snakeCanvas.width / gridSize;
+const gridSize = 20, tileCount = snakeCanvas.width / gridSize;
 
 function initSnake() {
   snake = [{x: 10, y: 10}];
   direction = {x: 1, y: 0};
   nextDirection = {x: 1, y: 0};
-  score = 0;
-  gameRunning = true;
-  placeFood();
-  updateScore();
+  score = 0; gameRunning = true;
+  placeFood(); updateScore();
 }
 function placeFood() {
   food = { x: Math.floor(Math.random() * tileCount), y: Math.floor(Math.random() * tileCount) };
@@ -383,19 +369,19 @@ function draw() {
   ctx.clearRect(0, 0, snakeCanvas.width, snakeCanvas.height);
   ctx.fillStyle = '#e74c3c';
   ctx.beginPath();
-  ctx.arc(food.x * gridSize + gridSize/2, food.y * gridSize + gridSize/2, gridSize/2 - 2, 0, 2 * Math.PI);
+  ctx.arc(food.x*gridSize + gridSize/2, food.y*gridSize + gridSize/2, gridSize/2 - 2, 0, 2*Math.PI);
   ctx.fill();
-  snake.forEach((p, i) => {
+  snake.forEach((p,i) => {
     ctx.fillStyle = i === 0 ? '#2ecc71' : '#27ae60';
-    ctx.fillRect(p.x * gridSize, p.y * gridSize, gridSize - 2, gridSize - 2);
+    ctx.fillRect(p.x*gridSize, p.y*gridSize, gridSize-2, gridSize-2);
   });
 }
 function moveSnake() {
   direction = nextDirection;
-  const head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
-  if (head.x < 0) head.x = tileCount - 1;
+  const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+  if (head.x < 0) head.x = tileCount-1;
   if (head.x >= tileCount) head.x = 0;
-  if (head.y < 0) head.y = tileCount - 1;
+  if (head.y < 0) head.y = tileCount-1;
   if (head.y >= tileCount) head.y = 0;
   if (snake.some(p => p.x === head.x && p.y === head.y)) { endGame(); return; }
   snake.unshift(head);
@@ -406,7 +392,7 @@ function endGame() {
   gameRunning = false;
   clearInterval(gameInterval);
   ctx.fillStyle = 'rgba(0,0,0,0.7)';
-  ctx.fillRect(0, 0, snakeCanvas.width, snakeCanvas.height);
+  ctx.fillRect(0,0,snakeCanvas.width,snakeCanvas.height);
   ctx.fillStyle = 'white';
   ctx.font = '20px Inter, sans-serif';
   ctx.textAlign = 'center';
@@ -428,14 +414,13 @@ let touchStartX, touchStartY;
 snakeCanvas.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; });
 snakeCanvas.addEventListener('touchend', e => {
   if (!touchStartX || !touchStartY) return;
-  const dx = e.changedTouches[0].clientX - touchStartX;
-  const dy = e.changedTouches[0].clientY - touchStartY;
+  const dx = e.changedTouches[0].clientX - touchStartX, dy = e.changedTouches[0].clientY - touchStartY;
   if (Math.abs(dx) > Math.abs(dy)) {
-    if (dx > 0 && direction.x === 0) nextDirection = {x:1, y:0};
-    else if (dx < 0 && direction.x === 0) nextDirection = {x:-1, y:0};
+    if (dx > 0 && direction.x === 0) nextDirection = {x:1,y:0};
+    else if (dx < 0 && direction.x === 0) nextDirection = {x:-1,y:0};
   } else {
-    if (dy > 0 && direction.y === 0) nextDirection = {x:0, y:1};
-    else if (dy < 0 && direction.y === 0) nextDirection = {x:0, y:-1};
+    if (dy > 0 && direction.y === 0) nextDirection = {x:0,y:1};
+    else if (dy < 0 && direction.y === 0) nextDirection = {x:0,y:-1};
   }
   touchStartX = null; touchStartY = null;
 });
@@ -490,8 +475,7 @@ const songArtistEl = document.getElementById('songArtist');
 function loadTrack(idx) {
   curTrack = idx;
   const t = playlist[idx];
-  songTitleEl.textContent = t.title;
-  songArtistEl.textContent = t.artist;
+  songTitleEl.textContent = t.title; songArtistEl.textContent = t.artist;
   if (player && player.loadVideoById) {
     player.loadVideoById(t.id);
     isPlaying = false;
@@ -507,9 +491,8 @@ function togglePlay() {
 function initYT() {
   if (player || typeof YT === 'undefined' || !YT.Player) return;
   player = new YT.Player('ytPlayer', {
-    height: '0', width: '0',
-    videoId: playlist[0].id,
-    playerVars: { autoplay: 0, controls: 0, disablekb: 1, fs: 0, iv_load_policy: 3, modestbranding: 1, rel: 0 },
+    height: '0', width: '0', videoId: playlist[0].id,
+    playerVars: { autoplay: 0, controls: 0, disablekb: 1, fs:0, iv_load_policy:3, modestbranding:1, rel:0 },
     events: {
       onReady: () => { setVol(); updateDur(); progressInterval = setInterval(updateProg, 500); },
       onStateChange: e => {
@@ -524,24 +507,16 @@ function setVol() { if (player) player.setVolume(volumeBar.value); }
 function updateProg() {
   if (player && player.getCurrentTime && player.getDuration) {
     const cur = player.getCurrentTime(), dur = player.getDuration();
-    if (dur) {
-      progressBar.value = (cur / dur) * 100;
-      currentTimeEl.textContent = fmt(cur);
-      durationEl.textContent = fmt(dur);
-    }
+    if (dur) { progressBar.value = (cur/dur)*100; currentTimeEl.textContent = fmt(cur); durationEl.textContent = fmt(dur); }
   }
 }
 function updateDur() { if (player && player.getDuration) { const d = player.getDuration(); if (d) durationEl.textContent = fmt(d); } }
-function seekTo(v) { if (player && player.getDuration) player.seekTo((v / 100) * player.getDuration(), true); }
-function fmt(s) { const m = Math.floor(s / 60), sec = Math.floor(s % 60); return m + ':' + (sec < 10 ? '0' : '') + sec; }
+function seekTo(v) { if (player && player.getDuration) player.seekTo((v/100)*player.getDuration(), true); }
+function fmt(s) { const m = Math.floor(s/60), sec = Math.floor(s%60); return m + ':' + (sec<10?'0':'') + sec; }
 function prevTrack() { let i = curTrack - 1; if (i < 0) i = playlist.length - 1; loadTrack(i); if (isPlaying) setTimeout(() => player.playVideo(), 500); }
 function nextTrack() { let i = (curTrack + 1) % playlist.length; loadTrack(i); if (isPlaying) setTimeout(() => player.playVideo(), 500); }
 
-musicBtn.addEventListener('click', () => {
-  musicModal.classList.add('active');
-  loadTrack(0);
-  if (!player && typeof YT !== 'undefined' && YT.Player) initYT();
-});
+musicBtn.addEventListener('click', () => { musicModal.classList.add('active'); loadTrack(0); if (!player && typeof YT !== 'undefined' && YT.Player) initYT(); });
 musicCloseBtn.addEventListener('click', () => { musicModal.classList.remove('active'); });
 playBtn.addEventListener('click', togglePlay);
 prevBtn.addEventListener('click', prevTrack);
@@ -569,66 +544,48 @@ if (isMobile) {
   const arr = Array.from(blobsEls);
   arr.forEach((b, i) => {
     const factor = (i + 1) * 0.1;
-    const x = (mX - innerWidth / 2) * factor;
-    const y = (mY - innerHeight / 2) * factor;
+    const x = (mX - innerWidth/2) * factor, y = (mY - innerHeight/2) * factor;
     b.style.transform = `translate(${x}px, ${y}px)`;
   });
   requestAnimationFrame(moveBlobs);
 })();
 
 /* ============================
-   2D WORLD MAP WITH LIVE TRAFFIC (replaces 3D globe)
+   2D WORLD MAP WITH LIVE TRAFFIC (full screen, responsive)
    ============================ */
 function initMap() {
   const canvas = document.getElementById('mapCanvas');
   const ctx = canvas.getContext('2d');
   let w, h;
 
-  // Simplified world map (polygons of major continents)
-  // This path is a rough outline to keep things lightweight.
-  const worldOutline = new Path2D(
-    // North America
-    "M 100 50 L 250 30 L 280 90 L 240 170 L 180 200 L 160 260 L 200 280 L 240 240 L 300 200 L 320 120 L 300 80 Z " +
-    // South America
-    "M 260 300 L 280 380 L 260 440 L 230 450 L 210 400 L 240 340 Z " +
-    // Europe
-    "M 420 40 L 460 30 L 500 50 L 530 60 L 560 100 L 520 140 L 480 150 L 450 130 L 430 100 Z " +
+  // Continent outlines (simplified, but recognisable)
+  const continents = [
     // Africa
-    "M 460 160 L 490 140 L 530 150 L 560 200 L 550 260 L 520 300 L 480 280 L 460 230 Z " +
-    // Asia (simplified)
-    "M 540 50 L 680 40 L 760 80 L 800 140 L 780 200 L 720 240 L 650 260 L 600 240 L 580 200 L 560 150 L 530 110 Z " +
+    { path: [ [31.1, -17.3], [32.3, -26.1], [28.6, -32.7], [23.0, -33.0], [18.5, -34.8], [14.5, -30.0], [10.0, -25.0], [8.0, -18.0], [11.0, -11.0], [15.0, -3.0], [21.0, 0.0], [25.0, 5.0], [31.1, 5.0], [37.0, 10.0], [37.1, 17.0], [36.0, 22.0], [33.0, 25.0], [31.0, 23.0], [31.1, -17.3] ], fill: '#2a5298' },
+    // North America
+    { path: [ [53.0, -170.0], [53.0, -130.0], [48.0, -125.0], [44.0, -124.0], [42.0, -115.0], [35.0, -105.0], [32.0, -105.0], [30.0, -95.0], [25.0, -80.0], [20.0, -78.0], [18.0, -90.0], [20.0, -105.0], [22.0, -110.0], [28.0, -118.0], [35.0, -125.0], [45.0, -130.0], [53.0, -170.0] ], fill: '#2a5298' },
+    // South America
+    { path: [ [10.0, -75.0], [8.0, -60.0], [4.0, -51.0], [-2.0, -45.0], [-5.0, -35.0], [-15.0, -38.0], [-22.0, -40.0], [-34.0, -53.0], [-40.0, -62.0], [-44.0, -65.0], [-54.0, -68.0], [-53.0, -72.0], [-48.0, -73.0], [-34.0, -57.0], [-22.0, -40.0], [-10.0, -35.0], [0.0, -50.0], [10.0, -75.0] ], fill: '#2a5298' },
+    // Asia
+    { path: [ [50.0, 140.0], [50.0, 150.0], [55.0, 160.0], [60.0, 170.0], [65.0, 180.0], [68.0, -170.0], [70.0, -160.0], [72.0, -140.0], [74.0, -110.0], [70.0, -90.0], [62.0, -75.0], [55.0, -60.0], [45.0, -55.0], [40.0, -50.0], [36.0, -45.0], [32.0, -35.0], [31.1, -17.3], [37.0, 10.0], [42.0, 30.0], [48.0, 40.0], [53.0, 50.0], [60.0, 60.0], [68.0, 70.0], [72.0, 80.0], [76.0, 90.0], [78.0, 100.0], [70.0, 120.0], [60.0, 130.0], [50.0, 140.0] ], fill: '#2a5298' },
+    // Europe
+    { path: [ [48.0, 0.0], [52.0, 5.0], [55.0, 15.0], [60.0, 20.0], [65.0, 25.0], [70.0, 20.0], [72.0, 15.0], [70.0, 5.0], [65.0, -10.0], [60.0, -15.0], [55.0, -15.0], [48.0, -5.0], [45.0, 0.0], [48.0, 0.0] ], fill: '#2a5298' },
     // Australia
-    "M 700 320 L 740 310 L 760 340 L 740 370 L 700 360 Z"
-  );
-
-  // Cities with [lat, lon, name, importance]
-  const cities = [
-    [40.7, -74.0, "New York", 2],
-    [51.5, -0.1, "London", 2],
-    [35.7, 139.7, "Tokyo", 2],
-    [-33.9, 151.2, "Sydney", 1],
-    [55.8, 37.6, "Moscow", 1],
-    [25.2, 55.3, "Dubai", 1],
-    [1.3, 103.8, "Singapore", 1],
-    [-23.5, -46.6, "São Paulo", 1],
-    [19.4, -99.1, "Mexico City", 1],
-    [48.9, 2.3, "Paris", 1],
-    [39.9, 32.9, "Ankara", 1],
-    [-26.2, 28.0, "Johannesburg", 1],
-    [37.6, 127.0, "Seoul", 1],
-    [-1.3, 36.8, "Nairobi", 1],
-    [28.6, 77.2, "Delhi", 1],
-    [13.8, 100.5, "Bangkok", 1],
-    [14.6, 121.0, "Manila", 1],
-    [-6.2, 106.8, "Jakarta", 1],
-    [3.1, 101.7, "Kuala Lumpur", 1],
-    [22.3, 114.2, "Hong Kong", 1]
+    { path: [ [-12.0, 130.0], [-10.0, 135.0], [-15.0, 145.0], [-20.0, 148.0], [-25.0, 150.0], [-30.0, 153.0], [-35.0, 150.0], [-38.0, 145.0], [-35.0, 135.0], [-28.0, 125.0], [-20.0, 115.0], [-12.0, 130.0] ], fill: '#2a5298' }
   ];
 
-  // Traffic arcs
+  // Cities
+  const cities = [
+    [40.7, -74.0], [51.5, -0.1], [35.7, 139.7], [-33.9, 151.2],
+    [55.8, 37.6], [25.2, 55.3], [1.3, 103.8], [-23.5, -46.6],
+    [19.4, -99.1], [48.9, 2.3], [39.9, 32.9], [-26.2, 28.0],
+    [37.6, 127.0], [-1.3, 36.8], [28.6, 77.2], [13.8, 100.5],
+    [14.6, 121.0], [-6.2, 106.8], [3.1, 101.7], [22.3, 114.2]
+  ];
+
   let arcs = [];
 
-  // Mercator projection helper
+  // Project lat/lon to canvas coordinates (Mercator)
   function project(lat, lon) {
     const x = (lon + 180) * (w / 360);
     const latRad = lat * Math.PI / 180;
@@ -637,16 +594,26 @@ function initMap() {
     return [x, y];
   }
 
-  // Draw map outlines
+  // Draw continent outlines
   function drawMap() {
     ctx.save();
-    ctx.globalAlpha = 0.15;
-    ctx.fillStyle = '#4a90e2';
-    ctx.fill(worldOutline);
+    ctx.globalAlpha = 0.2;
+    continents.forEach(c => {
+      ctx.beginPath();
+      const first = project(c.path[0][0], c.path[0][1]);
+      ctx.moveTo(first[0], first[1]);
+      for (let i = 1; i < c.path.length; i++) {
+        const p = project(c.path[i][0], c.path[i][1]);
+        ctx.lineTo(p[0], p[1]);
+      }
+      ctx.closePath();
+      ctx.fillStyle = c.fill;
+      ctx.fill();
+    });
     ctx.restore();
   }
 
-  // Main animation loop
+  // Animation loop
   function animate() {
     requestAnimationFrame(animate);
     ctx.clearRect(0, 0, w, h);
@@ -656,53 +623,39 @@ function initMap() {
     ctx.fillStyle = '#4ae2ff';
     cities.forEach(c => {
       const [x, y] = project(c[0], c[1]);
-      ctx.beginPath();
-      ctx.arc(x, y, 1.5 + c[3], 0, 2 * Math.PI);
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(x, y, 1.5, 0, 2*Math.PI); ctx.fill();
     });
 
-    // Sri Lanka blinking red dot
+    // Sri Lanka blinking dot
     const [slX, slY] = project(6.9, 79.9);
     const blink = Math.sin(Date.now() * 0.01) * 0.5 + 0.5;
     ctx.fillStyle = `rgba(255, 50, 50, ${blink})`;
-    ctx.beginPath();
-    ctx.arc(slX, slY, 4, 0, 2 * Math.PI);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(slX, slY, 4, 0, 2*Math.PI); ctx.fill();
 
     // Draw traffic arcs
     arcs.forEach(a => {
       const [x1, y1] = project(a.from[0], a.from[1]);
       const [x2, y2] = project(a.to[0], a.to[1]);
-      // Quadratic curve for a nicer arc
       const midX = (x1 + x2) / 2 + (y2 - y1) * 0.3;
       const midY = (y1 + y2) / 2 - (x2 - x1) * 0.3;
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.quadraticCurveTo(midX, midY, x2, y2);
-      ctx.strokeStyle = a.color;
-      ctx.lineWidth = 0.8;
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.quadraticCurveTo(midX, midY, x2, y2);
+      ctx.strokeStyle = a.color; ctx.lineWidth = 0.8; ctx.stroke();
 
-      // Moving dots along the arc
       a.dots.forEach(d => {
         const t = d.t;
         const dx = (1-t)*(1-t)*x1 + 2*(1-t)*t*midX + t*t*x2;
         const dy = (1-t)*(1-t)*y1 + 2*(1-t)*t*midY + t*t*y2;
-        ctx.beginPath();
-        ctx.arc(dx, dy, 1.5, 0, 2*Math.PI);
-        ctx.fillStyle = a.color;
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(dx, dy, 1.5, 0, 2*Math.PI);
+        ctx.fillStyle = a.color; ctx.fill();
         d.t += d.speed * d.dir;
         if (d.t > 1 || d.t < 0) d.dir *= -1;
       });
     });
 
-    // Spawn new arcs periodically
     if (Math.random() < 0.02) {
       const to = cities[Math.floor(Math.random() * cities.length)];
       arcs.push({
-        from: [6.9, 79.9],
-        to: [to[0], to[1]],
+        from: [6.9, 79.9], to: [to[0], to[1]],
         color: `hsl(${Math.random() * 360}, 80%, 60%)`,
         dots: [{ t: 0, speed: 0.003 + Math.random() * 0.006, dir: 1 }]
       });

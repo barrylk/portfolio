@@ -8,12 +8,12 @@
 }
 
 :root {
-  /* Dark mode colors (default) */
+  /* Dark mode palette (default) */
   --bg: #050510;
   --bg-alt: #0a0a18;
   --text: #eef0ff;
   --text-secondary: #9a9cbc;
-  --accent: #3b82f6;        /* blue */
+  --accent: #3b82f6;        /* primary blue */
   --accent-glow: rgba(59,130,246,0.35);
   --purple: #8b5cf6;
   --purple-glow: rgba(139,92,246,0.35);
@@ -52,7 +52,7 @@ body.light {
 html {
   scroll-behavior: smooth;
   font-size: 16px;
-  -webkit-tap-highlight-color: transparent;
+  -webkit-tap-highlight-color: transparent; /* removes blue highlight on mobile tap */
 }
 
 body {
@@ -64,7 +64,7 @@ body {
   transition: background-color 0.5s, color 0.5s;
   overflow-x: hidden;
   margin: 0;
-  padding-bottom: 70px; /* room for mobile tab bar */
+  padding-bottom: 70px; /* space for mobile tab bar */
 }
 
 /* ============================
@@ -76,11 +76,11 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: -3;             /* behind everything */
+  z-index: -3;          /* behind everything */
   opacity: 0.9;
 }
 body.light #mapCanvas {
-  opacity: 0.5;            /* slightly softer in light mode */
+  opacity: 0.5;         /* softer in light mode */
 }
 
 /* ============================
@@ -108,7 +108,7 @@ body.light #mapCanvas {
   opacity: 0.35;
   pointer-events: none;
   z-index: -1;
-  will-change: transform;
+  will-change: transform;   /* GPU optimisation */
 }
 .blob-blue  { background: radial-gradient(circle, var(--accent-glow), transparent 70%); }
 .blob-purple{ background: radial-gradient(circle, var(--purple-glow), transparent 70%); }
@@ -133,6 +133,7 @@ body.loaded .splash-loader {
   opacity: 0;
   visibility: hidden;
 }
+/* Inline SVG Apple logo */
 .apple-logo {
   width: 40px;
   height: 40px;
@@ -379,7 +380,7 @@ body.light .mobile-tab-bar { background: rgba(255,255,255,0.5); }
   position: relative;
   transition: var(--transition);
 }
-/* Force icons to be perfectly centered inside */
+/* The icon itself is also flexed to ensure it sits dead centre */
 .icon-btn i,
 .social-circle i {
   font-size: 1.15rem;
@@ -394,7 +395,7 @@ body.light .mobile-tab-bar { background: rgba(255,255,255,0.5); }
   border-color: var(--accent);
   transform: scale(1.08);
 }
-/* Tooltip on contact icons */
+/* Tooltip that appears on hover (only for contact icons) */
 .icon-btn::after {
   content: attr(data-tooltip);
   position: absolute;
@@ -413,7 +414,7 @@ body.light .mobile-tab-bar { background: rgba(255,255,255,0.5); }
 }
 .icon-btn:hover::after { opacity: 1; }
 
-/* ==================== CTA BUTTONS (Hire Me, Get in Touch) – perfectly centered icons ==================== */
+/* ==================== CTA BUTTONS (Hire Me, Get in Touch) – perfectly centred icons ==================== */
 .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
 .cta-btn {
   display: inline-flex;
@@ -617,7 +618,7 @@ body.light .mobile-tab-bar { background: rgba(255,255,255,0.5); }
 .footer-social { display: flex; justify-content: center; gap: 20px; margin-bottom: 1rem; }
 .footer-text { color: var(--text-secondary); }
 
-/* ==================== FAB BUTTONS – perfectly centered icons ==================== */
+/* ==================== FAB BUTTONS – perfectly centred icons ==================== */
 .fab-container {
   position: fixed;
   bottom: 90px;          /* above mobile tab bar */
@@ -752,25 +753,14 @@ body.light .mobile-tab-bar { background: rgba(255,255,255,0.5); }
   font-size: 0.8rem;
   color: var(--text-secondary);
 }
-.controls {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-}
+.controls { display: flex; justify-content: center; gap: 20px; }
 .controls button {
-  background: none;
-  border: none;
-  color: var(--text);
-  font-size: 1.5rem;
-  cursor: pointer;
-  transition: color 0.2s;
+  background: none; border: none;
+  color: var(--text); font-size: 1.5rem;
+  cursor: pointer; transition: color 0.2s;
 }
 .controls button:hover { color: var(--accent); }
-.volume-container {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.volume-container { display: flex; align-items: center; gap: 10px; }
 .volume-container i { font-size: 1.2rem; color: var(--text-secondary); }
 .volume-container input[type=range] { flex: 1; }
 
@@ -800,11 +790,7 @@ body.light .mobile-tab-bar { background: rgba(255,255,255,0.5); }
   font-size: 0.8rem;
   color: var(--accent);
 }
-.monitor-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
+.monitor-stats { display: flex; flex-direction: column; gap: 4px; }
 .stat-row {
   display: flex;
   justify-content: space-between;
