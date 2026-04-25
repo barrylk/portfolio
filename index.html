@@ -23,34 +23,6 @@
   <canvas id="mapCanvas"></canvas>
   
 
-  <!-- ==================== LIVE NETWORK TRAFFIC OVERLAY ==================== -->
-<div class="traffic-hud" id="trafficHud">
-  <div class="traffic-hud-header">
-    <span class="traffic-live-dot"></span>
-    <span>Live Network Traffic</span>
-  </div>
-
-  <div class="traffic-hud-grid">
-    <div>
-      <small>Active Flows</small>
-      <strong id="activeFlows">0</strong>
-    </div>
-    <div>
-      <small>Packets / sec</small>
-      <strong id="packetRate">0</strong>
-    </div>
-    <div>
-      <small>Avg Latency</small>
-      <strong id="avgLatency">0 ms</strong>
-    </div>
-    <div>
-      <small>Data Flow</small>
-      <strong id="dataFlow">0 GB</strong>
-    </div>
-  </div>
-</div>
-
-
   <!-- ==================== SPLASH LOADER (Apple style) ==================== -->
   <!-- Disappears when the page is ready (or after 3 seconds fallback) -->
   <div class="splash-loader" id="splashLoader">
@@ -222,6 +194,32 @@
 
     <!-- ---------- FOOTER ---------- -->
     <footer class="footer" data-aos="fade-up">
+      <div class="footer-traffic-hud" id="trafficHud">
+  <div class="footer-traffic-title">
+    <span class="traffic-live-dot"></span>
+    <span>Live Network Traffic</span>
+  </div>
+
+  <div class="footer-traffic-grid">
+    <div>
+      <small>Active Flows</small>
+      <strong id="activeFlows">0</strong>
+    </div>
+    <div>
+      <small>Packets / sec</small>
+      <strong id="packetRate">0</strong>
+    </div>
+    <div>
+      <small>Avg Latency</small>
+      <strong id="avgLatency">0 ms</strong>
+    </div>
+    <div>
+      <small>Data Flow</small>
+      <strong id="dataFlow">0 GB</strong>
+    </div>
+  </div>
+</div>
+
       <div class="footer-social">
         <!-- Social icons are perfectly centred inside circles -->
         <a href="https://linkedin.com/in/nadeejanirmala/" target="_blank" class="social-circle"><i class="fab fa-linkedin-in"></i></a>

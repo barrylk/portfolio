@@ -656,7 +656,6 @@ function initMap() {
   // Main animation loop
   function animate(now) {
     requestAnimationFrame(animate);
-    updateHud();
     if (now - lastTime < frameDelay) return;
     lastTime = now;
     frame++;
