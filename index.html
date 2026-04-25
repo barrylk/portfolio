@@ -2,61 +2,41 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- Ensures proper mobile rendering and prevents zooming on double-tap -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
   <title>Nadeeja Nirmala · IT & Creative</title>
-
-  <!-- Stylesheets -->
   <link rel="stylesheet" href="style.css">
-  <!-- Font Awesome 6 for vector icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- Google Fonts: Inter (modern, Apple-like typeface) -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-  <!-- AOS (Animate on Scroll) for smooth reveal animations -->
   <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body class="loading dark">
 
-  <!-- ==================== 2D WORLD MAP CANVAS (fullscreen background) ==================== -->
-  <!-- The canvas is drawn by script.js using realistic continent outlines -->
+  <!-- 2D World Map Canvas -->
   <canvas id="mapCanvas"></canvas>
 
-  <!-- ==================== SPLASH LOADER (Apple-style) ==================== -->
-  <!-- It disappears once the page is ready (or after 3s fallback) -->
+  <!-- Splash Loader -->
   <div class="splash-loader" id="splashLoader">
     <div class="apple-logo"></div>
     <div class="loading-bar"></div>
   </div>
 
-  <!-- ==================== NETWORK MONITOR (top-left corner) ==================== -->
+  <!-- Network Monitor -->
   <div class="network-monitor glass-card" id="networkMonitor">
     <div class="monitor-header">
-      <i class="fas fa-network-wired"></i>
-      <span>Network Monitor</span>
+      <i class="fas fa-network-wired"></i> <span>Network Monitor</span>
     </div>
     <div class="monitor-stats">
-      <div class="stat-row">
-        <span>↓ Download</span>
-        <span id="dlSpeed">0 Mbps</span>
-      </div>
-      <div class="stat-row">
-        <span>↑ Upload</span>
-        <span id="ulSpeed">0 Mbps</span>
-      </div>
-      <div class="stat-row">
-        <span>🌐 Latency</span>
-        <span id="latency">0 ms</span>
-      </div>
+      <div class="stat-row"><span>↓ Download</span><span id="dlSpeed">0 Mbps</span></div>
+      <div class="stat-row"><span>↑ Upload</span><span id="ulSpeed">0 Mbps</span></div>
+      <div class="stat-row"><span>🌐 Latency</span><span id="latency">0 ms</span></div>
     </div>
     <div class="monitor-wave"></div>
   </div>
 
-  <!-- ==================== NAVIGATION BAR (sticky, glass effect) ==================== -->
+  <!-- Navigation -->
   <nav class="nav-bar glass-nav" id="navbar">
     <div class="nav-container">
-      <!-- Logo -->
       <a href="#" class="nav-logo">Nadeeja<span>.</span></a>
-      <!-- Desktop links (hidden on mobile) -->
       <div class="nav-links desktop-only">
         <a href="#experience">Experience</a>
         <a href="#projects">Projects</a>
@@ -64,14 +44,11 @@
         <a href="#education">Education</a>
         <a href="#contact">Contact</a>
       </div>
-      <!-- Right side actions -->
       <div class="nav-actions">
-        <!-- Visitor country flag and local time -->
         <div class="visitor-info">
           <span id="visitorFlag">🌐</span>
           <span id="liveClock">00:00</span>
         </div>
-        <!-- iOS-style toggle for dark/light mode -->
         <label class="ios-toggle" for="themeToggleCheckbox">
           <input type="checkbox" id="themeToggleCheckbox" />
           <span class="ios-toggle-slider"></span>
@@ -80,7 +57,7 @@
     </div>
   </nav>
 
-  <!-- ==================== MOBILE TAB BAR (bottom) ==================== -->
+  <!-- Mobile Tab Bar -->
   <div class="mobile-tab-bar glass-nav" id="mobileTabBar">
     <a href="#hero" class="tab-item active"><i class="fas fa-home"></i><span>Home</span></a>
     <a href="#experience" class="tab-item"><i class="fas fa-briefcase"></i><span>Work</span></a>
@@ -89,44 +66,37 @@
     <a href="#contact" class="tab-item"><i class="fas fa-paper-plane"></i><span>Contact</span></a>
   </div>
 
-  <!-- ==================== CURSOR-FOLLOWING BLOBS (decorative) ==================== -->
+  <!-- Cursor-following Blobs -->
   <div class="blob blob-blue"></div>
   <div class="blob blob-purple"></div>
   <div class="blob blob-red"></div>
 
-  <!-- ==================== MAIN CONTENT ==================== -->
   <main class="container main-content">
 
-    <!-- HERO SECTION -->
+    <!-- Hero Section -->
     <section class="hero" id="hero">
-      <!-- Profile picture with spinning glow ring -->
       <div class="hero-image" data-aos="fade-down" data-aos-duration="1000">
         <div class="profile-wrapper">
           <img src="images/nadeeja-profile.jpg" alt="Nadeeja Nirmala" class="profile-img">
         </div>
       </div>
-      <!-- Hero text and CTAs -->
       <div class="hero-text" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
-        <!-- Dynamic island badge -->
         <div class="dynamic-island">
           <span class="island-dot"></span>
           <span>IT Manager & Digital Creative</span>
           <span class="island-dot"></span>
         </div>
-        <!-- Name with gradient -->
         <h1 class="hero-title">
           <span class="gradient-text">Nadeeja Nirmala<br>Hendavitharana</span>
         </h1>
         <div class="hero-location">
           <i class="fas fa-map-pin"></i> Polonnaruwa, Sri Lanka · <span id="ageDisplay">26</span> y/o
         </div>
-        <!-- Contact icons with tooltips -->
         <div class="hero-contact-icons">
           <a href="tel:+94717111009" class="icon-btn" data-tooltip="071 711 1009"><i class="fas fa-phone"></i></a>
           <a href="mailto:nirmala.itdev@gmail.com" class="icon-btn" data-tooltip="nirmala.itdev@gmail.com"><i class="fas fa-envelope"></i></a>
           <a href="mailto:nirmala.itdev@proton.me" class="icon-btn" data-tooltip="ProtonMail"><i class="fas fa-shield-halved"></i></a>
         </div>
-        <!-- Action buttons -->
         <div class="hero-cta">
           <a href="https://linkedin.com/in/nadeejanirmala/" target="_blank" class="cta-btn primary"><i class="fab fa-linkedin"></i> Hire Me</a>
           <a href="#contact" class="cta-btn secondary">Get in Touch</a>
@@ -134,18 +104,19 @@
       </div>
     </section>
 
-    <!-- BIO SECTION -->
+    <!-- Bio (with perfectly centred LinkedIn badge) -->
     <section class="bio-card glass-card" data-aos="fade-up" data-aos-duration="800">
       <p class="bio-quote">
         <i class="fas fa-quote-left"></i>
         I manage IT at FIBC Lanka, keeping everything from networks, servers, cloud, ERP, and CCTV running smoothly. Alongside that, I handle digital design work &amp; artwork for bags, social media posts, and other creative needs. My background is in computer networks and software engineering, with hands‑on experience in both tech and design.
       </p>
-      <div class="linkedin-badge" id="linkedinStatus">
-        <i class="fab fa-linkedin"></i> <span id="linkedinHeadline">Loading...</span>
+      <div class="linkedin-badge-glass">
+        <span class="badge-icon-circle"><i class="fab fa-linkedin"></i></span>
+        <span id="linkedinHeadline">Loading...</span>
       </div>
     </section>
 
-    <!-- EXPERIENCE TIMELINE -->
+    <!-- Experience Timeline -->
     <section id="experience" data-aos="fade-up">
       <div class="section-header">
         <span class="section-eyebrow">Career</span>
@@ -154,7 +125,7 @@
       <div class="timeline" id="experienceTimeline"></div>
     </section>
 
-    <!-- PROJECTS GRID -->
+    <!-- Projects Grid -->
     <section id="projects" data-aos="fade-up">
       <div class="section-header">
         <span class="section-eyebrow">Work</span>
@@ -163,7 +134,7 @@
       <div class="projects-grid" id="projectsGrid"></div>
     </section>
 
-    <!-- SKILLS BARS -->
+    <!-- Skills Bars -->
     <section id="skills" data-aos="fade-up">
       <div class="section-header">
         <span class="section-eyebrow">Expertise</span>
@@ -172,7 +143,7 @@
       <div class="skills-container" id="skillsContainer"></div>
     </section>
 
-    <!-- EDUCATION TIMELINE -->
+    <!-- Education Timeline -->
     <section id="education" data-aos="fade-up">
       <div class="section-header">
         <span class="section-eyebrow">Learning</span>
@@ -181,13 +152,12 @@
       <div class="timeline" id="educationTimeline"></div>
     </section>
 
-    <!-- CONTACT FORM -->
+    <!-- Contact Form -->
     <section id="contact" data-aos="fade-up">
       <div class="section-header">
         <span class="section-eyebrow">Connect</span>
         <h2>Get in Touch</h2>
       </div>
-      <!-- Uses Formspree to send emails to your ProtonMail -->
       <form class="contact-form glass-card" id="contactForm" action="https://formspree.io/f/mkokkena" method="POST">
         <div class="form-row">
           <div class="form-group">
@@ -214,7 +184,7 @@
       </form>
     </section>
 
-    <!-- FOOTER -->
+    <!-- Footer -->
     <footer class="footer" data-aos="fade-up">
       <div class="footer-social">
         <a href="https://linkedin.com/in/nadeejanirmala/" target="_blank" class="social-circle"><i class="fab fa-linkedin-in"></i></a>
@@ -226,14 +196,14 @@
 
   </main>
 
-  <!-- ==================== FLOATING ACTION BUTTONS (WhatsApp, Snake, Music) ==================== -->
+  <!-- Floating Action Buttons -->
   <div class="fab-container">
     <a href="https://wa.me/message/4YGA7K2KMFCNK1" target="_blank" class="fab whatsapp-fab"><i class="fab fa-whatsapp"></i></a>
     <button class="fab snake-fab" id="snakeBtn" title="Play Snake"><i class="fas fa-gamepad"></i></button>
     <button class="fab music-fab" id="musicBtn" title="Bored?"><i class="fas fa-music"></i></button>
   </div>
 
-  <!-- ==================== SNAKE GAME MODAL ==================== -->
+  <!-- Snake Game Modal -->
   <div class="game-modal" id="snakeGameModal">
     <div class="game-window" id="snakeGameWindow">
       <div class="game-header" id="snakeDragHandle">
@@ -248,7 +218,7 @@
     </div>
   </div>
 
-  <!-- ==================== MUSIC PLAYER MODAL (YouTube audio only) ==================== -->
+  <!-- Music Player Modal -->
   <div class="music-modal" id="musicModal">
     <div class="music-player glass-card">
       <div class="music-header">
@@ -277,12 +247,11 @@
           <input type="range" id="volumeBar" value="80" min="0" max="100">
         </div>
       </div>
-      <!-- Hidden YouTube player (audio only) -->
       <div id="ytPlayer" style="position:absolute;width:0;height:0;overflow:hidden;"></div>
     </div>
   </div>
 
-  <!-- ==================== PROJECT MODAL ==================== -->
+  <!-- Project Modal -->
   <div class="modal" id="projectModal">
     <div class="modal-content glass-card">
       <span class="modal-close" onclick="closeModal()">&times;</span>
@@ -292,20 +261,17 @@
     </div>
   </div>
 
-  <!-- ==================== SCRIPTS ==================== -->
-  <!-- AOS animation library -->
+  <!-- Scripts -->
   <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-  <!-- YouTube IFrame API for music player -->
   <script async src="https://www.youtube.com/iframe_api"></script>
-  <!-- Our main JavaScript file -->
   <script src="script.js"></script>
 
-  <!-- FAILSAFE LOADER HIDE: guarantees the splash screen disappears -->
+  <!-- Failsafe loader hide -->
   <script>
     (function() {
       var hide = function() { document.body.classList.add('loaded'); };
-      hide();                  // Try immediately (body already exists)
-      setTimeout(hide, 3000);  // Backup after 3 seconds
+      hide();
+      setTimeout(hide, 3000);
     })();
   </script>
 </body>
