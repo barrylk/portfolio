@@ -1,53 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- ===== META & RESPONSIVENESS ===== -->
   <meta charset="UTF-8">
-  <!-- Responsive viewport settings: prevent zoom, fit to screen -->
+  <!-- Prevent zooming on double‑tap, fit screen perfectly -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
   <title>Nadeeja Nirmala · IT & Creative</title>
 
-  <!-- CSS Stylesheets -->
+  <!-- ===== STYLESHEETS ===== -->
   <link rel="stylesheet" href="style.css">
-  <!-- Font Awesome 6 for all icons -->
+  <!-- Font Awesome 6 – all icons used in the site -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- Google Fonts: Inter (modern, Apple‑like font) -->
+  <!-- Google Fonts: Inter – modern, Apple‑like sans‑serif -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-  <!-- AOS (Animate on Scroll) for smooth fade‑in effects -->
+  <!-- AOS – smooth fade‑in animations on scroll -->
   <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body class="loading dark">
 
-  <!-- ==================== 2D WORLD MAP CANVAS ==================== -->
-  <!-- Drawn by script.js using realistic continent outlines and live traffic arcs -->
+  <!-- ==================== BACKGROUND CANVAS ==================== -->
+  <!-- The 2D world map with internet traffic is drawn here (see script.js) -->
   <canvas id="mapCanvas"></canvas>
 
   <!-- ==================== SPLASH LOADER (Apple style) ==================== -->
-  <!-- Disappears when the page is ready (or after 3s fallback) -->
+  <!-- Disappears when the page is ready (or after 3 seconds fallback) -->
   <div class="splash-loader" id="splashLoader">
     <div class="apple-logo"></div>
     <div class="loading-bar"></div>
   </div>
 
   <!-- ==================== NETWORK MONITOR (top‑left corner) ==================== -->
-  <!-- Simulated real‑time network statistics -->
+  <!-- Simulated real‑time internet statistics -->
   <div class="network-monitor glass-card" id="networkMonitor">
     <div class="monitor-header">
       <i class="fas fa-network-wired"></i>
       <span>Network Monitor</span>
     </div>
     <div class="monitor-stats">
-      <div class="stat-row">
-        <span>↓ Download</span>
-        <span id="dlSpeed">0 Mbps</span>
-      </div>
-      <div class="stat-row">
-        <span>↑ Upload</span>
-        <span id="ulSpeed">0 Mbps</span>
-      </div>
-      <div class="stat-row">
-        <span>🌐 Latency</span>
-        <span id="latency">0 ms</span>
-      </div>
+      <div class="stat-row"><span>↓ Download</span><span id="dlSpeed">0 Mbps</span></div>
+      <div class="stat-row"><span>↑ Upload</span><span id="ulSpeed">0 Mbps</span></div>
+      <div class="stat-row"><span>🌐 Latency</span><span id="latency">0 ms</span></div>
     </div>
     <div class="monitor-wave"></div>
   </div>
@@ -65,7 +57,7 @@
         <a href="#contact">Contact</a>
       </div>
       <div class="nav-actions">
-        <!-- Visitor flag and clock (IP‑based timezone) -->
+        <!-- Visitor's country flag and local time (IP‑based) -->
         <div class="visitor-info">
           <span id="visitorFlag">🌐</span>
           <span id="liveClock">00:00</span>
@@ -79,7 +71,7 @@
     </div>
   </nav>
 
-  <!-- ==================== MOBILE TAB BAR (bottom) ==================== -->
+  <!-- ==================== MOBILE TAB BAR ==================== -->
   <div class="mobile-tab-bar glass-nav" id="mobileTabBar">
     <a href="#hero" class="tab-item active"><i class="fas fa-home"></i><span>Home</span></a>
     <a href="#experience" class="tab-item"><i class="fas fa-briefcase"></i><span>Work</span></a>
@@ -88,7 +80,7 @@
     <a href="#contact" class="tab-item"><i class="fas fa-paper-plane"></i><span>Contact</span></a>
   </div>
 
-  <!-- ==================== CURSOR‑FOLLOWING BLOBS (decorative) ==================== -->
+  <!-- ==================== DECORATIVE BLOBS ==================== -->
   <div class="blob blob-blue"></div>
   <div class="blob blob-purple"></div>
   <div class="blob blob-red"></div>
@@ -96,7 +88,7 @@
   <!-- ==================== MAIN CONTENT ==================== -->
   <main class="container main-content">
 
-    <!-- HERO SECTION -->
+    <!-- ---------- HERO SECTION ---------- -->
     <section class="hero" id="hero">
       <div class="hero-image" data-aos="fade-down" data-aos-duration="1000">
         <!-- Profile picture with spinning glow ring -->
@@ -105,7 +97,7 @@
         </div>
       </div>
       <div class="hero-text" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
-        <!-- Dynamic island badge -->
+        <!-- Dynamic Island badge -->
         <div class="dynamic-island">
           <span class="island-dot"></span>
           <span>IT Manager & Digital Creative</span>
@@ -117,7 +109,7 @@
         <div class="hero-location">
           <i class="fas fa-map-pin"></i> Polonnaruwa, Sri Lanka · <span id="ageDisplay">26</span> y/o
         </div>
-        <!-- Contact icons with hover tooltips -->
+        <!-- Contact icons with tooltips -->
         <div class="hero-contact-icons">
           <a href="tel:+94717111009" class="icon-btn" data-tooltip="071 711 1009"><i class="fas fa-phone"></i></a>
           <a href="mailto:nirmala.itdev@gmail.com" class="icon-btn" data-tooltip="nirmala.itdev@gmail.com"><i class="fas fa-envelope"></i></a>
@@ -131,20 +123,20 @@
       </div>
     </section>
 
-    <!-- BIO SECTION -->
+    <!-- ---------- BIO ---------- -->
     <section class="bio-card glass-card" data-aos="fade-up" data-aos-duration="800">
       <p class="bio-quote">
         <i class="fas fa-quote-left"></i>
         I manage IT at FIBC Lanka, keeping everything from networks, servers, cloud, ERP, and CCTV running smoothly. Alongside that, I handle digital design work &amp; artwork for bags, social media posts, and other creative needs. My background is in computer networks and software engineering, with hands‑on experience in both tech and design.
       </p>
-      <!-- LinkedIn badge with perfectly centered icon -->
+      <!-- LinkedIn badge with perfectly centred icon -->
       <div class="linkedin-badge-glass">
         <span class="badge-icon-circle"><i class="fab fa-linkedin"></i></span>
         <span id="linkedinHeadline">Loading...</span>
       </div>
     </section>
 
-    <!-- EXPERIENCE TIMELINE -->
+    <!-- ---------- EXPERIENCE TIMELINE ---------- -->
     <section id="experience" data-aos="fade-up">
       <div class="section-header">
         <span class="section-eyebrow">Career</span>
@@ -153,7 +145,7 @@
       <div class="timeline" id="experienceTimeline"></div>
     </section>
 
-    <!-- PROJECTS GRID -->
+    <!-- ---------- PROJECTS GRID ---------- -->
     <section id="projects" data-aos="fade-up">
       <div class="section-header">
         <span class="section-eyebrow">Work</span>
@@ -162,7 +154,7 @@
       <div class="projects-grid" id="projectsGrid"></div>
     </section>
 
-    <!-- SKILLS BARS -->
+    <!-- ---------- SKILLS BARS ---------- -->
     <section id="skills" data-aos="fade-up">
       <div class="section-header">
         <span class="section-eyebrow">Expertise</span>
@@ -171,7 +163,7 @@
       <div class="skills-container" id="skillsContainer"></div>
     </section>
 
-    <!-- EDUCATION TIMELINE -->
+    <!-- ---------- EDUCATION TIMELINE ---------- -->
     <section id="education" data-aos="fade-up">
       <div class="section-header">
         <span class="section-eyebrow">Learning</span>
@@ -180,13 +172,13 @@
       <div class="timeline" id="educationTimeline"></div>
     </section>
 
-    <!-- CONTACT FORM -->
+    <!-- ---------- CONTACT FORM ---------- -->
     <section id="contact" data-aos="fade-up">
       <div class="section-header">
         <span class="section-eyebrow">Connect</span>
         <h2>Get in Touch</h2>
       </div>
-      <!-- Uses Formspree to send emails to your ProtonMail -->
+      <!-- Form submissions go to your ProtonMail via Formspree -->
       <form class="contact-form glass-card" id="contactForm" action="https://formspree.io/f/mkokkena" method="POST">
         <div class="form-row">
           <div class="form-group">
@@ -213,9 +205,10 @@
       </form>
     </section>
 
-    <!-- FOOTER -->
+    <!-- ---------- FOOTER ---------- -->
     <footer class="footer" data-aos="fade-up">
       <div class="footer-social">
+        <!-- Social icons are perfectly centred inside circles -->
         <a href="https://linkedin.com/in/nadeejanirmala/" target="_blank" class="social-circle"><i class="fab fa-linkedin-in"></i></a>
         <a href="https://github.com/barrylk" target="_blank" class="social-circle"><i class="fab fa-github"></i></a>
         <a href="https://drive.google.com/drive/folders/1MyCzaJPsRv2DFtU6tRUc-oV7pnDDOETM" target="_blank" class="social-circle"><i class="fab fa-google-drive"></i></a>
@@ -296,10 +289,11 @@
   <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
   <!-- YouTube IFrame API for music player -->
   <script async src="https://www.youtube.com/iframe_api"></script>
-  <!-- Our main JavaScript file -->
+  <!-- Our main JavaScript file (all features + map) -->
   <script src="script.js"></script>
 
-  <!-- FAILSAFE LOADER HIDE: guarantees the splash screen disappears -->
+  <!-- ==================== FAILSAFE LOADER HIDE ==================== -->
+  <!-- Guarantees the splash screen disappears even if JS is slow -->
   <script>
     (function() {
       var hide = function() { document.body.classList.add('loaded'); };
