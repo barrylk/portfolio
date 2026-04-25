@@ -451,10 +451,16 @@ function initMap() {
       for (let x = 0; x < offscreen.width; x += DOT_STEP) {
         const i = (y * offscreen.width + x) * 4;
         const r = imgData[i], g = imgData[i + 1], b = imgData[i + 2], a = imgData[i + 3];
-        if (a < 80) continue;                            // transparent → skip
-        const isOcean  = b > r + 15 && b > g + 5 && b > 140;  // light blue ocean
-        const isWhite  = r > 230 && g > 230 && b > 230;        // white areas
-        if (!isOcean && !isWhite) dotCache.push({ nx: x / offscreen.width, ny: y / offscreen.height });
+        if (a < 80) continue;
+        const isOcean = b > r + 15 && b > g + 5 && b > 140;
+        const isWhite = r > 230 && g > 230 && b > 230;
+        if (!isOcean && !isWhite) {
+          // Store as lat/lon so dots go through the same project()
+          // as city markers — guarantees perfect alignment
+          const lat =  90 - (y / offscreen.height) * 180;
+          const lon = -180 + (x / offscreen.width)  * 360;
+          dotCache.push({ lat, lon });
+        }
       }
     }
     mapReady = true;
@@ -538,14 +544,12 @@ function initMap() {
   // ── Dotted world map ───────────────────────────────────
   function drawDottedMap() {
     if (!mapReady || !dotCache.length) return;
-    const { mapW, mapH, mapX, mapY } = mapBounds();
     const r = isMobile ? 1.1 : 1.5;
     ctx.fillStyle = 'rgba(115, 105, 140, 0.52)';
     dotCache.forEach(d => {
-      const x = mapX + d.nx * mapW;
-      const y = mapY + d.ny * mapH;
+      const p = project(d.lat, d.lon);
       ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
       ctx.fill();
     });
   }
