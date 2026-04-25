@@ -3,9 +3,16 @@
    ============================ */
 function initAOS() {
   if (typeof AOS !== 'undefined') {
-    AOS.init({ duration: 800, easing: 'ease-out-cubic', once: true });
+    AOS.init({
+      duration: 700,
+      easing: 'ease-out-cubic',
+      once: true,
+      disable: window.innerWidth < 768
+    });
+
+    document.body.classList.add('aos-ready');
   } else {
-    setTimeout(initAOS, 200);   // wait for AOS to load
+    document.body.classList.add('aos-ready');
   }
 }
 initAOS();
@@ -785,5 +792,6 @@ function drawRealWorldMap() {
   requestAnimationFrame(animate);
 }
 
-window.addEventListener('load', initMap);t e s t  
+window.addEventListener('load', initMap);t e s t 
+ 
  

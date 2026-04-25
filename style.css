@@ -703,3 +703,16 @@ body.light .mobile-tab-bar { background: rgba(255,255,255,0.5); }
     justify-content: center;
   }
 }
+
+/* Emergency fix: show content even if AOS/CDN fails */
+[data-aos] {
+  opacity: 1 !important;
+  transform: none !important;
+  visibility: visible !important;
+}
+
+.aos-init,
+.aos-animate {
+  opacity: 1 !important;
+  transform: none !important;
+}
