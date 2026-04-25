@@ -1,32 +1,18 @@
-// ========== AOS (safe init) ==========
-function initAOS() {
-  if (typeof AOS !== 'undefined') {
-    AOS.init({ duration: 800, easing: 'ease-out-cubic', once: true });
-  } else {
-    setTimeout(initAOS, 200);
-  }
-}
+// ========== AOS ==========
+function initAOS() { if (typeof AOS !== 'undefined') AOS.init({ duration: 800, easing: 'ease-out-cubic', once: true }); else setTimeout(initAOS, 200); }
 initAOS();
 
 // ========== THEME (iOS toggle + auto) ==========
 const bodyEl = document.body;
 const themeToggle = document.getElementById('themeToggleCheckbox');
 let manualMode = false, userOverride = localStorage.getItem('themeOverride');
-
 function updateThemeUI(light) {
-  if (light) {
-    bodyEl.classList.add('light');
-    themeToggle.checked = true;
-  } else {
-    bodyEl.classList.remove('light');
-    themeToggle.checked = false;
-  }
+  if (light) { bodyEl.classList.add('light'); themeToggle.checked = true; }
+  else { bodyEl.classList.remove('light'); themeToggle.checked = false; }
 }
 function isDay() { const h = new Date().getHours(); return h >= 6 && h < 18; }
 function applyTheme() {
-  let light;
-  if (manualMode) light = userOverride === 'light';
-  else light = isDay();
+  let light = manualMode ? userOverride === 'light' : isDay();
   updateThemeUI(light);
 }
 themeToggle.addEventListener('change', () => {
@@ -130,12 +116,8 @@ timeline.innerHTML = expData.map((e,i) => `
 
 // ========== SKILLS ==========
 const skills = [
-  { cat:'IT & ERP', items:[
-    {n:'Tally ERP / SignHR',p:85},{n:'Network & Security',p:90},{n:'Cloud & Server Admin',p:80},{n:'CCTV & Hardware Support',p:88}
-  ]},
-  { cat:'Graphic & CAD Design', items:[
-    {n:'Adobe Photoshop',p:92},{n:'Modaris',p:85},{n:'AutoCAD',p:80},{n:'CorelDRAW',p:88}
-  ]}
+  { cat:'IT & ERP', items:[{n:'Tally ERP / SignHR',p:85},{n:'Network & Security',p:90},{n:'Cloud & Server Admin',p:80},{n:'CCTV & Hardware Support',p:88}] },
+  { cat:'Graphic & CAD Design', items:[{n:'Adobe Photoshop',p:92},{n:'Modaris',p:85},{n:'AutoCAD',p:80},{n:'CorelDRAW',p:88}] }
 ];
 const skillsContainer = document.getElementById('skillsContainer');
 skillsContainer.innerHTML = skills.map(c => `
@@ -239,126 +221,6 @@ document.getElementById('contactForm').addEventListener('submit', async function
   } catch { status.textContent = '❌ Network error.'; }
 });
 
-// ========== 3D BACKGROUND (Three.js) ==========
-function init3D() {
-  if (typeof THREE === 'undefined') return;
-  const canvas = document.getElementById('bgCanvas');
-  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setClearColor(0x000000, 0);
-
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  camera.position.z = 40;
-
-  const globeGeom = new THREE.IcosahedronGeometry(8, 2);
-  const globeMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, wireframe: true, transparent: true, opacity: 0.2 });
-  const globe = new THREE.Mesh(globeGeom, globeMat);
-  scene.add(globe);
-
-  const particleCount = 1000;
-  const particleGeom = new THREE.BufferGeometry();
-  const positions = new Float32Array(particleCount * 3);
-  const colors = new Float32Array(particleCount * 3);
-  const color1 = new THREE.Color(0x00f0ff);
-  const color2 = new THREE.Color(0xb44bff);
-  const color3 = new THREE.Color(0xff4d7d);
-
-  for (let i = 0; i < particleCount; i++) {
-    const radius = 12 + Math.random() * 8;
-    const theta = Math.random() * Math.PI * 2;
-    const phi = Math.asin((Math.random() * 2) - 1);
-    positions[i * 3] = Math.cos(theta) * Math.cos(phi) * radius;
-    positions[i * 3 + 1] = Math.sin(phi) * radius;
-    positions[i * 3 + 2] = Math.sin(theta) * Math.cos(phi) * radius;
-
-    let color;
-    const r = Math.random();
-    if (r < 0.33) color = color1;
-    else if (r < 0.66) color = color2;
-    else color = color3;
-    colors[i * 3] = color.r;
-    colors[i * 3 + 1] = color.g;
-    colors[i * 3 + 2] = color.b;
-  }
-  particleGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  particleGeom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-  const particleMat = new THREE.PointsMaterial({
-    size: 0.2,
-    vertexColors: true,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-    transparent: true,
-    opacity: 0.9
-  });
-  const particles = new THREE.Points(particleGeom, particleMat);
-  scene.add(particles);
-
-  const lineGeom = new THREE.BufferGeometry();
-  const linePositions = [];
-  const lineColors = [];
-  const maxDist = 2.5;
-  for (let i = 0; i < particleCount; i++) {
-    for (let j = i + 1; j < particleCount; j++) {
-      const dx = positions[i * 3] - positions[j * 3];
-      const dy = positions[i * 3 + 1] - positions[j * 3 + 1];
-      const dz = positions[i * 3 + 2] - positions[j * 3 + 2];
-      const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-      if (dist < maxDist) {
-        linePositions.push(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
-        linePositions.push(positions[j * 3], positions[j * 3 + 1], positions[j * 3 + 2]);
-        const alpha = 1 - dist / maxDist;
-        lineColors.push(colors[i * 3] * alpha, colors[i * 3 + 1] * alpha, colors[i * 3 + 2] * alpha);
-        lineColors.push(colors[j * 3] * alpha, colors[j * 3 + 1] * alpha, colors[j * 3 + 2] * alpha);
-      }
-    }
-  }
-  lineGeom.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
-  lineGeom.setAttribute('color', new THREE.Float32BufferAttribute(lineColors, 3));
-  const lineMat = new THREE.LineBasicMaterial({ vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.15 });
-  const lines = new THREE.LineSegments(lineGeom, lineMat);
-  scene.add(lines);
-
-  const mouse = { x: 0, y: 0 };
-  document.addEventListener('mousemove', (e) => {
-    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-  });
-  if (window.matchMedia('(pointer: coarse)').matches) {
-    window.addEventListener('deviceorientation', (e) => {
-      if (e.gamma === null || e.beta === null) return;
-      mouse.x = (e.gamma / 45);
-      mouse.y = -(e.beta / 45);
-    });
-  }
-
-  function animate() {
-    requestAnimationFrame(animate);
-    globe.rotation.y += 0.002;
-    globe.rotation.x += 0.001;
-    particles.rotation.y += 0.0005;
-    particles.rotation.x += 0.0002;
-    lines.rotation.y = particles.rotation.y;
-    lines.rotation.x = particles.rotation.x;
-
-    const targetRotX = mouse.y * 0.5;
-    const targetRotY = mouse.x * 0.5;
-    globe.rotation.x += (targetRotX - globe.rotation.x) * 0.01;
-    globe.rotation.y += (targetRotY - globe.rotation.y) * 0.01;
-    particles.rotation.x += (targetRotX * 0.1 - particles.rotation.x) * 0.01;
-    particles.rotation.y += (targetRotY * 0.1 - particles.rotation.y) * 0.01;
-
-    renderer.render(scene, camera);
-  }
-  animate();
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
-}
-
 // ========== NETWORK MONITOR SIMULATION ==========
 setInterval(() => {
   document.getElementById('dlSpeed').textContent = (Math.random() * 50 + 10).toFixed(1) + ' Mbps';
@@ -382,12 +244,9 @@ const tileCount = snakeCanvas.width / gridSize;
 
 function initSnake() {
   snake = [{x: 10, y: 10}];
-  direction = {x: 1, y: 0};
-  nextDirection = {x: 1, y: 0};
-  score = 0;
-  gameRunning = true;
-  placeFood();
-  updateScore();
+  direction = {x: 1, y: 0}; nextDirection = {x: 1, y: 0};
+  score = 0; gameRunning = true;
+  placeFood(); updateScore();
 }
 function placeFood() {
   food = { x: Math.floor(Math.random() * tileCount), y: Math.floor(Math.random() * tileCount) };
@@ -469,8 +328,7 @@ if (!isMobile) {
   snakeHandle.addEventListener('mousedown', (e) => {
     dragging = true;
     const rect = snakeWindow.getBoundingClientRect();
-    offX = e.clientX - rect.left;
-    offY = e.clientY - rect.top;
+    offX = e.clientX - rect.left; offY = e.clientY - rect.top;
     snakeWindow.style.transition = 'none';
   });
   document.addEventListener('mousemove', (e) => {
@@ -481,7 +339,7 @@ if (!isMobile) {
   document.addEventListener('mouseup', () => { dragging = false; snakeWindow.style.transition = ''; });
 }
 
-// ========== MUSIC PLAYER (YouTube audio only) ==========
+// ========== MUSIC PLAYER (YouTube audio) ==========
 const playlist = [
   { id: 'JGwWNGJdvx8', title: 'Shape of You', artist: 'Ed Sheeran' },
   { id: 'fKopy74weus', title: 'Blinding Lights', artist: 'The Weeknd' },
@@ -556,7 +414,7 @@ function nextTrack() { let idx = (currentTrackIndex + 1) % playlist.length; load
 
 musicBtn.addEventListener('click', () => {
   musicModal.classList.add('active');
-  loadTrack(0);   // always show first song info
+  loadTrack(0);
   if (!player && typeof YT !== 'undefined' && YT.Player) initYouTubePlayer();
 });
 musicCloseBtn.addEventListener('click', () => { musicModal.classList.remove('active'); });
@@ -567,6 +425,155 @@ progressBar.addEventListener('input', () => seekTo(progressBar.value));
 volumeBar.addEventListener('input', setVolume);
 if (typeof YT !== 'undefined' && YT.Player) initYouTubePlayer();
 else window.onYouTubeIframeAPIReady = initYouTubePlayer;
+
+// ========== CURSOR‑FOLLOWING BLOBS ==========
+const blobsEls = document.querySelectorAll('.blob');
+let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+if (isMobile) {
+  window.addEventListener('deviceorientation', (e) => {
+    if (e.gamma === null || e.beta === null) return;
+    mouseX = (e.gamma + 90) / 180 * window.innerWidth;
+    mouseY = (e.beta + 180) / 360 * window.innerHeight;
+  });
+}
+function moveBlobs() {
+  const arr = Array.from(blobsEls);
+  arr.forEach((blob, i) => {
+    const factor = (i + 1) * 0.1;
+    const x = (mouseX - window.innerWidth / 2) * factor;
+    const y = (mouseY - window.innerHeight / 2) * factor;
+    blob.style.transform = `translate(${x}px, ${y}px)`;
+  });
+  requestAnimationFrame(moveBlobs);
+}
+moveBlobs();
+
+// ========== 3D EARTH WITH ARCS & SRI LANKA MARKER ==========
+function init3D() {
+  if (typeof THREE === 'undefined') return;
+  const canvas = document.getElementById('bgCanvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x000000, 0);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.z = 35;
+
+  const earthGroup = new THREE.Group();
+  scene.add(earthGroup);
+
+  // Earth sphere
+  const geometry = new THREE.SphereGeometry(8, 64, 64);
+  const textureLoader = new THREE.TextureLoader();
+  const earthTexture = textureLoader.load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
+  const material = new THREE.MeshPhongMaterial({ map: earthTexture, shininess: 5 });
+  const earth = new THREE.Mesh(geometry, material);
+  earthGroup.add(earth);
+
+  // Atmosphere
+  const atmosGeom = new THREE.SphereGeometry(8.15, 64, 64);
+  const atmosMat = new THREE.MeshPhongMaterial({ color: 0x00aaff, transparent: true, opacity: 0.1, side: THREE.FrontSide });
+  const atmosphere = new THREE.Mesh(atmosGeom, atmosMat);
+  earthGroup.add(atmosphere);
+
+  // Lighting
+  const ambientLight = new THREE.AmbientLight(0x404070);
+  scene.add(ambientLight);
+  const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+  dirLight.position.set(5, 3, 5);
+  scene.add(dirLight);
+
+  // Sri Lanka marker (approximately 6.9° N, 79.9° E)
+  const lat = 6.9 * (Math.PI / 180);
+  const lon = 79.9 * (Math.PI / 180);
+  const markerPos = new THREE.Vector3(
+    -8 * Math.cos(lat) * Math.cos(lon),
+    8 * Math.sin(lat),
+    8 * Math.cos(lat) * Math.sin(lon)
+  );
+  const markerGeom = new THREE.SphereGeometry(0.25, 16, 16);
+  const markerMat = new THREE.MeshBasicMaterial({ color: 0xff3333 });
+  const marker = new THREE.Mesh(markerGeom, markerMat);
+  marker.position.copy(markerPos);
+  earthGroup.add(marker);
+
+  // Profile photo sprite at marker
+  const spriteCanvas = document.createElement('canvas');
+  spriteCanvas.width = 64; spriteCanvas.height = 64;
+  const ctx = spriteCanvas.getContext('2d');
+  const img = new Image();
+  img.src = 'images/nadeeja-profile.jpg';
+  img.onload = () => {
+    ctx.beginPath();
+    ctx.arc(32, 32, 30, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(img, 2, 2, 60, 60);
+    const texture = new THREE.CanvasTexture(spriteCanvas);
+    const spriteMat = new THREE.SpriteMaterial({ map: texture });
+    const sprite = new THREE.Sprite(spriteMat);
+    sprite.scale.set(1.2, 1.2, 1);
+    sprite.position.copy(markerPos.clone().multiplyScalar(1.1));
+    earthGroup.add(sprite);
+  };
+
+  // Network traffic arcs (random destinations from/to Colombo)
+  function latLonToPosition(latitude, longitude, radius = 8.2) {
+    const phi = (90 - latitude) * (Math.PI / 180);
+    const theta = longitude * (Math.PI / 180);
+    return new THREE.Vector3(
+      -radius * Math.sin(phi) * Math.cos(theta),
+      radius * Math.cos(phi),
+      radius * Math.sin(phi) * Math.sin(theta)
+    );
+  }
+
+  const arcPairs = [
+    { from: [6.9, 79.9], to: [40.7, -74.0] },   // Colombo → New York
+    { from: [6.9, 79.9], to: [51.5, -0.1] },    // Colombo → London
+    { from: [6.9, 79.9], to: [35.7, 139.7] },   // Colombo → Tokyo
+    { from: [6.9, 79.9], to: [-33.9, 151.2] },  // Colombo → Sydney
+    { from: [6.9, 79.9], to: [55.8, 37.6] },    // Colombo → Moscow
+    { from: [6.9, 79.9], to: [25.2, 55.3] },    // Colombo → Dubai
+    { from: [6.9, 79.9], to: [1.3, 103.8] },    // Colombo → Singapore
+    { from: [6.9, 79.9], to: [-23.5, -46.6] },  // Colombo → São Paulo
+  ];
+
+  const arcsGroup = new THREE.Group();
+  earthGroup.add(arcsGroup);
+
+  arcPairs.forEach((pair, i) => {
+    const start = latLonToPosition(pair.from[0], pair.from[1]);
+    const end = latLonToPosition(pair.to[0], pair.to[1]);
+    const mid = start.clone().add(end).multiplyScalar(0.5).normalize().multiplyScalar(12);
+    const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
+    const points = curve.getPoints(50);
+    const geom = new THREE.BufferGeometry().setFromPoints(points);
+    const hue = (i / arcPairs.length) * 0.9;
+    const color = new THREE.Color().setHSL(hue, 0.8, 0.6);
+    const line = new THREE.Line(geom, new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending }));
+    arcsGroup.add(line);
+  });
+
+  // Rotate around X‑axis (vertical spin)
+  function animate() {
+    requestAnimationFrame(animate);
+    earthGroup.rotation.x += 0.001;
+    // Slight side tilt
+    earthGroup.rotation.z += 0.0002;
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+}
 
 // ========== START EVERYTHING ==========
 window.addEventListener('load', () => {
