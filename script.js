@@ -3,13 +3,7 @@
    ============================ */
 function initAOS() {
   if (typeof AOS !== 'undefined') {
-    AOS.init({
-      duration: 700,
-      easing: 'ease-out-cubic',
-      once: true,
-      disable: window.innerWidth < 768
-    });
-
+    AOS.init({ duration: 700, easing: 'ease-out-cubic', once: true, disable: window.innerWidth < 768 });
     document.body.classList.add('aos-ready');
   } else {
     document.body.classList.add('aos-ready');
@@ -341,7 +335,6 @@ document.getElementById('contactForm').addEventListener('submit', async function
   } catch { status.textContent = '❌ Network error.'; }
 });
 
-
 /* ============================
    SNAKE GAME (unchanged, fully functional)
    ============================ */
@@ -430,64 +423,41 @@ if (isMobile) { window.addEventListener('deviceorientation', e => { if (e.gamma 
 (function moveBlobs() { const arr = Array.from(blobsEls); arr.forEach((b, i) => { const factor = (i + 1) * 0.1; const x = (mX - innerWidth/2) * factor, y = (mY - innerHeight/2) * factor; b.style.transform = `translate(${x}px, ${y}px)`; }); requestAnimationFrame(moveBlobs); })();
 
 /* ============================
-   REAL 2D WORLD MAP + OPTIMIZED LIVE NETWORK TRAFFIC
-   Option A: simulated live network traffic
-   - Real SVG world map image
-   - Canvas traffic layer
-   - Mobile optimized
-   - Reduced lag
+   2D WORLD MAP WITH TRAFFIC (REAL SVG MAP)
    ============================ */
-
 function initMap() {
   const canvas = document.getElementById('mapCanvas');
   if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let w, h;
 
-  const ctx = canvas.getContext('2d', { alpha: true });
+  // Load a clean, low‑resolution world map SVG
+  const mapImage = new Image();
+  mapImage.crossOrigin = 'anonymous';
+  mapImage.src = 'https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg';
+  let mapReady = false;
+  mapImage.onload = () => { mapReady = true; };
 
-  let w = 0;
-  let h = 0;
-  let dpr = Math.min(window.devicePixelRatio || 1, 2);
-  let frame = 0;
-  let lastTime = 0;
-
-  const isMobile = window.matchMedia('(max-width: 768px)').matches;
-  const targetFPS = isMobile ? 24 : 60;
-  const frameDelay = 1000 / targetFPS;
-
-  const activeFlowsEl = document.getElementById('activeFlows');
-  const packetRateEl = document.getElementById('packetRate');
-  const avgLatencyEl = document.getElementById('avgLatency');
-  const dataFlowEl = document.getElementById('dataFlow');
-
-  let totalData = 164.2;
-  let flows = [];
-  let particles = [];
-
-  /* Real world map image */
-  const worldMap = new Image();
-  worldMap.crossOrigin = 'anonymous';
- worldMap.src = 'https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg';
-
+  // Cities (names, lat, lon)
   const cities = [
-    { name: 'Colombo', lat: 6.9271, lon: 79.8612, tier: 1 },
-    { name: 'Singapore', lat: 1.3521, lon: 103.8198, tier: 1 },
-    { name: 'Mumbai', lat: 19.0760, lon: 72.8777, tier: 1 },
-    { name: 'Dubai', lat: 25.2048, lon: 55.2708, tier: 1 },
-    { name: 'Frankfurt', lat: 50.1109, lon: 8.6821, tier: 1 },
-    { name: 'London', lat: 51.5072, lon: -0.1276, tier: 1 },
-    { name: 'Amsterdam', lat: 52.3676, lon: 4.9041, tier: 2 },
-    { name: 'Tokyo', lat: 35.6762, lon: 139.6503, tier: 1 },
-    { name: 'Seoul', lat: 37.5665, lon: 126.9780, tier: 2 },
-    { name: 'Sydney', lat: -33.8688, lon: 151.2093, tier: 2 },
-    { name: 'New York', lat: 40.7128, lon: -74.0060, tier: 1 },
-    { name: 'Los Angeles', lat: 34.0522, lon: -118.2437, tier: 2 },
-    { name: 'Toronto', lat: 43.6532, lon: -79.3832, tier: 2 },
-    { name: 'São Paulo', lat: -23.5558, lon: -46.6396, tier: 2 },
-    { name: 'Johannesburg', lat: -26.2041, lon: 28.0473, tier: 2 }
+    { name: 'Colombo', lat: 6.9271, lon: 79.8612 },
+    { name: 'Singapore', lat: 1.3521, lon: 103.8198 },
+    { name: 'Mumbai', lat: 19.0760, lon: 72.8777 },
+    { name: 'Dubai', lat: 25.2048, lon: 55.2708 },
+    { name: 'Frankfurt', lat: 50.1109, lon: 8.6821 },
+    { name: 'London', lat: 51.5072, lon: -0.1276 },
+    { name: 'Amsterdam', lat: 52.3676, lon: 4.9041 },
+    { name: 'Tokyo', lat: 35.6762, lon: 139.6503 },
+    { name: 'Seoul', lat: 37.5665, lon: 126.9780 },
+    { name: 'Sydney', lat: -33.8688, lon: 151.2093 },
+    { name: 'New York', lat: 40.7128, lon: -74.0060 },
+    { name: 'Los Angeles', lat: 34.0522, lon: -118.2437 },
+    { name: 'Toronto', lat: 43.6532, lon: -79.3832 },
+    { name: 'São Paulo', lat: -23.5558, lon: -46.6396 },
+    { name: 'Johannesburg', lat: -26.2041, lon: 28.0473 }
   ];
 
-  const cityByName = Object.fromEntries(cities.map(c => [c.name, c]));
-
+  // Traffic flows (pairs from Colombo or between major hubs)
   const routes = [
     ['Colombo', 'Singapore'],
     ['Colombo', 'Mumbai'],
@@ -507,26 +477,19 @@ function initMap() {
     ['Johannesburg', 'Dubai']
   ];
 
-  function resizeCanvas() {
-    w = window.innerWidth;
-    h = window.innerHeight;
-    dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1.25 : 2);
+  let flows = [];
+  let particles = [];
 
-    canvas.width = Math.floor(w * dpr);
-    canvas.height = Math.floor(h * dpr);
-    canvas.style.width = w + 'px';
-    canvas.style.height = h + 'px';
+  const isMobile = window.matchMedia('(max-width: 768px)').matches;
+  const targetFPS = isMobile ? 24 : 60;
+  const frameDelay = 1000 / targetFPS;
+  let lastTime = 0;
+  let frame = 0;
 
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
-
-  /* Equirectangular projection — matches the real map image */
+  // Equirectangular projection that matches the SVG map
   function project(lat, lon) {
-    const mapRatio = 2; // world map 2:1
-    let mapW = w * 1.12;
+    const mapRatio = 2;               // world map 2:1
+    let mapW = w * 1.12;             // slightly zoomed in
     let mapH = mapW / mapRatio;
 
     if (mapH < h * 0.72) {
@@ -539,103 +502,83 @@ function initMap() {
 
     const x = mapX + ((lon + 180) / 360) * mapW;
     const y = mapY + ((90 - lat) / 180) * mapH;
-
     return { x, y };
   }
 
-  function drawBackground() {
-    const gradient = ctx.createLinearGradient(0, 0, 0, h);
-    gradient.addColorStop(0, '#020611');
-    gradient.addColorStop(0.5, '#030712');
-    gradient.addColorStop(1, '#01030a');
-
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, w, h);
-
-    ctx.strokeStyle = 'rgba(56, 189, 248, 0.045)';
-    ctx.lineWidth = 1;
-
-    const grid = isMobile ? 96 : 72;
-
-    for (let x = 0; x < w; x += grid) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, h);
-      ctx.stroke();
+  // Draw the world map image as background
+  function drawMap() {
+    if (!mapReady) {
+      // dark fallback while image loads
+      ctx.fillStyle = '#0a0a18';
+      ctx.fillRect(0, 0, w, h);
+      return;
     }
 
-    for (let y = 0; y < h; y += grid) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(w, y);
-      ctx.stroke();
+    const mapRatio = 2;
+    let mapW = w * 1.12;
+    let mapH = mapW / mapRatio;
+    if (mapH < h * 0.72) {
+      mapH = h * 0.72;
+      mapW = mapH * mapRatio;
     }
+    const mapX = (w - mapW) / 2;
+    const mapY = (h - mapH) / 2 + h * 0.02;
+
+    ctx.drawImage(mapImage, mapX, mapY, mapW, mapH);
   }
 
-function drawRealWorldMap() {
-  const mapRatio = 2;
-  let mapW = w * 1.12;
-  let mapH = mapW / mapRatio;
-
-  if (mapH < h * 0.72) {
-    mapH = h * 0.72;
-    mapW = mapH * mapRatio;
+  // Draw city labels (faint)
+  function drawCities() {
+    ctx.fillStyle = 'rgba(180,190,210,0.5)';
+    ctx.font = '11px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    cities.forEach(c => {
+      const p = project(c.lat, c.lon);
+      ctx.fillText(c.name, p.x, p.y - 6);
+    });
   }
 
-  const mapX = (w - mapW) / 2;
-  const mapY = (h - mapH) / 2 + h * 0.02;
+  // Spawn a new flow between two cities
+  function spawnFlow() {
+    if (flows.length > (isMobile ? 10 : 24)) return;
+    const pair = routes[Math.floor(Math.random() * routes.length)];
+    const fromCity = cities.find(c => c.name === pair[0]);
+    const toCity = cities.find(c => c.name === pair[1]);
+    if (!fromCity || !toCity) return;
 
-  if (!worldMap.complete) return;
+    const flow = {
+      from: fromCity,
+      to: toCity,
+      start: project(fromCity.lat, fromCity.lon),
+      end: project(toCity.lat, toCity.lon),
+      life: 0,
+      maxLife: 140 + Math.random() * 100,
+      opacity: 0.12 + Math.random() * 0.15
+    };
+    flows.push(flow);
 
-  /* Step 1: draw map into hidden canvas */
-  const temp = document.createElement('canvas');
-  const tctx = temp.getContext('2d');
-
-  const dotGap = isMobile ? 8 : 6;
-  const dotSize = isMobile ? 1.15 : 1.35;
-
-  temp.width = Math.floor(mapW);
-  temp.height = Math.floor(mapH);
-
-  tctx.drawImage(worldMap, 0, 0, temp.width, temp.height);
-
-  const img = tctx.getImageData(0, 0, temp.width, temp.height).data;
-
-  ctx.save();
-
-  /* Step 2: convert map pixels into dots */
-  for (let y = 0; y < temp.height; y += dotGap) {
-    for (let x = 0; x < temp.width; x += dotGap) {
-      const index = (y * temp.width + x) * 4;
-      const alpha = img[index + 3];
-
-      if (alpha > 30) {
-        ctx.beginPath();
-        ctx.arc(mapX + x, mapY + y, dotSize, 0, Math.PI * 2);
-
-        ctx.fillStyle = isMobile
-          ? 'rgba(148, 163, 184, 0.24)'
-          : 'rgba(180, 190, 210, 0.32)';
-
-        ctx.fill();
-      }
+    // add moving particles
+    const count = isMobile ? 1 : 3;
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        flow,
+        t: Math.random() * 0.3,
+        speed: 0.008 + Math.random() * 0.006,
+        size: isMobile ? 1.6 : 2.2
+      });
     }
   }
 
-  ctx.restore();
-}
-  }
-
+  // Calculate quadratic bezier control point for curved arcs
   function curvePoint(a, b, t) {
     const midX = (a.x + b.x) / 2;
     const midY = (a.y + b.y) / 2;
     const dx = b.x - a.x;
     const dy = b.y - a.y;
     const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-
-    const curveHeight = Math.min(isMobile ? 90 : 170, Math.max(35, dist * 0.18));
+    const curveHeight = Math.min(isMobile ? 70 : 140, Math.max(30, dist * 0.18));
     const nx = -dy / dist;
-    const ny = dx / dist;
+    const ny =  dx / dist;
 
     const cx = midX + nx * curveHeight;
     const cy = midY + ny * curveHeight;
@@ -648,37 +591,7 @@ function drawRealWorldMap() {
     };
   }
 
-  function spawnFlow() {
-    if (flows.length > (isMobile ? 12 : 26)) return;
-
-    const pair = routes[Math.floor(Math.random() * routes.length)];
-    const from = cityByName[pair[0]];
-    const to = cityByName[pair[1]];
-
-    const flow = {
-      from,
-      to,
-      start: project(from.lat, from.lon),
-      end: project(to.lat, to.lon),
-      life: 0,
-      maxLife: 130 + Math.random() * 120,
-      opacity: 0.14 + Math.random() * 0.16
-    };
-
-    flows.push(flow);
-
-    const particleCount = isMobile ? 1 : 3;
-
-    for (let i = 0; i < particleCount; i++) {
-      particles.push({
-        flow,
-        t: Math.random() * 0.22,
-        speed: 0.009 + Math.random() * 0.006,
-        size: isMobile ? 1.6 : 2.2
-      });
-    }
-  }
-
+  // Update flows and particles
   function updateTraffic() {
     if (frame % (isMobile ? 12 : 7) === 0) spawnFlow();
 
@@ -689,6 +602,7 @@ function drawRealWorldMap() {
     particles = particles.filter(p => p.t <= 1 && flows.includes(p.flow));
   }
 
+  // Render the traffic arcs and particles
   function drawTraffic() {
     flows.forEach(f => {
       const fadeIn = Math.min(1, f.life / 35);
@@ -702,96 +616,54 @@ function drawRealWorldMap() {
       ctx.moveTo(f.start.x, f.start.y);
       ctx.quadraticCurveTo(c.cx, c.cy, f.end.x, f.end.y);
       ctx.strokeStyle = `rgba(34, 211, 238, ${alpha})`;
-      ctx.lineWidth = isMobile ? 0.8 : 1.1;
-
-      if (!isMobile) {
-        ctx.shadowColor = 'rgba(34, 211, 238, 0.5)';
-        ctx.shadowBlur = 10;
-      }
-
+      ctx.lineWidth = isMobile ? 0.7 : 1;
       ctx.stroke();
       ctx.restore();
     });
 
     particles.forEach(p => {
       const pos = curvePoint(p.flow.start, p.flow.end, p.t);
-
       ctx.save();
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, p.size, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(125, 249, 255, 0.9)';
-
-      if (!isMobile) {
-        ctx.shadowColor = 'rgba(125, 249, 255, 1)';
-        ctx.shadowBlur = 16;
-      }
-
       ctx.fill();
       ctx.restore();
     });
   }
 
-  function drawCities() {
-    cities.forEach(city => {
-      const p = project(city.lat, city.lon);
-      const active = flows.some(f => f.from.name === city.name || f.to.name === city.name);
-
-      ctx.save();
-
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, active ? 4 : 2.6, 0, Math.PI * 2);
-      ctx.fillStyle = active ? 'rgba(34, 211, 238, 0.95)' : 'rgba(148, 163, 184, 0.55)';
-      ctx.fill();
-
-      if (!isMobile && (active || city.tier === 1)) {
-        ctx.font = '600 11px Inter, sans-serif';
-        ctx.fillStyle = active ? 'rgba(226, 252, 255, 0.9)' : 'rgba(203, 213, 225, 0.55)';
-        ctx.fillText(city.name, p.x + 8, p.y - 7);
-      }
-
-      ctx.restore();
-    });
-  }
-
-  function updateHud() {
-    if (!activeFlowsEl) return;
-
-    const active = flows.length;
-    const packets = Math.round(3800 + active * 420 + Math.random() * 900);
-    const latency = Math.round(24 + Math.random() * 38);
-
-    totalData += 0.03 + Math.random() * 0.08;
-
-    activeFlowsEl.textContent = active.toString().padStart(2, '0');
-    packetRateEl.textContent = packets.toLocaleString();
-    avgLatencyEl.textContent = latency + ' ms';
-    dataFlowEl.textContent = totalData.toFixed(1) + ' GB';
-  }
-
+  // Main animation loop
   function animate(now) {
     requestAnimationFrame(animate);
-
     if (now - lastTime < frameDelay) return;
     lastTime = now;
     frame++;
 
     ctx.clearRect(0, 0, w, h);
-
-    drawBackground();
-    drawRealWorldMap();
+    drawMap();
+    drawCities();
     updateTraffic();
     drawTraffic();
-    drawCities();
-
-    if (frame % 18 === 0) updateHud();
   }
 
-  for (let i = 0; i < (isMobile ? 6 : 14); i++) spawnFlow();
+  // Resize canvas to fill screen
+  function resize() {
+    w = canvas.width = innerWidth;
+    h = canvas.height = innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
 
-  updateHud();
+  // Start with a few initial flows
+  for (let i = 0; i < (isMobile ? 5 : 12); i++) spawnFlow();
+
   requestAnimationFrame(animate);
 }
 
-window.addEventListener('load', initMap);t e s t 
- 
- 
+/* ============================
+   START EVERYTHING
+   ============================ */
+window.addEventListener('load', () => {
+  loadProjects();   // populate project cards
+  initMap();        // start the world map with traffic
+});
